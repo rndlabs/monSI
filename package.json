@@ -1,79 +1,81 @@
 {
-  "name": "monSI",
-  "version": "1.0.0",
-  "description": "Monitor Bee Swarm Storage Incentives",
-  "main": "monSI.js",
-  "scripts": {
-    "prepare": "husky install",
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --ext .ts && prettier -c .",
-    "lint:fix": "eslint . --ext .ts --fix && prettier -w ."
-  },
-  "author": "ldeffenb",
-  "contributors": [
-    {
-      "name": "mfw78",
-      "email": "mfw@rndlabs.xyz"
-    }
-  ],
-  "license": "BSD-3-Clause",
-  "dependencies": {
-    "abi-decoder": "^2.4.0",
-    "blessed": "^0.1.81",
-    "dotenv": "^16.0.1",
-    "ethers": "^5.7.2"
-  },
-  "devDependencies": {
-    "@typechain/ethers-v5": "^10.1.0",
-    "@types/blessed": "^0.1.19",
-    "@typescript-eslint/eslint-plugin": "^5.40.1",
-    "eslint": "^8.25.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "husky": "^8.0.1",
-    "lint-staged": "^13.0.3",
-    "prettier": "^2.7.1",
-    "typechain": "^8.1.0",
-    "typescript": "^4.8.4"
-  },
-  "lint-staged": {
-    "*.{ts}": "prettier --write"
-  },
-  "eslintConfig": {
-    "extends": [
-      "prettier",
-      "plugin:prettier/recommended",
-      "plugin:@typescript-eslint/eslint-recommended",
-      "plugin:@typescript-eslint/recommended"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint",
-      "unicorn"
-    ],
-    "rules": {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          "argsIgnorePattern": "^_"
-        }
-      ],
-      "no-duplicate-imports": "off",
-      "@typescript-eslint/no-duplicate-imports": [
-        "error"
-      ],
-      "new-cap": "off",
-      "unicorn/filename-case": [
-        "error",
-        {
-          "case": "kebabCase"
-        }
-      ],
-      "prefer-reflect": "off"
-    }
-  },
-  "eslintIgnore": [
-    "build/*"
-  ]
+	"name": "monSI",
+	"version": "1.0.0",
+	"description": "Monitor Bee Swarm Storage Incentives",
+	"main": "monSI.js",
+	"scripts": {
+		"prepare": "husky install && npm run typechain",
+		"build": "tsc",
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"lint": "eslint . --ext .ts && prettier -c .",
+		"lint:fix": "eslint . --ext .ts --fix && prettier -w .",
+		"typechain": "typechain --target ethers-v5 --out-dir src/types/contracts \"./contracts/**/*.json\""
+	},
+	"author": "ldeffenb",
+	"contributors": [
+		{
+			"name": "mfw78",
+			"email": "mfw@rndlabs.xyz"
+		}
+	],
+	"license": "BSD-3-Clause",
+	"dependencies": {
+		"abi-decoder": "^2.4.0",
+		"blessed": "^0.1.81",
+		"dotenv": "^16.0.1",
+		"ethers": "^5.7.2"
+	},
+	"devDependencies": {
+		"@typechain/ethers-v5": "^10.1.0",
+		"@types/blessed": "^0.1.19",
+		"@typescript-eslint/eslint-plugin": "^5.40.1",
+		"eslint": "^8.25.0",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-prettier": "^4.2.1",
+		"eslint-plugin-unicorn": "^44.0.2",
+		"husky": "^8.0.1",
+		"lint-staged": "^13.0.3",
+		"prettier": "^2.7.1",
+		"typechain": "^8.1.0",
+		"typescript": "^4.8.4"
+	},
+	"lint-staged": {
+		"*.{ts,json}": "prettier --write"
+	},
+	"eslintConfig": {
+		"extends": [
+			"prettier",
+			"plugin:prettier/recommended",
+			"plugin:@typescript-eslint/eslint-recommended",
+			"plugin:@typescript-eslint/recommended"
+		],
+		"parser": "@typescript-eslint/parser",
+		"plugins": [
+			"@typescript-eslint",
+			"unicorn"
+		],
+		"rules": {
+			"@typescript-eslint/no-unused-vars": [
+				"error",
+				{
+					"argsIgnorePattern": "^_"
+				}
+			],
+			"no-duplicate-imports": "off",
+			"@typescript-eslint/no-duplicate-imports": [
+				"error"
+			],
+			"new-cap": "off",
+			"unicorn/filename-case": [
+				"error",
+				{
+					"case": "kebabCase"
+				}
+			],
+			"prefer-reflect": "off"
+		}
+	},
+	"eslintIgnore": [
+		"build/*"
+	]
 }
