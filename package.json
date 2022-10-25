@@ -2,7 +2,7 @@
 	"name": "monSI",
 	"version": "1.0.0",
 	"description": "Monitor Bee Swarm Storage Incentives",
-	"main": "monSI.js",
+	"main": "./dist/index.js",
 	"scripts": {
 		"prepare": "husky install && npm run typechain",
 		"build": "tsc",
@@ -23,11 +23,14 @@
 		"abi-decoder": "^2.4.0",
 		"blessed": "^0.1.81",
 		"dotenv": "^16.0.1",
-		"ethers": "^5.7.2"
+		"ethers": "^5.7.2",
+		"semaphore": "^1.1.0",
+		"sorted-btree": "^1.8.1"
 	},
 	"devDependencies": {
 		"@typechain/ethers-v5": "^10.1.0",
 		"@types/blessed": "^0.1.19",
+		"@types/semaphore": "^1.1.1",
 		"@typescript-eslint/eslint-plugin": "^5.40.1",
 		"eslint": "^8.25.0",
 		"eslint-config-prettier": "^8.5.0",
@@ -36,6 +39,7 @@
 		"husky": "^8.0.1",
 		"lint-staged": "^13.0.3",
 		"prettier": "^2.7.1",
+		"ts-node": "^10.9.1",
 		"typechain": "^8.1.0",
 		"typescript": "^4.8.4"
 	},
@@ -77,5 +81,6 @@
 	},
 	"eslintIgnore": [
 		"build/*"
-	]
+	],
+	"type": "module"
 }
