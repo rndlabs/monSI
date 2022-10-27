@@ -25,7 +25,7 @@ const chainConfig: Configs = {
 	'5': {
 		blocksPerRound: 152,
 		commitPhaseBlocks: 152 / 4,
-		revealPhaseBlocks: 152 / 2,
+		revealPhaseBlocks: 152 / 4 + 1,
 		contracts: {
 			redistribution: '0xF4963031E8b9f9659CB6ed35E53c031D76480EAD',
 			stakeRegistry: '0x18391158435582D5bE5ac1640ab5E2825F68d3a4',
