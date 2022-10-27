@@ -91,9 +91,7 @@ export class Round {
 	formatRoundPlayers(): string {
 		let r = ''
 		for (const player of this.players) {
-			//if (r.length > 0) 
-				r += '\n'
-
+			r += '\n' // Always start with a newline to have room for the current round at the top
 			const p = SchellingGame.getInstance().getPlayer(player)!
 			r += p.formatRound(this._id)
 		}

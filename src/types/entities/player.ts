@@ -2,18 +2,18 @@ import { BigNumber } from 'ethers'
 import { Logging } from '../../utils'
 import { BlockDetails } from '../../chain/sync'
 import { specificLocalTime } from '../../lib/formatDate'
-import { leftId, shortId } from '../../lib/formatText'
+import { fmtOverlay, shortId } from '../../lib/formatText'
 import { colorDelta, colorValue } from '../../lib/formatUi'
 import { formatSi, shortBZZ } from '../../lib/formatUnits'
 import { Round } from './round'
-import { SchellingGame } from './schelling'
 import Ui from './ui'
 
 export class Player {
 	private _overlay: string // overlay of the bee node
 	private _account: string // ethereum address of the bee node
 	private amount: BigNumber = BigNumber.from(0) // total amount won / lost
-	private line: number // where this player is in the players list
+	public line: number // where this player is in the players list
+	private _isPlaying: boolean = false
 	private lastBlock: BlockDetails // block details of last interaction
 	private playCount?: number // don't initialize
 	private winCount = 0 // initialize as 0
@@ -30,15 +30,28 @@ export class Player {
 		return this._account
 	}
 
+	public notPlaying() {
+		if (this._isPlaying) {
+			// Saves a render() if it isn't changing
+			this._isPlaying = false
+			this.render()
+		}
+	}
+
 	/**
 	 * Create a new Player object
 	 * @param overlay address of the bee node (swarm overlay)
 	 * @param account ethereum address of the bee node
 	 */
-	constructor(overlay: string, account: string, _block: BlockDetails) {
+	constructor(
+		overlay: string,
+		account: string,
+		_block: BlockDetails,
+		line: number
+	) {
 		this._overlay = overlay
 		this._account = account
-		this.line = SchellingGame.getInstance().size
+		this.line = line
 		this.lastBlock = _block
 
 		//Logging.showLogError('New player: ' + this.overlayString())
@@ -51,7 +64,7 @@ export class Player {
 	 * @returns the overlay address as a string
 	 */
 	overlayString(): string {
-		return leftId(this._overlay, 12)
+		return fmtOverlay(this._overlay, 12)
 	}
 
 	/**
@@ -60,7 +73,7 @@ export class Player {
 	 */
 	format(): string {
 		let result = this.overlayString()
-
+		if (this._isPlaying) result = '{blue-bg}' + result + '{/blue-bg}'
 		if (this.playCount) result = result + ` ${this.winCount}/${this.playCount}`
 		if (this.freezeCount > 0)
 			result += ` {blue-fg}${this.freezeCount}{/blue-fg}`
@@ -101,6 +114,7 @@ export class Player {
 	 */
 	commit(block: BlockDetails) {
 		this.lastBlock = block
+		this._isPlaying = true
 		this.playCount = (this.playCount || 0) + 1
 
 		// if the player is frozen, check if they should be thawed
@@ -113,6 +127,7 @@ export class Player {
 
 	reveal(block: BlockDetails, round: number, hash: string, depth: number) {
 		this.lastBlock = block
+		this._isPlaying = true
 		this.reveals[round] = { hash, depth }
 	}
 
@@ -123,6 +138,7 @@ export class Player {
 	 */
 	claim(block: BlockDetails, _amount: BigNumber) {
 		this.lastBlock = block
+		this._isPlaying = true
 		this.amount = this.amount.add(_amount)
 		this.winCount++
 
