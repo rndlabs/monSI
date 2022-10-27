@@ -8,7 +8,7 @@ import semaphore from 'semaphore'
 
 import config, { getRpcUrl } from '../config'
 import { Logging } from '../utils'
-import gasmonitor, { gasPriceToString, gasUtilization } from './gas'
+import { Gas } from './gas'
 
 import {
 	BzzToken,
@@ -24,6 +24,8 @@ import {
 	StakeFreeze,
 	StakeSlash,
 } from '../types/entities/schelling'
+import { formatBlockDeltaColor } from '../lib/formatChain'
+import { specificLocalTime } from '../lib/formatDate'
 import { shortBZZ } from '../lib/formatUnits'
 import { fmtAccount } from '../lib/formatText'
 import { Round } from '../types/entities/round'
@@ -65,6 +67,9 @@ export default class ChainSync {
 
 	private numFailedTransactions = 0
 
+	private baseGasMonitor: Gas
+	private gasPriceMonitor: Gas
+
 	private constructor() {
 		// configure the RPC
 		this.provider = new providers.WebSocketProvider(getRpcUrl())
@@ -82,6 +87,8 @@ export default class ChainSync {
 			config.contracts.bzzToken,
 			this.provider
 		)
+		this.baseGasMonitor = new Gas(32)
+		this.gasPriceMonitor = new Gas(32)
 	}
 
 	// --- singleton method
@@ -116,19 +123,22 @@ export default class ChainSync {
 	private async syncBlockchain(startFromBlock: number) {
 		startFromBlock =
 			Math.floor(startFromBlock / config.blocksPerRound) * config.blocksPerRound
-		Logging.showLogError(`Syncing blockchain from block ${startFromBlock}...`)
 
-		if (false) {
-			// 1. Process all `StakeUpdated` events as this determines who is in the game.
-			const stakeUpdatedFilter = this.stakeRegistry.filters.StakeUpdated()
-			const stakeUpdatedLogs = await this.provider.getLogs({
-				...stakeUpdatedFilter,
-				fromBlock: 7716036, // TODO: set to genesis block for stake registry
-			})
+		Logging.showLogError(`Loading StakeUpdated logs from block 7716036`) // TODO: This should come from chain-config
+		const start = Date.now()
+		// 1. Process all `StakeUpdated` events as this determines who is in the game.
+		const stakeUpdatedFilter = this.stakeRegistry.filters.StakeUpdated()
+		const stakeUpdatedLogs = await this.provider.getLogs({
+			...stakeUpdatedFilter,
+			fromBlock: 7716036, // TODO: set to genesis block for stake registry
+		})
 
-			// now process the logs and add players to the game
-			await this.processStakeUpdatedLogs(stakeUpdatedLogs)
-		}
+		// now process the logs and add players to the game
+		await this.processStakeUpdatedLogs(stakeUpdatedLogs)
+		const elapsed = Date.now() - start
+		Logging.showLogError(
+			`Loaded ${stakeUpdatedLogs.length} StakeUpdated logs in ${elapsed}ms`
+		)
 
 		// 2. Process all `commit`, `reveal`, and `claim` transactions to the Redistribution contract.
 
@@ -140,8 +150,11 @@ export default class ChainSync {
 
 		// data structures / reporting are designed so that we can process blocks in any order
 		Logging.showLogError(
-			`Sync: Processing blocks ${this.lastBlock.blockNo + 1} to ${this.tip}`
+			`Syncing blockchain from block ${this.lastBlock.blockNo + 1} to ${
+				this.tip
+			}`
 		)
+		const start2 = Date.now()
 		do {
 			//Logging.showLogError(`Sync block ${this.lastBlock.blockNo+1}`)
 			const block = await this.provider.getBlockWithTransactions(
@@ -159,8 +172,9 @@ export default class ChainSync {
 				baseFeePerGas: block.baseFeePerGas,
 			}
 		} while (this.lastBlock.blockNo < this.tip)
+		const elapsed2 = Date.now() - start2
 		Logging.showLogError(
-			`Sync: Complete including block ${this.lastBlock.blockNo}`
+			`Sync: Complete from block ${startFromBlock} to ${this.lastBlock.blockNo} in ${elapsed2}ms`
 		)
 
 		// for (let i = this.lastBlock; i <= nowBlockNumber; i++) {
@@ -229,25 +243,38 @@ export default class ChainSync {
 		// setup listener for new blocks
 		this.provider.on('block', async (blockNumber: number) => {
 			const block = await this.provider.getBlockWithTransactions(blockNumber)
-			gasmonitor(block.baseFeePerGas ?? BigNumber.from(1))
+
+			this.gasPriceMonitor.newSample(await this.provider.getGasPrice())
+
+			const priceText = `{left}${specificLocalTime(
+				block.timestamp * 1000
+			)} ${blockNumber} ${
+				this.gasPriceMonitor.lastPrice
+			} ${this.gasPriceMonitor.percentColor()}%{/left}`
+			const offsetLine = game.size
+			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
+				offsetLine,
+				'{center}getGasPrice{/center}',
+				-1
+			)
+			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
+				offsetLine + 1,
+				`{center}${this.gasPriceMonitor.history}{/center}`,
+				-1
+			)
+			Ui.getInstance().lineInserterCallback(BOXES.ALL_PLAYERS)(
+				offsetLine + 2,
+				priceText,
+				-1
+			)
 
 			const dt = new Date(block.timestamp * 1000).toISOString()
-			const gas = `${gasUtilization(block)}% ${gasPriceToString(
+			const gas = `${Gas.gasUtilization(block)}% ${Gas.gasPriceToString(
 				block.baseFeePerGas || BigNumber.from(0)
 			)}`
 			let text = `${Round.roundFromBlock(block.number)} Block: ${
 				block.number
 			} Gas: ${gas} Time: ${dt}`
-			const deltaBlockTime =
-				this.tipTimestamp == 0
-					? ''
-					: `${block.timestamp - this.tipTimestamp / 1000}s`
-
-			Ui.getInstance().lineInserterCallback(BOXES.BLOCKS)(
-				0,
-				`${block.number} ${gas}${deltaBlockTime}`,
-				block.timestamp * 1000
-			)
 
 			Logging.showError(text, 'block')
 
@@ -268,13 +295,6 @@ export default class ChainSync {
 			const elapsed = Date.now() - start
 
 			text += ` ${elapsed}ms`
-
-			Ui.getInstance().lineSetterCallback(BOXES.BLOCKS)(
-				0,
-				`${block.number} ${gas} ${deltaBlockTime} ${elapsed}ms`,
-				block.timestamp * 1000
-			)
-
 			Logging.showError(text, 'block')
 
 			this.tip = blockNumber
@@ -287,6 +307,27 @@ export default class ChainSync {
 	}
 
 	private async blockHandler(block: BlockWithTransactions) {
+		this.baseGasMonitor.newSample(block.baseFeePerGas ?? BigNumber.from(1))
+		const deltaBlockTime =
+			this.lastBlock.blockTimestamp == 0
+				? ''
+				: `${formatBlockDeltaColor(
+						block.timestamp - this.lastBlock.blockTimestamp / 1000
+				  )}s`
+
+		Ui.getInstance().lineSetterCallback(BOXES.BLOCKS)(
+			0,
+			this.baseGasMonitor.history,
+			block.timestamp * 1000
+		)
+		Ui.getInstance().lineInserterCallback(BOXES.BLOCKS)(
+			1,
+			`${block.number} ${deltaBlockTime} ${
+				this.baseGasMonitor.lastPrice
+			} ${this.baseGasMonitor.percentColor()}%`,
+			block.timestamp * 1000
+		)
+
 		const blockDetails: BlockDetails = {
 			blockNo: block.number,
 			blockTimestamp: block.timestamp * 1000, // always set to milliseconds
