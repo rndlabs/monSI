@@ -6,6 +6,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export type ChainConfig = {
+	secondsPerBlock: number
 	blocksPerRound: number
 	commitPhaseBlocks: number
 	revealPhaseBlocks: number
@@ -23,6 +24,7 @@ export type Configs = {
 
 const chainConfig: Configs = {
 	'5': {
+		secondsPerBlock: 12,
 		blocksPerRound: 152,
 		commitPhaseBlocks: 152 / 4,
 		revealPhaseBlocks: 152 / 4 + 1,
@@ -33,9 +35,22 @@ const chainConfig: Configs = {
 			postageStamp: '0x7aAC0f092F7b961145900839Ed6d54b1980F200c',
 		},
 	},
+	'100': {
+		// ToDO: Correct these values once gnosis is deployed
+		secondsPerBlock: 5,
+		blocksPerRound: 152,
+		commitPhaseBlocks: 152 / 4,
+		revealPhaseBlocks: 152 / 4 + 1,
+		contracts: {
+			redistribution: '0xF4963031E8b9f9659CB6ed35E53c031D76480EAD', // wrong
+			stakeRegistry: '0x18391158435582D5bE5ac1640ab5E2825F68d3a4', // wrong
+			bzzToken: '0xdBF3Ea6F5beE45c02255B2c26a16F300502F68da', // correct
+			postageStamp: '0x6a1A21ECA3aB28BE85C7Ba22b2d6eAE5907c900E', // correct
+		},
+	},
 }
 
 export const getRpcUrl = () =>
 	process.env.RPC_URL || 'ws://goerli-geth.dappnode:8546'
 
-export default chainConfig[Number(process.env.CHAIN_ID) || 5]
+export default chainConfig[Number(process.env.CHAIN_ID) || 5] // TODO: Determine from RPC provider getChainId()
