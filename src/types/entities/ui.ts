@@ -206,6 +206,14 @@ export default class Ui {
 		}
 	}
 
+	insertTopCallback(box: BOXES): (text: string, when?: number) => void {
+		return (text: string, when?: number) => {
+			this._boxes[box].insertTop(Ui.genText(text, when))
+			// render the changes
+			this._screen.render()
+		}
+	}
+
 	updatePlayer(line: number, text: string, when: number) {
 		this._boxes[BOXES.ALL_PLAYERS].setLine(line, Ui.genText(text, when))
 	}
