@@ -84,9 +84,9 @@ export class SchellingGame {
 		this.lastBlock = block
 		const blocksPerRound = config.blocksPerRound // TODO use configured blocksPerRound
 		const offset = block.blockNo % blocksPerRound
-		var phase
-		var length
-		var elapsed
+		let phase
+		let length
+		let elapsed
 		if (offset < blocksPerRound / 4) {
 			phase = 'commit'
 			length = blocksPerRound / 4

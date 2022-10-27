@@ -39,19 +39,18 @@ const log = Logging
 // sane defaults for the environment variables (if not set)
 const PRELOAD_ROUNDS = process.env.PRELOAD_ROUNDS || 4 // Startup can take a LONG time if you make this large!
 
-var preloadRounds = 0
-var startBlock = 0
-var startRound = 0
+let preloadRounds = 0
+let startBlock = 0
+let startRound = 0
 
 for (
-	var i = 2;
+	let i = 2;
 	i < process.argv.length;
 	i++ // start at 3 if/when RPC_URL is on command line
 ) {
 	if (process.argv[i] == '--preloadRounds')
-		preloadRounds = Number(
-			process.argv[++i]
-		) // Startup can take a LONG time if you make this large!
+		preloadRounds = Number(process.argv[++i])
+	// Startup can take a LONG time if you make this large!
 	else if (process.argv[i] == '--startBlock')
 		startBlock = Number(process.argv[++i])
 	else if (process.argv[i] == '--startRound')
@@ -60,7 +59,7 @@ for (
 		console.error('Invalid option ${process.argv[i]}')
 		process.exit(-1)
 	} else {
-		var overlay = process.argv[i].toLowerCase()
+		let overlay = process.argv[i].toLowerCase()
 		if (overlay.slice(0, 2) != '0x') overlay = '0x' + overlay
 		if (
 			overlay.length !=
@@ -75,7 +74,7 @@ for (
 }
 
 ;(async () => {
-	var startArg = await chainsync.getCurrentBlock()
+	let startArg = await chainsync.getCurrentBlock()
 	if (preloadRounds > 0)
 		startArg = startArg - preloadRounds * config.blocksPerRound
 	else if (startRound > 0) startArg = startRound * config.blocksPerRound
