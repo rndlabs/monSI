@@ -9,6 +9,7 @@ import Ui, { BOXES } from './ui'
 export type RoundHash = {
 	depth: number
 	count: number
+	highlight: boolean
 }
 
 export type Claim = {
@@ -65,12 +66,16 @@ export class Round {
 		// enumerate and output the hashes
 		let i = 0
 		for (const hash in this.hashes) {
+			const rh = this.hashes[hash]
 			r += i > 0 ? '+' : ' '
 			const color = this.claim && hash == this.claim.truth ? 'green' : 'red'
-			r +=
-				`{${color}-fg}${this.hashes[hash].count}` +
-				(!sameDepth ? `^${this.hashes[hash].depth}` : '') +
+			let term =
+				`{${color}-fg}${rh.count}` +
+				(!sameDepth ? `^${rh.depth}` : '') +
 				`{/${color}-fg}`
+			if (rh.highlight && (Object.keys(this.hashes).length > 1 || rh.count > 1))
+				term = `{yellow-bg}${term}{/yellow-bg}`
+			r += term
 			i++
 		}
 

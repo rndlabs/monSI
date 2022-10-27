@@ -184,10 +184,12 @@ export class SchellingGame {
 			}
 
 			round.hashes[hash].count++
+			if (this.isMyOverlay(overlay)) round.hashes[hash].highlight = true
 		} else {
 			round.hashes[hash] = {
 				count: 1,
 				depth,
+				highlight: this.isMyOverlay(overlay),
 			}
 			if (SchellingGame._showLogs)
 				Logging.showError(
