@@ -92,7 +92,7 @@ export default class Ui {
 			left: '55%',
 			width: '20%',
 			height: '100%',
-			content: 'hh:mm:ss bbbbbbb nns mmmms',
+			content: '',
 			scrollable: true,
 			tags: true,
 		})
