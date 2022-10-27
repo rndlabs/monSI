@@ -28,7 +28,9 @@ export class Round {
 	public players: string[] = []
 	public hashes: { [hash: string]: RoundHash } = {}
 	public claim: Claim | undefined = undefined
+	public unclaimed = false
 	private line = 0
+	private rendered = false
 
 	public get id() {
 		return this._id
@@ -37,7 +39,7 @@ export class Round {
 	constructor(block: BlockDetails) {
 		this._id = Round.roundFromBlock(block.blockNo)
 		this.lastBlock = block
-
+		this.rendered = false
 		this.line = SchellingGame.getInstance().numRounds
 	}
 
@@ -80,6 +82,8 @@ export class Round {
 				' {green-fg}' +
 				formatSi(this.claim.amount, { showPlus: true }) +
 				'{/green-fg}'
+		} else if (this.unclaimed) {
+			r += ' {magenta-fg}UNCLAIMED{/magenta-fg}'
 		}
 		return r
 	}
@@ -87,7 +91,8 @@ export class Round {
 	formatRoundPlayers(): string {
 		let r = ''
 		for (const player of this.players) {
-			if (r.length > 0) r += '\n'
+			//if (r.length > 0) 
+				r += '\n'
 
 			const p = SchellingGame.getInstance().getPlayer(player)!
 			r += p.formatRound(this._id)
@@ -100,11 +105,17 @@ export class Round {
 	 */
 	render() {
 		const ui = Ui.getInstance()
-		const roundsCb = ui.lineSetterCallback(BOXES.ROUNDS)
 		const playersCb = ui.boxSetterCallback(BOXES.ROUND_PLAYERS)
 
 		// update the rounds box
-		roundsCb(this.line, this.format(), this.lastBlock.blockTimestamp)
+		if (this.rendered) {
+			const roundsCb = ui.lineSetterCallback(BOXES.ROUNDS)
+			roundsCb(0, this.format(), this.lastBlock.blockTimestamp)
+		} else {
+			this.rendered = true
+			const roundsCb = ui.insertTopCallback(BOXES.ROUNDS)
+			roundsCb(this.format(), this.lastBlock.blockTimestamp)
+		}
 
 		// set the round players box
 		ui.boxLabelSetterCallback(BOXES.ROUND_PLAYERS)(`Round ${this.id} players`)

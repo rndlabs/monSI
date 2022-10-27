@@ -41,7 +41,7 @@ export class Player {
 		this.line = SchellingGame.getInstance().size
 		this.lastBlock = _block
 
-		Logging.showLogError('New player: ' + this.overlayString())
+		//Logging.showLogError('New player: ' + this.overlayString())
 
 		this.render()
 	}
