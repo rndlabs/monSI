@@ -23,5 +23,5 @@ const log = Logging
 const PRELOAD_ROUNDS = process.env.PRELOAD_ROUNDS || 4 // Startup can take a LONG time if you make this large!
 
 ;(async () => {
-	chainsync.start()
+	chainsync.start(8*152)
 })()

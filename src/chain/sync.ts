@@ -93,7 +93,7 @@ export default class ChainSync {
 		return ChainSync.instance
 	}
 
-	public async start() {
+	public async start(preloadBlocks: number) {
 		Logging.showLogError(`Starting ChainSync...`)
 
 		// change the state to warmup
@@ -103,14 +103,16 @@ export default class ChainSync {
 		this.setupEventListeners()
 
 		// sync the blockchain - effectively backfilling the game state
-		await this.syncBlockchain()
+		await this.syncBlockchain(preloadBlocks)
 
 		// change the state to running
 		this._state = State.RUNNING
 	}
 
-	private async syncBlockchain() {
+	private async syncBlockchain(preloadBlocks: number) {
 		Logging.showLogError(`Syncing blockchain...`)
+
+		if (false) {
 		// 1. Process all `StakeUpdated` events as this determines who is in the game.
 		const stakeUpdatedFilter = this.stakeRegistry.filters.StakeUpdated()
 		const stakeUpdatedLogs = await this.provider.getLogs({
@@ -120,6 +122,7 @@ export default class ChainSync {
 
 		// now process the logs and add players to the game
 		await this.processStakeUpdatedLogs(stakeUpdatedLogs)
+		}
 
 		// 2. Process all `commit`, `reveal`, and `claim` transactions to the Redistribution contract.
 
@@ -127,13 +130,18 @@ export default class ChainSync {
 		// const sem = semaphore(MAX_CONCURRENT)
 
 		this.tip = await this.provider.getBlockNumber()
-		Logging.showLogError(`Processing blocks ${this.lastBlock} to ${this.tip}`)
+		this.lastBlock.blockNo = this.tip - preloadBlocks - 1	// Start here
 
 		// data structures / reporting are designed so that we can process blocks in any order
+		Logging.showLogError(`Sync: Processing blocks ${this.lastBlock.blockNo+1} to ${this.tip}`)
 		do {
+			//Logging.showLogError(`Sync block ${this.lastBlock.blockNo+1}`)
 			const block = await this.provider.getBlockWithTransactions(
 				this.lastBlock.blockNo + 1
 			)
+
+			if (block.number % 100 == 0)
+				Logging.showError(`Sync: Processing block ${block.number}`, 'sync')
 
 			await this.blockHandler(block)
 
@@ -142,7 +150,8 @@ export default class ChainSync {
 				blockTimestamp: block.timestamp * 1000,
 				baseFeePerGas: block.baseFeePerGas,
 			}
-		} while (this.lastBlock.blockNo <= this.tip)
+		} while (this.lastBlock.blockNo < this.tip)
+		Logging.showLogError(`Sync: Complete including block ${this.lastBlock.blockNo}`)
 
 		// for (let i = this.lastBlock; i <= nowBlockNumber; i++) {
 		//     // sem.take(async () => {
@@ -234,6 +243,8 @@ export default class ChainSync {
 
 			const start = Date.now()
 			if (this._state == State.RUNNING) {
+				if (block.number != this.lastBlock.blockNo+1)
+					Logging.showError(`Skipped from block ${this.lastBlock.blockNo} to ${block.number}`)
 				await this.blockHandler(block)
 
 				this.lastBlock = {
@@ -264,8 +275,15 @@ export default class ChainSync {
 	}
 
 	private async blockHandler(block: BlockWithTransactions) {
-		if (block.number % 100 == 0)
-			Logging.showLogError(`Sync: Processing block ${block.number}`)
+		const blockDetails: BlockDetails = {
+			blockNo: block.number,
+			blockTimestamp: block.timestamp * 1000, // always set to milliseconds
+		}
+		const line = game.newBlock(blockDetails)
+		Ui.getInstance().lineSetterCallback(BOXES.ROUND_PLAYERS)(
+			0, line, block.timestamp * 1000
+		)
+
 		block.transactions.forEach(async (tx) => {
 			if (tx.to === config.contracts.redistribution) {
 				await this.processRedistributionTx(tx, block.timestamp)
@@ -298,11 +316,11 @@ export default class ChainSync {
 		switch (desc.name) {
 			case 'commit': // commit
 				const [, overlayAddress] = desc.args
-				game.commit(overlayAddress, blockDetails)
+				game.commit(overlayAddress, receipt.from, blockDetails)
 				break
 			case 'reveal': // reveal
 				const [overlay, depth, hash] = desc.args
-				game.reveal(overlay, hash, depth, blockDetails)
+				game.reveal(overlay, receipt.from, hash, depth, blockDetails)
 				break
 			case 'claim': // claim
 				// check for a 'Winner' event
@@ -350,7 +368,7 @@ export default class ChainSync {
 				})
 
 				// make a claim on the game!
-				game.claim(winner!, amount, blockDetails, freezes, slashes)
+				game.claim(winner!, receipt.from, amount, blockDetails, freezes, slashes)
 				break
 		}
 	}
