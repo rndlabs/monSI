@@ -56,6 +56,16 @@ export class SchellingGame {
 		this.lastBlock = { blockNo: 0, blockTimestamp: 0 }
 	}
 
+	public highlightOverlay(overlay: string) {
+		if (!this.myOverlays.includes(overlay)) {
+			this.myOverlays[this.myOverlays.length] = overlay
+			this.players.set(
+				overlay,
+				new Player(overlay, undefined, undefined, this.size)
+			)
+		}
+	}
+
 	// --- game logic ---
 
 	public newBlock(block: BlockDetails): string {

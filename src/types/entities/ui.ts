@@ -24,7 +24,7 @@ export default class Ui {
 	/**
 	 * Make the constructor private so that it can't be called.
 	 */
-	private constructor() {
+	private constructor(usage: string) {
 		this._screen = blessed.screen({
 			smartCSR: true,
 			dockBorders: true,
@@ -103,8 +103,8 @@ export default class Ui {
 			left: 0,
 			width: '55%', // blocksBox ? '55%' : '75%',
 			height: '100%',
-			content:
-				'{left}error and trace\noutput will appear here\nand scroll down{/left}',
+			content: `{left}\n${usage}{/left}`,
+			//			`{left}error and trace\noutput will appear here\nand scroll down{/left}\n${usage}`,
 			scrollable: true,
 			tags: true,
 		})
@@ -154,9 +154,9 @@ export default class Ui {
 	 * Get the singleton instance of the Ui class.
 	 * @returns the singleton instance of the Ui class
 	 */
-	public static getInstance(): Ui {
+	public static getInstance(usage: string = ''): Ui {
 		if (!Ui.instance) {
-			Ui.instance = new Ui()
+			Ui.instance = new Ui(usage)
 		}
 
 		return Ui.instance
@@ -214,8 +214,10 @@ export default class Ui {
 		}
 	}
 
-	updatePlayer(line: number, text: string, when: number) {
-		this._boxes[BOXES.ALL_PLAYERS].setLine(line, Ui.genText(text, when))
+	updatePlayer(line: number, text: string, when: number | undefined) {
+		if (when) text = Ui.genText(text, when)
+		else text = '         ' + text
+		this._boxes[BOXES.ALL_PLAYERS].setLine(line, text)
 	}
 
 	private static genText(text: string, when?: number): string {

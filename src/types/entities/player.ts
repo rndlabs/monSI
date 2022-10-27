@@ -10,11 +10,11 @@ import Ui from './ui'
 
 export class Player {
 	private _overlay: string // overlay of the bee node
-	private _account: string // ethereum address of the bee node
+	private _account: string | undefined // ethereum address of the bee node
 	private amount: BigNumber = BigNumber.from(0) // total amount won / lost
 	public line: number // where this player is in the players list
 	private _isPlaying: boolean = false
-	private lastBlock: BlockDetails // block details of last interaction
+	private lastBlock: BlockDetails | undefined // block details of last interaction
 	private playCount?: number // don't initialize
 	private winCount = 0 // initialize as 0
 	private frozenThawBlock?: number // if true, this is a frozen overlay
@@ -45,8 +45,8 @@ export class Player {
 	 */
 	constructor(
 		overlay: string,
-		account: string,
-		_block: BlockDetails,
+		account: string | undefined,
+		_block: BlockDetails | undefined,
 		line: number
 	) {
 		this._overlay = overlay
@@ -96,16 +96,16 @@ export class Player {
 
 	formatRound(round: number): string {
 		let t = `${Round.roundString(
-			this.lastBlock.blockNo
+			this.lastBlock!.blockNo
 		)} ${this.overlayString()}`
-		t += ` ${Round.roundPhaseFromBlock(this.lastBlock.blockNo)}`
+		t += ` ${Round.roundPhaseFromBlock(this.lastBlock!.blockNo)}`
 		if (this.reveals[round]) {
 			t += ` ^${this.reveals[round].depth} ${shortId(
 				this.reveals[round].hash,
 				10
 			)}`
 		}
-		return `${specificLocalTime(this.lastBlock.blockTimestamp)} ${t}`
+		return `${specificLocalTime(this.lastBlock!.blockTimestamp)} ${t}`
 	}
 
 	/**
@@ -196,7 +196,7 @@ export class Player {
 		Ui.getInstance().updatePlayer(
 			this.line,
 			this.format(),
-			this.lastBlock.blockTimestamp
+			this.lastBlock ? this.lastBlock.blockTimestamp : undefined
 		)
 	}
 }
