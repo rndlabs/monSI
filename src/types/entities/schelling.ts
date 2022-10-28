@@ -56,13 +56,38 @@ export class SchellingGame {
 		this.lastBlock = { blockNo: 0, blockTimestamp: 0 }
 	}
 
+	private getOrCreatePlayer(
+		overlay: string,
+		account?: string,
+		block?: BlockDetails
+	): Player {
+		if (!this.players.has(overlay)) {
+			this.players.set(overlay, new Player(overlay, account, block, this.size))
+			let line = 0 // Reassign the lines to sort the new player into place
+			this.players.forEachPair((overlay, player) => {
+				player.setLine(line++)
+			})
+		}
+		return this.players.get(overlay)!
+	}
+
+	public getOrCreateRound(roundNo: number, block: BlockDetails): Round {
+		// create the round if it doesn't exist
+		if (!this.rounds.has(roundNo)) {
+			this.rounds.set(roundNo, new Round(block))
+			this.players.forEachPair((overlay, player) => {
+				player.notPlaying()
+			})
+		}
+		const round = this.rounds.get(roundNo)
+		round!.lastBlock = block
+		return round!
+	}
+
 	public highlightOverlay(overlay: string) {
 		if (!this.myOverlays.includes(overlay)) {
 			this.myOverlays[this.myOverlays.length] = overlay
-			this.players.set(
-				overlay,
-				new Player(overlay, undefined, undefined, this.size)
-			)
+			this.getOrCreatePlayer(overlay)
 		}
 	}
 
@@ -111,32 +136,14 @@ export class SchellingGame {
 		return line
 	}
 
-	public getOrCreateRound(roundNo: number, block: BlockDetails): Round {
-		// create the round if it doesn't exist
-		if (!this.rounds.has(roundNo)) {
-			this.rounds.set(roundNo, new Round(block))
-			this.players.forEachPair((overlay, player) => {
-				player.notPlaying()
-			})
-		}
-		const round = this.rounds.get(roundNo)
-		round!.lastBlock = block
-		return round!
-	}
-
 	// --- commit
 	public commit(overlay: string, owner: string, block: BlockDetails) {
 		const roundNo = SchellingGame.roundFromBlockNo(block.blockNo)
 
 		const round = this.getOrCreateRound(roundNo, block)
 
-		// create the player if it doesn't exist
-		if (!this.players.has(overlay)) {
-			this.players.set(overlay, new Player(overlay, owner, block, this.size))
-		}
-
 		// update player state
-		const player = this.players.get(overlay)!
+		const player = this.getOrCreatePlayer(overlay, owner, block)!
 		player.commit(block)
 
 		// update the round state
@@ -163,13 +170,8 @@ export class SchellingGame {
 
 		const round = this.getOrCreateRound(roundNo, block)
 
-		// create the player if it doesn't exist
-		if (!this.players.has(overlay)) {
-			this.players.set(overlay, new Player(overlay, owner, block, this.size))
-		}
-
 		// update the player
-		const player = this.players.get(overlay)!
+		const player = this.getOrCreatePlayer(overlay, owner, block)!
 		player.reveal(block, roundNo, hash, depth)
 
 		// update the round state
@@ -222,16 +224,8 @@ export class SchellingGame {
 
 		const round = this.getOrCreateRound(roundNo, block)
 
-		// create the player if it doesn't exist
-		if (!this.players.has(winner.overlay)) {
-			this.players.set(
-				winner.overlay,
-				new Player(winner.overlay, owner, block, this.size)
-			)
-		}
-
 		// update player state
-		const winningPlayer = this.players.get(winner.overlay)!
+		const winningPlayer = this.getOrCreatePlayer(winner.overlay, owner, block)!
 		winningPlayer.claim(block, amount)
 
 		// freeze any players
@@ -283,13 +277,8 @@ export class SchellingGame {
 		amount: BigNumber,
 		block: BlockDetails
 	) {
-		// create the player if it doesn't exist
-		if (!this.players.has(overlay)) {
-			this.players.set(overlay, new Player(overlay, owner, block, this.size))
-		}
-
 		// update player state
-		const player = this.players.get(overlay)!
+		const player = this.getOrCreatePlayer(overlay, owner, block)
 		player.updateStake(block, amount)
 	}
 

@@ -14,7 +14,7 @@ export class Player {
 	private amount: BigNumber = BigNumber.from(0) // total amount won / lost
 	private stake?: BigNumber // Total stake (if tracking)
 	private stakeChangeCount: number = 0
-	public line: number // where this player is in the players list
+	private line: number // where this player is in the players list TODO: -1 for not visible
 	private _isPlaying: boolean = false
 	private lastBlock: BlockDetails | undefined // block details of last interaction
 	private playCount?: number // don't initialize
@@ -38,6 +38,11 @@ export class Player {
 			this._isPlaying = false
 			this.render()
 		}
+	}
+
+	public setLine(line: number, reRender: boolean = true) {
+		this.line = line
+		if (reRender) this.render()
 	}
 
 	/**
@@ -172,6 +177,7 @@ export class Player {
 
 	updateStake(block: BlockDetails, amount: BigNumber) {
 		this.lastBlock = block
+
 		// don't set the below as the amount is only used to track winnings
 		// this.amount = amount
 
