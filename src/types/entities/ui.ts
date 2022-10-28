@@ -92,7 +92,7 @@ export class Ui {
 			left: '55%',
 			width: '20%',
 			height: '100%',
-			content: 'hh:mm:ss bbbbbbb nns mmmms',
+			content: '',
 			scrollable: true,
 			tags: true,
 		})
@@ -213,10 +213,16 @@ export class Ui {
 		}
 	}
 
-	updatePlayer(line: number, text: string, when: number | undefined) {
+	updatePlayer(
+		line: number,
+		text: string,
+		when: number | undefined,
+		newone?: boolean
+	) {
 		if (when) text = Ui.genText(text, when)
 		else text = '         ' + text
-		this._boxes[BOXES.ALL_PLAYERS].setLine(line, text)
+		if (newone) this._boxes[BOXES.ALL_PLAYERS].insertLine(line, text)
+		else this._boxes[BOXES.ALL_PLAYERS].setLine(line, text)
 	}
 
 	private static genText(text: string, when?: number): string {

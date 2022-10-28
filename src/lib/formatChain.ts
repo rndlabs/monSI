@@ -1,3 +1,5 @@
+import config from '../config'
+
 export function chainName(id: number) {
 	switch (id) {
 		// from https://besu.hyperledger.org/en/stable/public-networks/concepts/network-and-chain-id/
@@ -23,4 +25,13 @@ export function chainName(id: number) {
 		default:
 			return `chain ${id}`
 	}
+}
+
+export function formatBlockDeltaColor(blockDelta: number) {
+	let result = `${blockDelta}`
+	if (blockDelta > config.chain.secondsPerBlock * 2)
+		result = `{red-fg}${result}{/red-fg}`
+	else if (blockDelta > config.chain.secondsPerBlock)
+		result = `{yellow-fg}${result}{/yellow-fg}`
+	return result
 }

@@ -5,6 +5,9 @@
 import { ChainSync } from './chain'
 
 export type ChainConfig = {
+	chain: {
+		secondsPerBlock: number
+	}
 	game: {
 		blocksPerRound: number
 		commitPhaseBlocks: number
@@ -24,6 +27,9 @@ export type Configs = {
 
 export const chainConfig: Configs = {
 	'5': {
+		chain: {
+			secondsPerBlock: 12,
+		},
 		game: {
 			blocksPerRound: 152,
 			commitPhaseBlocks: 152 / 4,
@@ -36,6 +42,23 @@ export const chainConfig: Configs = {
 			postageStamp: '0x7aAC0f092F7b961145900839Ed6d54b1980F200c',
 		},
 	},
+	'100': {
+		// TODO: Correct these values once gnosis is deployed
+		chain: {
+			secondsPerBlock: 5,
+		},
+		game: {
+			blocksPerRound: 152,
+			commitPhaseBlocks: 152 / 4,
+			revealPhaseBlocks: 152 / 4 + 1,
+		},
+		contracts: {
+			redistribution: '0xF4963031E8b9f9659CB6ed35E53c031D76480EAD', // wrong
+			stakeRegistry: '0x18391158435582D5bE5ac1640ab5E2825F68d3a4', // wrong
+			bzzToken: '0xdBF3Ea6F5beE45c02255B2c26a16F300502F68da', // correct
+			postageStamp: '0x6a1A21ECA3aB28BE85C7Ba22b2d6eAE5907c900E', // correct
+		},
+	},
 }
 
 export default class Config {
@@ -46,6 +69,10 @@ export default class Config {
 
 	private constructor() {}
 
+	static setChainId(chainId: number) {
+		this.chainId = chainId
+	}
+
 	static get contracts(): ChainConfig['contracts'] {
 		return Config.chainConfig[Config.chainId].contracts
 	}
@@ -54,7 +81,7 @@ export default class Config {
 		return Config.chainConfig[Config.chainId].game
 	}
 
-	static setChainId(chainId: number) {
-		Config.chainId = chainId
+	static get chain(): ChainConfig['chain'] {
+		return Config.chainConfig[Config.chainId].chain
 	}
 }
