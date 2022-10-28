@@ -1,84 +1,132 @@
-import { Logging } from './utils'
-import dotenv from 'dotenv'
-
-import tui from './types/entities/ui'
-import ChainSync from './chain/sync'
-
-import { SchellingGame } from './types/entities/schelling'
-
+import { Command, Option, InvalidOptionArgumentError } from 'commander'
+import pack from '../package.json'
 import config from './config'
 
-// get the environment variables
-dotenv.config()
-
-const RPC_URL = process.env.RPC_URL || 'ws://goerli-geth.dappnode:8546'
-const CHAIN_ID = Number(process.env.CHAIN_ID) || 5
-
-//const usage = `Usage: ${process.argv[0]} ${process.argv[1]} rpcURL(websocket) <HighlightOverlays...> <options>` +
-const usage =
-	`Usage: ${process.argv[0]} ${process.argv[1]} <HighlightOverlays...> <options>` +
-	'\n' +
-	'Valid options are:' +
-	'\n' +
-	'    --preloadRounds N          Number of rounds to load before current round' +
-	'\n' +
-	'    --startBlock N             Block number to start loading' +
-	'\n' +
-	'    --startRound N             Round number to start loading; each round is 152 blocks' +
-	'\n' +
-	'' +
-	'\n' +
-	`for example: ${process.argv[0]} ${process.argv[1]} 6a7c4d45064a382fdd6913fcfdf631b9cacd163c02f9207dee219ef63e953e43 0xB7563E747205FA41E3C59ADCEC667AA5D7415A8E1F4A61B35232486FF49F7C7B 828bec0209b77c751b8e41cd1e4004e902db05a8a7323f53ddf3d1d3dbb7f412 --preloadRounds 4`
-//				`for example: ${process.argv[0]} ${process.argv[1]} ws://localhost:8545 6a7c4d45064a382fdd6913fcfdf631b9cacd163c02f9207dee219ef63e953e43 0xB7563E747205FA41E3C59ADCEC667AA5D7415A8E1F4A61B35232486FF49F7C7B 828bec0209b77c751b8e41cd1e4004e902db05a8a7323f53ddf3d1d3dbb7f412 --preloadRounds 4`
-
-const chainsync = ChainSync.getInstance()
-const ui = tui.getInstance(usage)
-const game = SchellingGame.getInstance()
-const log = Logging
+import { ChainSync } from './chain'
+import { SchellingGame, Ui } from './types/entities'
+import { Logging } from './utils'
+import { utils } from 'ethers'
 
 // sane defaults for the environment variables (if not set)
-const PRELOAD_ROUNDS = process.env.PRELOAD_ROUNDS || 4 // Startup can take a LONG time if you make this large!
+const DEFAULT_PRELOAD_ROUNDS = 4
+const DEFAULT_RPC_ENDPOINT = 'ws://goerli-geth.dappnode:8546'
 
-let preloadRounds = 0
-let startBlock = 0
-let startRound = 0
-
-for (
-	let i = 2;
-	i < process.argv.length;
-	i++ // start at 3 if/when RPC_URL is on command line
-) {
-	if (process.argv[i] == '--preloadRounds')
-		preloadRounds = Number(process.argv[++i])
-	// Startup can take a LONG time if you make this large!
-	else if (process.argv[i] == '--startBlock')
-		startBlock = Number(process.argv[++i])
-	else if (process.argv[i] == '--startRound')
-		startRound = Number(process.argv[++i])
-	else if (process.argv[i].slice(0, 1) == '-') {
-		console.error('Invalid option ${process.argv[i]}')
-		process.exit(-1)
-	} else {
-		let overlay = process.argv[i].toLowerCase()
-		if (overlay.slice(0, 2) != '0x') overlay = '0x' + overlay
-		if (
-			overlay.length !=
-			'0x47d48ff50fcfe118ecadb97d6cefe17397a0eeb554e4112b7a24d14ded8451bc'
-				.length
-		) {
-			console.error('Invalid overlay ${overlay}')
-			process.exit(-1)
-		}
-		game.highlightOverlay(overlay)
-	}
+interface CLIOptions {
+	mainnet: boolean
+	rpcEndpoint: string
+	rounds?: number
+	block?: number
+	round?: number
 }
 
-;(async () => {
-	let startArg = await chainsync.getCurrentBlock()
-	if (preloadRounds > 0)
-		startArg = startArg - preloadRounds * config.blocksPerRound
-	else if (startRound > 0) startArg = startRound * config.blocksPerRound
-	else if (startBlock > 0) startArg = startBlock
+/**
+ * Run the CLI
+ * @param overlays User's overlays to highlight
+ * @param options CLI options
+ */
+async function run(overlays: string[], options: CLIOptions) {
+	const { mainnet, rpcEndpoint, rounds, block, round } = options
 
-	chainsync.start(startArg)
-})()
+	// Set the chain ID
+	config.setChainId(mainnet ? 100 : 5)
+
+	const chainsync = ChainSync.getInstance()
+
+	// initialiaze ChainSync
+	await chainsync.init(rpcEndpoint)
+
+	let startBlock = await chainsync.getCurrentBlock()
+
+	// preload from the given block
+	if (block !== undefined) startBlock = block
+	// preload from the given round
+	else if (round) startBlock = round * config.game.blocksPerRound
+	// preload the last 'rounds' rounds
+	else if (rounds) startBlock -= rounds * config.game.blocksPerRound
+
+	// start the chain sync
+	chainsync.start(startBlock)
+
+	// start the game
+	const game = SchellingGame.getInstance()
+
+	if (overlays.length > 0) {
+		for (const overlay of overlays) {
+			game.highlightOverlay(overlay)
+		}
+	}
+
+	// start the TUI
+	const ui = Ui.getInstance()
+}
+
+function cliParseInt(value: string, dummyPrevious: unknown): number {
+	// parseInt takes a string and an optional radix
+	const parsedValue = parseInt(value, 10)
+	if (isNaN(parsedValue)) {
+		throw new InvalidOptionArgumentError('Not a number.')
+	}
+	return parsedValue
+}
+
+function cliParseOverlay(value: string[]): string[] {
+	for (const overlay of value) {
+		try {
+			// use ethers to validate the overlay address
+			utils.parseBytes32String(utils.arrayify(overlay))
+		} catch (e) {
+			throw new InvalidOptionArgumentError('Not a valid overlay.')
+		}
+	}
+	return value
+}
+
+/**
+ * CLI entry point
+ */
+async function main() {
+	const program = new Command()
+
+	program
+		.name('monSI')
+		.description('Monitor Storage Incentives for Swarm')
+		.version(pack.version)
+		.argument(
+			'[overlays...]',
+			'Overlay addresses for highlighting',
+			cliParseOverlay
+		)
+		.addOption(new Option('--mainnet', 'Use Swarm mainnet').default(false))
+		.addOption(
+			new Option(
+				'--rpc-endpoint <string>',
+				'RPC endpoint for the blockchain node'
+			)
+				.env('RPC_URL')
+				.default(DEFAULT_RPC_ENDPOINT)
+		)
+		.addOption(
+			new Option(
+				'-r, --rounds [rounds]',
+				'Load the last number of rounds from the blockchain'
+			)
+				.conflicts(['block, round'])
+				.default(DEFAULT_PRELOAD_ROUNDS) // Startup can take a LONG time if you make this large!
+				.argParser(cliParseInt)
+		)
+		.addOption(
+			new Option('-b, --block [block]', 'Block number to start loading from')
+				.conflicts(['rounds, round'])
+				.argParser(cliParseInt)
+		)
+		.addOption(
+			new Option('-R, --round [round]', 'Round number to start loading from')
+				.conflicts(['rounds, block'])
+				.argParser(cliParseInt)
+		)
+		.action(run)
+
+	await program.parseAsync(process.argv)
+}
+
+main()
