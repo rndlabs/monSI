@@ -4,6 +4,7 @@ import {
 	TransactionResponse,
 } from '@ethersproject/abstract-provider'
 import { BigNumber, providers } from 'ethers'
+import invariant from 'tiny-invariant'
 import semaphore from 'semaphore'
 
 import config from '../config'
@@ -33,6 +34,7 @@ import { gasPriceMonitor, gasPriceToString, gasUtilization } from './gas'
 const game = SchellingGame.getInstance()
 
 enum State {
+	COLD,
 	INIT,
 	WARMUP,
 	RUNNING,
@@ -53,22 +55,44 @@ const MAX_CONCURRENT = 500
 export class ChainSync {
 	private static instance: ChainSync
 
-	private provider: providers.WebSocketProvider
+	// ram these variables to avoid undefined error checking (initialized in init)
+	private provider!: providers.WebSocketProvider
+	private stakeRegistry!: StakeRegistry
+	private redistribution!: Redistribution
+	private bzzToken!: BzzToken
 
-	private stakeRegistry: StakeRegistry
-	private redistribution: Redistribution
-	private bzzToken: BzzToken
-
-	private _state: State = State.INIT
+	private _state: State = State.COLD
 	private lastBlock: BlockDetails = { blockNo: 7753000, blockTimestamp: 0 }
 	private tip: number = 0
 	private tipTimestamp: number = 0
 
+	private _network?: providers.Network
+
 	private numFailedTransactions = 0
 
-	private constructor() {
-		// configure the RPC
-		this.provider = new providers.WebSocketProvider(getRpcUrl())
+	private constructor() {}
+
+	// --- singleton method
+
+	public static getInstance(): ChainSync {
+		if (!ChainSync.instance) {
+			ChainSync.instance = new ChainSync()
+		}
+		return ChainSync.instance
+	}
+
+	public async getCurrentBlock(): Promise<number> {
+		return await this.provider.getBlockNumber()
+	}
+
+	public async init(rpc: string) {
+		// check the state
+		invariant(this._state === State.COLD, 'ChainSync must be cold')
+
+		this.provider = new providers.WebSocketProvider(rpc)
+
+		// cache the network information
+		this._network = await this.provider.getNetwork()
 
 		// connect to the contracts
 		this.stakeRegistry = StakeRegistry__factory.connect(
@@ -83,22 +107,14 @@ export class ChainSync {
 			config.contracts.bzzToken,
 			this.provider
 		)
-	}
 
-	// --- singleton method
-
-	public static getInstance(): ChainSync {
-		if (!ChainSync.instance) {
-			ChainSync.instance = new ChainSync()
-		}
-		return ChainSync.instance
-	}
-
-	public async getCurrentBlock(): Promise<number> {
-		return this.provider.getBlockNumber()
+		// mark as initialized
+		this._state = State.INIT
 	}
 
 	public async start(startFromBlock: number) {
+		invariant(this._state === State.INIT, 'ChainSync must be initialized')
+
 		Logging.showLogError(`Starting ChainSync...`)
 
 		// change the state to warmup
