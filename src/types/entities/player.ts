@@ -1,12 +1,17 @@
 import { BigNumber } from 'ethers'
 import { Logging } from '../../utils'
-import { BlockDetails } from '../../chain/sync'
-import { specificLocalTime } from '../../lib/formatDate'
-import { fmtOverlay, shortId } from '../../lib/formatText'
-import { colorDelta, colorValue } from '../../lib/formatUi'
-import { formatSi, shortBZZ } from '../../lib/formatUnits'
+import { BlockDetails } from '../../chain'
+import {
+	specificLocalTime,
+	fmtOverlay,
+	shortId,
+	colorDelta,
+	colorValue,
+	formatSi,
+	shortBZZ,
+} from '../../lib'
 import { Round } from './round'
-import Ui from './ui'
+import { Ui } from './ui'
 
 export class Player {
 	private _overlay: string // overlay of the bee node

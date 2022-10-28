@@ -1,6 +1,6 @@
 import blessed, { Widgets } from 'blessed'
-import { getRpcUrl } from '../../config'
-import { currentLocalTime, specificLocalTime } from '../../lib/formatDate'
+import { ChainSync } from '../../chain'
+import { currentLocalTime, specificLocalTime } from '../../lib'
 
 /**
  * A singleton class for managing the user interface
@@ -14,7 +14,7 @@ export enum BOXES {
 	OUTPUT = 4,
 }
 
-export default class Ui {
+export class Ui {
 	private static instance: Ui
 
 	private _screen: Widgets.Screen
@@ -24,7 +24,7 @@ export default class Ui {
 	/**
 	 * Make the constructor private so that it can't be called.
 	 */
-	private constructor(usage: string) {
+	private constructor() {
 		this._screen = blessed.screen({
 			smartCSR: true,
 			dockBorders: true,
@@ -59,7 +59,7 @@ export default class Ui {
 			width: '25%',
 			height: '100%',
 
-			content: '\n{center}' + getRpcUrl() + '{/center}',
+			content: '\n{center}' + ChainSync.getInstance().rpcUrl + '{/center}',
 			scrollable: true,
 			tags: true,
 		})
@@ -103,8 +103,7 @@ export default class Ui {
 			left: 0,
 			width: '55%', // blocksBox ? '55%' : '75%',
 			height: '100%',
-			content: `{left}\n${usage}{/left}`,
-			//			`{left}error and trace\noutput will appear here\nand scroll down{/left}\n${usage}`,
+			content: `{left}error and trace\noutput will appear here\nand scroll down{/left}`,
 			scrollable: true,
 			tags: true,
 		})
@@ -154,9 +153,9 @@ export default class Ui {
 	 * Get the singleton instance of the Ui class.
 	 * @returns the singleton instance of the Ui class
 	 */
-	public static getInstance(usage: string = ''): Ui {
+	public static getInstance(): Ui {
 		if (!Ui.instance) {
-			Ui.instance = new Ui(usage)
+			Ui.instance = new Ui()
 		}
 
 		return Ui.instance

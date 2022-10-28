@@ -1,14 +1,13 @@
 import { BigNumber, utils } from 'ethers'
 import { BlockWithTransactions } from '@ethersproject/abstract-provider'
-import { SchellingGame } from '../types/entities/schelling'
-import tui, { BOXES } from '../types/entities/ui'
+import { SchellingGame, Ui, BOXES } from '../types/entities'
 
 let history = ''
 let historyCount = 0
 let lastPrice = BigNumber.from(0)
 
-export default (newPrice: BigNumber) => {
-	const ui = tui.getInstance()
+export const gasPriceMonitor = (newPrice: BigNumber) => {
+	const ui = Ui.getInstance()
 	const game = SchellingGame.getInstance()
 
 	const delta = newPrice.sub(lastPrice)

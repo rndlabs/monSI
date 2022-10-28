@@ -1,10 +1,9 @@
 import { BigNumber, BigNumberish } from 'ethers'
-import { BlockDetails } from '../../chain/sync'
+import { BlockDetails } from '../../chain'
 import config from '../../config'
-import { fmtOverlay } from '../../lib/formatText'
-import { formatSi } from '../../lib/formatUnits'
+import { fmtOverlay, formatSi } from '../../lib'
 import { SchellingGame } from './schelling'
-import Ui, { BOXES } from './ui'
+import { Ui, BOXES } from './ui'
 
 export type RoundHash = {
 	depth: number

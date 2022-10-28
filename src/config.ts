@@ -2,8 +2,7 @@
  * Ethereum Swarm Schelling game configuration by chain
  */
 
-import dotenv from 'dotenv'
-dotenv.config()
+import { ChainSync } from './chain'
 
 export type ChainConfig = {
 	blocksPerRound: number
@@ -21,7 +20,7 @@ export type Configs = {
 	[chainId: number]: ChainConfig
 }
 
-const chainConfig: Configs = {
+export const chainConfig: Configs = {
 	'5': {
 		blocksPerRound: 152,
 		commitPhaseBlocks: 152 / 4,

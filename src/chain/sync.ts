@@ -21,13 +21,15 @@ import {
 import {
 	Reveal,
 	SchellingGame,
+	Round,
 	StakeFreeze,
 	StakeSlash,
-} from '../types/entities/schelling'
-import { shortBZZ } from '../lib/formatUnits'
-import { fmtAccount } from '../lib/formatText'
-import { Round } from '../types/entities/round'
-import Ui, { BOXES } from '../types/entities/ui'
+	Ui,
+	BOXES,
+} from '../types/entities'
+
+import { shortBZZ, fmtAccount } from '../lib'
+import { gasPriceMonitor, gasPriceToString, gasUtilization } from './gas'
 
 const game = SchellingGame.getInstance()
 
@@ -49,7 +51,7 @@ const MAX_CONCURRENT = 500
  * A service to monitor blockchain events, subsequently updating the game state.
  */
 
-export default class ChainSync {
+export class ChainSync {
 	private static instance: ChainSync
 
 	private provider: providers.WebSocketProvider
@@ -229,7 +231,7 @@ export default class ChainSync {
 		// setup listener for new blocks
 		this.provider.on('block', async (blockNumber: number) => {
 			const block = await this.provider.getBlockWithTransactions(blockNumber)
-			gasmonitor(block.baseFeePerGas ?? BigNumber.from(1))
+			gasPriceMonitor(block.baseFeePerGas ?? BigNumber.from(1))
 
 			const dt = new Date(block.timestamp * 1000).toISOString()
 			const gas = `${gasUtilization(block)}% ${gasPriceToString(

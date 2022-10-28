@@ -1,14 +1,14 @@
 import { BigNumber } from 'ethers'
 import BTree_ from 'sorted-btree'
-import { leftId, shortId } from '../../lib/formatText'
 const BTree = (BTree_ as any).default as typeof BTree_
 
 import config from '../../config'
 import { Logging } from '../../utils'
+import { leftId, shortId } from '../../lib'
+import { BlockDetails } from '../../chain'
 
 import { Player } from './player'
 import { Round } from './round'
-import { BlockDetails } from '../../chain/sync'
 
 export type StakeFreeze = {
 	overlay: string

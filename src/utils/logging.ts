@@ -1,10 +1,10 @@
-import { currentLocalTime, specificLocalTime } from '../lib/formatDate'
-import Ui, { BOXES } from '../types/entities/ui'
+import { currentLocalTime, specificLocalTime } from '../lib'
+import { Ui, BOXES } from '../types/entities'
 
 export default class Logging {
 	private static instance: Logging
-	private _debugging: boolean = false	// Controls all showError logging to stderr (extensive)
-	private _errorLogEnabled: boolean = false	// Controls showLog* logging to stderr (less stuff)
+	private _debugging: boolean = false // Controls all showError logging to stderr (extensive)
+	private _errorLogEnabled: boolean = false // Controls showLog* logging to stderr (less stuff)
 	private _lastErrorTag: string = ''
 
 	private constructor() {}
@@ -42,16 +42,13 @@ export default class Logging {
 		if (!when) when = Date.now()
 
 		if (this._debugging) {
-			console.error(
-				`${specificLocalTime(when)} ${tag ? `[${tag}]` : ''}${msg}`
-			)
+			console.error(`${specificLocalTime(when)} ${tag ? `[${tag}]` : ''}${msg}`)
 		}
 
 		// output to the output box
 		if (this._lastErrorTag != tag)
-			Ui.getInstance().insertTopCallback(BOXES.OUTPUT)(msg, when)	// Scroll down
-		else 
-			Ui.getInstance().lineSetterCallback(BOXES.OUTPUT)(0, msg, when)	// Replace top line
+			Ui.getInstance().insertTopCallback(BOXES.OUTPUT)(msg, when) // Scroll down
+		else Ui.getInstance().lineSetterCallback(BOXES.OUTPUT)(0, msg, when) // Replace top line
 
 		this._lastErrorTag = tag || ''
 	}
