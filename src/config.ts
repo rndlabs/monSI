@@ -6,6 +6,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export type ChainConfig = {
+	name: string
 	secondsPerBlock: number
 	blocksPerRound: number
 	commitPhaseBlocks: number
@@ -24,6 +25,7 @@ export type Configs = {
 
 const chainConfig: Configs = {
 	'5': {
+		name: 'goerli',
 		secondsPerBlock: 12,
 		blocksPerRound: 152,
 		commitPhaseBlocks: 152 / 4,
@@ -37,6 +39,7 @@ const chainConfig: Configs = {
 	},
 	'100': {
 		// ToDO: Correct these values once gnosis is deployed
+		name: 'gnosis',
 		secondsPerBlock: 5,
 		blocksPerRound: 152,
 		commitPhaseBlocks: 152 / 4,

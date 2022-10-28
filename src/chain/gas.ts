@@ -34,6 +34,8 @@ export class Gas {
 
 	constructor(maxWidth: number) {
 		this._maxWidth = maxWidth
+		this._historyCount = maxWidth
+		this._history = '.'.repeat(maxWidth)
 	}
 
 	newSample(newPrice: BigNumber): void {

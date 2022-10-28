@@ -58,7 +58,7 @@ export class Player {
 
 		//Logging.showLogError('New player: ' + this.overlayString())
 
-		this.render()
+		this.render(true)
 	}
 
 	/**
@@ -213,11 +213,12 @@ export class Player {
 	/**
 	 * Render the player to the screen
 	 */
-	render() {
+	render(newone?: boolean) {
 		Ui.getInstance().updatePlayer(
 			this.line,
 			this.format(),
-			this.lastBlock ? this.lastBlock.blockTimestamp : undefined
+			this.lastBlock ? this.lastBlock.blockTimestamp : undefined,
+			newone
 		)
 	}
 }

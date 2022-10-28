@@ -59,7 +59,7 @@ export default class Ui {
 			width: '25%',
 			height: '100%',
 
-			content: '\n{center}' + getRpcUrl() + '{/center}',
+			content: '{center}' + getRpcUrl() + '{/center}',
 			scrollable: true,
 			tags: true,
 		})
@@ -214,10 +214,16 @@ export default class Ui {
 		}
 	}
 
-	updatePlayer(line: number, text: string, when: number | undefined) {
+	updatePlayer(
+		line: number,
+		text: string,
+		when: number | undefined,
+		newone?: boolean
+	) {
 		if (when) text = Ui.genText(text, when)
 		else text = '         ' + text
-		this._boxes[BOXES.ALL_PLAYERS].setLine(line, text)
+		if (newone) this._boxes[BOXES.ALL_PLAYERS].insertLine(line, text)
+		else this._boxes[BOXES.ALL_PLAYERS].setLine(line, text)
 	}
 
 	private static genText(text: string, when?: number): string {

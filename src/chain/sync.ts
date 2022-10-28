@@ -251,10 +251,10 @@ export default class ChainSync {
 			)} ${blockNumber} ${
 				this.gasPriceMonitor.lastPrice
 			} ${this.gasPriceMonitor.percentColor()}%{/left}`
-			const offsetLine = game.size
+			const offsetLine = game.size + 1 // Keep room for the getRpcUrl
 			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
 				offsetLine,
-				'{center}getGasPrice{/center}',
+				`{center}${config.name} getGasPrice{/center}`,
 				-1
 			)
 			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
@@ -317,8 +317,8 @@ export default class ChainSync {
 
 		Ui.getInstance().lineSetterCallback(BOXES.BLOCKS)(
 			0,
-			this.baseGasMonitor.history,
-			block.timestamp * 1000
+			`{center}${this.baseGasMonitor.history}{/center}`,
+			-1 // Don't timestamp this line
 		)
 		Ui.getInstance().lineInserterCallback(BOXES.BLOCKS)(
 			1,
