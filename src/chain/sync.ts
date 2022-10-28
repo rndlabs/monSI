@@ -6,9 +6,8 @@ import {
 import { BigNumber, providers } from 'ethers'
 import semaphore from 'semaphore'
 
-import config, { getRpcUrl } from '../config'
+import config from '../config'
 import { Logging } from '../utils'
-import gasmonitor, { gasPriceToString, gasUtilization } from './gas'
 
 import {
 	BzzToken,
@@ -117,7 +116,8 @@ export class ChainSync {
 
 	private async syncBlockchain(startFromBlock: number) {
 		startFromBlock =
-			Math.floor(startFromBlock / config.blocksPerRound) * config.blocksPerRound
+			Math.floor(startFromBlock / config.game.blocksPerRound) *
+			config.game.blocksPerRound
 		Logging.showLogError(`Syncing blockchain from block ${startFromBlock}...`)
 
 		if (false) {

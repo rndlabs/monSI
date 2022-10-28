@@ -129,19 +129,24 @@ export class Round {
 	}
 
 	public static roundFromBlock(block: number) {
-		return Math.floor(block / config.blocksPerRound)
+		return Math.floor(block / config.game.blocksPerRound)
 	}
 
 	public static roundString(block: number) {
-		return `${Round.roundFromBlock(block)}(${block % config.blocksPerRound})`
+		return `${Round.roundFromBlock(block)}(${
+			block % config.game.blocksPerRound
+		})`
 	}
 
 	public static roundPhaseFromBlock(block: number) {
-		const residual = block % config.blocksPerRound
+		const residual = block % config.game.blocksPerRound
 
-		if (residual < config.commitPhaseBlocks) {
+		if (residual < config.game.commitPhaseBlocks) {
 			return 'commit'
-		} else if (residual < config.commitPhaseBlocks + config.revealPhaseBlocks) {
+		} else if (
+			residual <
+			config.game.commitPhaseBlocks + config.game.revealPhaseBlocks
+		) {
 			return 'reveal'
 		} else {
 			return 'claim'

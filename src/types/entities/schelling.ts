@@ -82,7 +82,7 @@ export class SchellingGame {
 			this.currentRoundNo = roundNo
 		}
 		this.lastBlock = block
-		const blocksPerRound = config.blocksPerRound // TODO use configured blocksPerRound
+		const blocksPerRound = config.game.blocksPerRound // TODO use configured blocksPerRound
 		const offset = block.blockNo % blocksPerRound
 		let phase
 		let length
@@ -106,8 +106,8 @@ export class SchellingGame {
 		let line = `${Round.roundString(
 			block.blockNo
 		)} ${percent}% of ${phase}, ${remaining} blocks left`
-		if (config.blocksPerRound - offset - 1 != remaining)
-			line = line + `, ${config.blocksPerRound - offset - 1} in round`
+		if (config.game.blocksPerRound - offset - 1 != remaining)
+			line = line + `, ${config.game.blocksPerRound - offset - 1} in round`
 		return line
 	}
 
@@ -368,6 +368,6 @@ export class SchellingGame {
 	 * @returns the round number
 	 */
 	public static roundFromBlockNo(blockNo: number): number {
-		return Math.floor(blockNo / config.blocksPerRound)
+		return Math.floor(blockNo / config.game.blocksPerRound)
 	}
 }

@@ -5,9 +5,11 @@
 import { ChainSync } from './chain'
 
 export type ChainConfig = {
-	blocksPerRound: number
-	commitPhaseBlocks: number
-	revealPhaseBlocks: number
+	game: {
+		blocksPerRound: number
+		commitPhaseBlocks: number
+		revealPhaseBlocks: number
+	}
 	contracts: {
 		redistribution: string
 		stakeRegistry: string
@@ -22,9 +24,11 @@ export type Configs = {
 
 export const chainConfig: Configs = {
 	'5': {
-		blocksPerRound: 152,
-		commitPhaseBlocks: 152 / 4,
-		revealPhaseBlocks: 152 / 4 + 1,
+		game: {
+			blocksPerRound: 152,
+			commitPhaseBlocks: 152 / 4,
+			revealPhaseBlocks: 152 / 4 + 1,
+		},
 		contracts: {
 			redistribution: '0xF4963031E8b9f9659CB6ed35E53c031D76480EAD',
 			stakeRegistry: '0x18391158435582D5bE5ac1640ab5E2825F68d3a4',
@@ -34,7 +38,23 @@ export const chainConfig: Configs = {
 	},
 }
 
-export const getRpcUrl = () =>
-	process.env.RPC_URL || 'ws://goerli-geth.dappnode:8546'
+export default class Config {
+	static chainConfig: Configs = chainConfig
+	static chainSync: ChainSync = ChainSync.getInstance()
 
-export default chainConfig[Number(process.env.CHAIN_ID) || 5]
+	static chainId = 5
+
+	private constructor() {}
+
+	static get contracts(): ChainConfig['contracts'] {
+		return Config.chainConfig[Config.chainId].contracts
+	}
+
+	static get game(): ChainConfig['game'] {
+		return Config.chainConfig[Config.chainId].game
+	}
+
+	static setChainId(chainId: number) {
+		Config.chainId = chainId
+	}
+}
