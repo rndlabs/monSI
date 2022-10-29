@@ -87,8 +87,27 @@ export class Gas {
 	}
 
 	public static gasPriceToString(price: BigNumber): string {
-		const units = price.lt(utils.parseUnits('1', 'gwei')) ? 'mwei' : 'gwei'
-		return `${Number(utils.formatUnits(price, units)).toFixed(3)} ${units}`
+		const unitBreakdown = [
+			{ price: utils.parseUnits('1', 'wei'), units: 'wei' },
+			{ price: utils.parseUnits('1', 'kwei'), units: 'wei' },
+			{ price: utils.parseUnits('1', 'mwei'), units: 'kwei' },
+			{ price: utils.parseUnits('1', 'gwei'), units: 'mwei' },
+		]
+
+		let pu = unitBreakdown.find((pu) => {
+			return price.lt(pu.price)
+		})
+		if (!pu) pu = { price: BigNumber.from(0), units: 'gwei' }
+
+		// Reduce precision based on magnitude by dropping rightmost decimal places
+		let n = utils.formatUnits(price, pu.units)
+		const dot = n.indexOf('.')
+		if (dot > 0) {
+			if (dot < 3) n = n.slice(0, 4)
+			else n = n.slice(0, dot)
+		}
+
+		return `${n} ${pu.units}`
 	}
 }
 
