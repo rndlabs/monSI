@@ -3,7 +3,7 @@ import {
 	BlockWithTransactions,
 	TransactionResponse,
 } from '@ethersproject/abstract-provider'
-import { BigNumber, providers } from 'ethers'
+import { BigNumber, providers, utils } from 'ethers'
 import invariant from 'tiny-invariant'
 import semaphore from 'semaphore'
 
@@ -64,8 +64,8 @@ export class ChainSync {
 
 	private _state: State = State.COLD
 	private lastBlock: BlockDetails = { blockNo: 7753000, blockTimestamp: 0 }
-	private tip: number = 0
-	private tipTimestamp: number = 0
+	private tip = 0
+	private tipTimestamp = 0
 
 	private baseGasMonitor: Gas
 	private gasPriceMonitor: Gas
@@ -142,20 +142,26 @@ export class ChainSync {
 			Math.floor(startFromBlock / config.game.blocksPerRound) *
 			config.game.blocksPerRound
 
-		Logging.showLogError(`Loading StakeUpdated logs from block 7716036`) // TODO: This should come from chain-config
+		Logging.showLogError(`Loading StakeRegistry logs from block 7716036`) // TODO: This should come from chain-config
 		const start = Date.now()
-		// 1. Process all `StakeUpdated` events as this determines who is in the game.
-		const stakeUpdatedFilter = this.stakeRegistry.filters.StakeUpdated()
-		const stakeUpdatedLogs = await this.provider.getLogs({
-			...stakeUpdatedFilter,
-			fromBlock: 7716036, // TODO: set to genesis block for stake registry
-		})
+		// 1. Process all `StakeUpdated` and `StakeSlashed` events as this determines who is in the game.
+		const stakeLogs = await this.stakeRegistry.queryFilter(
+			{
+				topics: [
+					[
+						this.stakeRegistry.interface.getEventTopic('StakeUpdated'),
+						this.stakeRegistry.interface.getEventTopic('StakeSlashed'),
+					],
+				],
+			},
+			7716036
+		)
 
 		// now process the logs and add players to the game
-		await this.processStakeUpdatedLogs(stakeUpdatedLogs)
+		await this.processStakeLog(stakeLogs)
 		const elapsed = Date.now() - start
 		Logging.showLogError(
-			`Loaded ${stakeUpdatedLogs.length} StakeUpdated logs in ${elapsed}ms`
+			`Loaded ${stakeLogs.length} StakeRegistry logs in ${elapsed}ms`
 		)
 
 		// 2. Process all `commit`, `reveal`, and `claim` transactions to the Redistribution contract.
@@ -456,7 +462,7 @@ export class ChainSync {
 		}
 	}
 
-	private async processStakeUpdatedLogs(logs: Log[]) {
+	private async processStakeLog(logs: Log[]) {
 		// process the logs
 		for (let i = 0; i < logs.length; i++) {
 			const log = logs[i]
@@ -477,8 +483,19 @@ export class ChainSync {
 				}
 
 				const desc = this.stakeRegistry.interface.parseLog(log)
-				const [overlay, stakeAmount, owner] = desc.args
-				game.stakeUpdated(overlay, owner, stakeAmount, blockDetails)
+				if (
+					log.topics[0] ==
+					this.stakeRegistry.interface.getEventTopic('StakeUpdated')
+				) {
+					const [overlay, stakeAmount, owner] = desc.args
+					game.stakeUpdated(overlay, owner, stakeAmount, blockDetails)
+				} else if (
+					log.topics[0] ==
+					this.stakeRegistry.interface.getEventTopic('StakeSlashed')
+				) {
+					const [overlay, amount] = desc.args
+					game.stakeSlashed(overlay, amount, blockDetails)
+				}
 			}
 		}
 	}

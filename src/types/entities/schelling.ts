@@ -282,6 +282,12 @@ export class SchellingGame {
 		player.updateStake(block, amount)
 	}
 
+	public stakeSlashed(overlay: string, amount: BigNumber, block: BlockDetails) {
+		// update player state
+		const player = this.getOrCreatePlayer(overlay, undefined, block)
+		player.slash(block, amount)
+	}
+
 	// --- singleton method
 
 	public static getInstance(): SchellingGame {
