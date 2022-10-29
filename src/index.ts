@@ -133,7 +133,7 @@ async function main() {
 		)
 		.addOption(
 			new Option('-S, --singleRound [round]', 'Load a single round and stop')
-				.conflicts(['rounds, block, singleRound'])
+				.conflicts(['rounds, round, block'])
 				.argParser(cliParseInt)
 		)
 		.action(run)
