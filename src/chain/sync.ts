@@ -239,10 +239,16 @@ export class ChainSync {
 			this.stakeRegistry.filters[
 				'StakeUpdated(bytes32,uint256,address,uint256)'
 			](),
-			(stakeId, amount, owner, round) => {
-				// if (this._state == State.RUNNING)
+			async (overlay, stakeAmount, owner, lastBlockUpdated, event) => {
+				if (this._state == State.RUNNING) {
+					const block = await this.provider.getBlock(event.blockNumber)
+					game.stakeUpdated(overlay, owner, stakeAmount, {
+						blockNo: event.blockNumber,
+						blockTimestamp: block.timestamp,
+					})
+				}
 				Logging.showLogError(
-					`StakeUpdated event: ${stakeId}, ${amount}, ${owner}, ${round}`
+					`StakeUpdated event: ${overlay}, ${stakeAmount}, ${owner}, ${lastBlockUpdated}`
 				)
 			}
 		)
