@@ -119,7 +119,7 @@ export class ChainSync {
 		this._state = State.INIT
 	}
 
-	public async start(startFromBlock: number) {
+	public async start(startFromBlock: number, endingBlock?: number) {
 		invariant(this._state === State.INIT, 'ChainSync must be initialized')
 
 		Logging.showLogError(`Starting ChainSync...`)
@@ -128,16 +128,16 @@ export class ChainSync {
 		this._state = State.WARMUP
 
 		// we are synced to the tip of the chain, activate the listeners
-		this.setupEventListeners()
+		if (!endingBlock) this.setupEventListeners()
 
 		// sync the blockchain - effectively backfilling the game state
-		await this.syncBlockchain(startFromBlock)
+		await this.syncBlockchain(startFromBlock, endingBlock)
 
 		// change the state to running
 		this._state = State.RUNNING
 	}
 
-	private async syncBlockchain(startFromBlock: number) {
+	private async syncBlockchain(startFromBlock: number, endingBlock?: number) {
 		startFromBlock =
 			Math.floor(startFromBlock / config.game.blocksPerRound) *
 			config.game.blocksPerRound
@@ -189,6 +189,9 @@ export class ChainSync {
 				blockTimestamp: block.timestamp * 1000,
 				baseFeePerGas: block.baseFeePerGas,
 			}
+
+			// break out early when we've processed the endingBlock
+			if (block.number == endingBlock) break
 		} while (this.lastBlock.blockNo < this.tip)
 		const elapsed2 = Date.now() - start2
 		Logging.showLogError(

@@ -17,6 +17,7 @@ interface CLIOptions {
 	rounds?: number
 	block?: number
 	round?: number
+	singleRound?: number
 }
 
 /**
@@ -25,7 +26,7 @@ interface CLIOptions {
  * @param options CLI options
  */
 async function run(overlays: string[], options: CLIOptions) {
-	const { mainnet, rpcEndpoint, rounds, block, round } = options
+	const { mainnet, rpcEndpoint, rounds, block, round, singleRound } = options
 
 	// Set the chain ID
 	config.setChainId(mainnet ? 100 : 5)
@@ -36,16 +37,22 @@ async function run(overlays: string[], options: CLIOptions) {
 	await chainsync.init(rpcEndpoint)
 
 	let startBlock = await chainsync.getCurrentBlock()
+	let endBlock
 
+	// load only a single round and stop
+	if (singleRound) {
+		startBlock = singleRound * config.game.blocksPerRound
+		endBlock = startBlock + config.game.blocksPerRound - 1 // inclusive
+	}
 	// preload from the given block
-	if (block !== undefined) startBlock = block
+	else if (block !== undefined) startBlock = block
 	// preload from the given round
 	else if (round) startBlock = round * config.game.blocksPerRound
 	// preload the last 'rounds' rounds
 	else if (rounds) startBlock -= rounds * config.game.blocksPerRound
 
 	// start the chain sync
-	chainsync.start(startBlock)
+	chainsync.start(startBlock, endBlock)
 
 	// start the game
 	const game = SchellingGame.getInstance()
@@ -110,18 +117,23 @@ async function main() {
 				'-r, --rounds [rounds]',
 				'Load the last number of rounds from the blockchain'
 			)
-				.conflicts(['block, round'])
+				.conflicts(['block, round, singleRound'])
 				.default(DEFAULT_PRELOAD_ROUNDS) // Startup can take a LONG time if you make this large!
 				.argParser(cliParseInt)
 		)
 		.addOption(
 			new Option('-b, --block [block]', 'Block number to start loading from')
-				.conflicts(['rounds, round'])
+				.conflicts(['rounds, round, singleRound'])
 				.argParser(cliParseInt)
 		)
 		.addOption(
 			new Option('-R, --round [round]', 'Round number to start loading from')
-				.conflicts(['rounds, block'])
+				.conflicts(['rounds, block, singleRound'])
+				.argParser(cliParseInt)
+		)
+		.addOption(
+			new Option('-S, --singleRound [round]', 'Load a single round and stop')
+				.conflicts(['rounds, block, singleRound'])
 				.argParser(cliParseInt)
 		)
 		.action(run)
