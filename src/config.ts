@@ -33,10 +33,11 @@ export const chainConfig: Configs = {
 		game: {
 			blocksPerRound: 152,
 			commitPhaseBlocks: 152 / 4,
-			revealPhaseBlocks: 152 / 4 + 1,
+			revealPhaseBlocks: 152 / 4,
 		},
 		contracts: {
-			redistribution: '0xF4963031E8b9f9659CB6ed35E53c031D76480EAD',
+			//			redistribution: '0xF4963031E8b9f9659CB6ed35E53c031D76480EAD',	// Pre 2022/10/28 10.0.0 rc1
+			redistribution: '0x2e4ccEb9a88bcfbC7779Fa693714783A345c1343',
 			stakeRegistry: '0x18391158435582D5bE5ac1640ab5E2825F68d3a4',
 			bzzToken: '0x2aC3c1d3e24b45c6C310534Bc2Dd84B5ed576335',
 			postageStamp: '0x7aAC0f092F7b961145900839Ed6d54b1980F200c',
@@ -50,7 +51,7 @@ export const chainConfig: Configs = {
 		game: {
 			blocksPerRound: 152,
 			commitPhaseBlocks: 152 / 4,
-			revealPhaseBlocks: 152 / 4 + 1,
+			revealPhaseBlocks: 152 / 4,
 		},
 		contracts: {
 			redistribution: '0xF4963031E8b9f9659CB6ed35E53c031D76480EAD', // wrong

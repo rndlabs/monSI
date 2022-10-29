@@ -116,14 +116,14 @@ export class SchellingGame {
 			phase = 'commit'
 			length = blocksPerRound / 4
 			elapsed = offset + 1
-		} else if (offset <= blocksPerRound / 2) {
+		} else if (offset < blocksPerRound / 2) {
 			phase = 'reveal'
-			length = blocksPerRound / 4 + 1
+			length = blocksPerRound / 4
 			elapsed = offset - blocksPerRound / 4 + 1
 		} else {
 			phase = 'claim'
-			length = blocksPerRound / 2 - 1
-			elapsed = offset - blocksPerRound / 2
+			length = blocksPerRound / 2
+			elapsed = offset - blocksPerRound / 2 + 1
 		}
 		const remaining = length - elapsed
 		const percent = Math.floor((elapsed * 100) / length)
