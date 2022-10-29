@@ -77,18 +77,20 @@ function cliParseInt(value: string, dummyPrevious: unknown): number {
 }
 
 function cliParseOverlay(overlay: string, previous: string[]): string[] {
-	// Be forgiving to the user since /addresses doesn't include the 0x
-	if (overlay.slice(0, 2) != '0x') overlay = '0x' + overlay
 	try {
 		// use ethers to validate the overlay address
-		if (utils.arrayify(overlay).length != 32)
+		const bytes = utils.arrayify(overlay, { allowMissingPrefix: true })
+		if (bytes.length != 32) {
 			throw new Error('Invalid overlay length')
+		} else {
+			if (!previous) previous = []
+			// for ensuring consistent `0x` prefix
+			previous.push(utils.hexlify(bytes))
+			return previous
+		}
 	} catch (e) {
 		throw new InvalidOptionArgumentError('Not a valid overlay.')
 	}
-	if (!previous) previous = []
-	previous[previous.length] = overlay
-	return previous
 }
 
 /**
