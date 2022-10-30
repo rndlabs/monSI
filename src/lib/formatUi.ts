@@ -56,6 +56,7 @@ export function colorDelta(
 	}
 
 	const delta = value.sub(lastValue)
+	lastValues[name] = value
 	if (!delta.eq(0)) {
 		return ' (' + colorValue(delta, fmtRtn, options) + ')'
 	}
