@@ -161,7 +161,7 @@ export class ChainSync {
 		await this.processStakeLog(stakeLogs)
 		const elapsed = Date.now() - start
 		Logging.showLogError(
-			`Loaded ${stakeLogs.length} StakeRegistry logs in ${elapsed}ms`
+			`Loaded ${stakeLogs.length} StakeRegistry logs in ${elapsed / 1000}s`
 		)
 
 		// 2. Process all `commit`, `reveal`, and `claim` transactions to the Redistribution contract.
@@ -186,7 +186,12 @@ export class ChainSync {
 			)
 
 			if (block.number % 100 == 0)
-				Logging.showError(`Sync: Processing block ${block.number}`, 'sync')
+				Logging.showError(
+					`Sync: Processing block ${block.number}/${
+						endingBlock ? endingBlock : this.tip
+					}`,
+					'sync'
+				)
 
 			await this.blockHandler(block)
 
@@ -201,7 +206,9 @@ export class ChainSync {
 		} while (this.lastBlock.blockNo < this.tip)
 		const elapsed2 = Date.now() - start2
 		Logging.showLogError(
-			`Sync: Complete from block ${startFromBlock} to ${this.lastBlock.blockNo} in ${elapsed2}ms`
+			`Sync: Complete from block ${startFromBlock} to ${
+				this.lastBlock.blockNo
+			} in ${elapsed2 / 1000}s`
 		)
 
 		// for (let i = this.lastBlock; i <= nowBlockNumber; i++) {
@@ -257,7 +264,7 @@ export class ChainSync {
 		this.bzzToken.on(this.bzzToken.filters.Transfer(), (from, to, amount) => {
 			// if (this._state == State.RUNNING)
 			Logging.showLogError(
-				`${shortBZZ(amount)} gBZZ from ${fmtAccount(from)} to ${fmtAccount(to)}`
+				`${shortBZZ(amount)} from ${fmtAccount(from)} to ${fmtAccount(to)}`
 			)
 		})
 
@@ -266,7 +273,7 @@ export class ChainSync {
 			(owner, spender, value) => {
 				// if (this._state == State.RUNNING)
 				Logging.showLogError(
-					`${shortBZZ(value)} gBZZ Approved from ${fmtAccount(
+					`${shortBZZ(value)} Approved from ${fmtAccount(
 						owner
 					)} to ${fmtAccount(spender)}`
 				)
@@ -287,7 +294,7 @@ export class ChainSync {
 			const offsetLine = game.size + 1 // Keep room for the getRpcUrl
 			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
 				offsetLine,
-				`{center}${config.name} getGasPrice{/center}`,
+				`{center}${config.chain.name} getGasPrice{/center}`,
 				-1
 			)
 			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(

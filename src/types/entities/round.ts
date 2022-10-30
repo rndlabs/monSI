@@ -1,7 +1,7 @@
 import { BigNumber, BigNumberish } from 'ethers'
 import { BlockDetails } from '../../chain'
 import config from '../../config'
-import { fmtOverlay, formatSi } from '../../lib'
+import { fmtOverlay, shortBZZ } from '../../lib'
 import { SchellingGame } from './schelling'
 import { Ui, BOXES } from './ui'
 
@@ -84,7 +84,7 @@ export class Round {
 			r += ` ^${this.claim.depth}`
 			r +=
 				' {green-fg}' +
-				formatSi(this.claim.amount, { showPlus: true }) +
+				shortBZZ(this.claim.amount, { showPlus: true, suppressUnits: true }) +
 				'{/green-fg}'
 		} else if (this.unclaimed) {
 			r += ' {magenta-fg}UNCLAIMED{/magenta-fg}'
