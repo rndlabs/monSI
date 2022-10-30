@@ -2,11 +2,13 @@
  * Formats a string of numbers into a string with SI suffixes.
  */
 
+import config from '../config'
 import { BigNumber, utils } from 'ethers'
 
 export type FormatUnitOptions = {
 	precision?: number
 	showPlus?: boolean
+	suppressUnits?: boolean
 }
 
 export function formatSi(num: BigNumber, options?: FormatUnitOptions): string {
@@ -68,8 +70,11 @@ export function shortCurrency(
 		n = n.mul(-1)
 	}
 
-	const resultFmt = (precision: number) =>
-		Number(utils.formatUnits(n, decimals)).toFixed(precision) + ' ' + symbol
+	const resultFmt = (precision: number) => {
+		let rf = Number(utils.formatUnits(n, decimals)).toFixed(precision)
+		if (!options || !options.suppressUnits) rf += ' ' + symbol
+		return rf
+	}
 
 	if (n.lt(ONE.div(100))) return formatSi(n, options)
 	else if (n.gte(ONE.mul(100))) result = resultFmt(0)
@@ -83,7 +88,7 @@ export function shortCurrency(
 }
 
 export function shortBZZ(n: BigNumber, options?: FormatUnitOptions) {
-	return shortCurrency(n, 16, 'BZZ', options)
+	return shortCurrency(n, 16, config.units.BZZ, options)
 }
 
 export function shortETH(n: BigNumber, options?: FormatUnitOptions) {

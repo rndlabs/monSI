@@ -18,6 +18,7 @@ export class Player {
 	private _account: string | undefined // ethereum address of the bee node
 	private amount: BigNumber = BigNumber.from(0) // total amount won / lost
 	private stake?: BigNumber // Total stake (if tracking)
+	private stakeSlashed?: BigNumber // Total stake slashed (if tracking)
 	private stakeChangeCount: number = 0
 	private line: number // where this player is in the players list TODO: -1 for not visible
 	private _isPlaying: boolean = false
@@ -95,8 +96,9 @@ export class Player {
 			result +=
 				' ' +
 				colorValue(this.amount, shortBZZ, { showPlus: false }) +
-				colorDelta(this._overlay + ':amount', this.amount, formatSi, {
+				colorDelta(this._overlay + ':amount', this.amount, shortBZZ, {
 					showPlus: true,
+					suppressUnits: true,
 				})
 		}
 
@@ -106,6 +108,11 @@ export class Player {
 		if (this.stake) {
 			result += ` ${shortBZZ(this.stake)}`
 			if (this.stakeChangeCount > 1) result += `(${this.stakeChangeCount})`
+		}
+		if (this.stakeSlashed) {
+			result += ` {red-fg}-${shortBZZ(this.stakeSlashed, {
+				suppressUnits: true,
+			})}{/red-fg}`
 		}
 
 		return result
@@ -119,7 +126,7 @@ export class Player {
 		if (this.reveals[round]) {
 			t += ` ^${this.reveals[round].depth} ${shortId(
 				this.reveals[round].hash,
-				10
+				6
 			)}`
 		}
 		if (this.stake) t += ` ${shortBZZ(this.stake)}`
@@ -174,7 +181,9 @@ export class Player {
 		this.freezeCount++
 
 		Logging.showLogError(
-			`${this.overlayString()} Frozen for ${thawBlock - block.blockNo} blocks`
+			`${this.overlayString()} Frozen for ${
+				thawBlock - block.blockNo
+			} blocks @${block.blockNo}`
 		)
 
 		this.render()
@@ -192,7 +201,7 @@ export class Player {
 		Logging.showLogError(
 			`${this.overlayString()} Stake Updated ${shortBZZ(amount)} now ${shortBZZ(
 				this.stake
-			)}(${this.stakeChangeCount})`
+			)}(${this.stakeChangeCount}) @${block.blockNo}`
 		)
 
 		this.render()
@@ -205,17 +214,25 @@ export class Player {
 	 */
 	slash(block: BlockDetails, amount: BigNumber) {
 		this.lastBlock = block
+		if (!this.stakeSlashed) this.stakeSlashed = BigNumber.from(0)
 		if (this.stake) {
-			this.stake = this.stake.sub(amount)
-			if (this.stake.lt(0)) this.stake = BigNumber.from(0)
+			if (this.stake.gte(amount)) {
+				this.stake = this.stake.sub(amount)
+				this.stakeSlashed = this.stakeSlashed.add(amount)
+			} else {
+				this.stakeSlashed = this.stakeSlashed.add(this.stake)
+				this.stake = BigNumber.from(0)
+			}
 		} else this.stake = BigNumber.from(0)
 		this.slashCount++
 		this.stakeChangeCount++
 
 		Logging.showLogError(
-			`${this.overlayString()} Slashed ${shortBZZ(amount)}  now ${shortBZZ(
-				this.stake!
-			)}(${this.stakeChangeCount})`
+			`${this.overlayString()} Slashed ${shortBZZ(amount)} now ${shortBZZ(
+				this.stake
+			)} (${this.stakeChangeCount}) {red-fg}-${shortBZZ(
+				this.stakeSlashed
+			)}{/red-fg} @${block.blockNo}`
 		)
 
 		this.render()
