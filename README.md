@@ -1,4 +1,5 @@
 # monSI
+
 A monitor for the upcoming Storage Incentives (SI) for the Ethersphere Bee swarm written in JavaScript for node.js
 
 ## Installing packages
@@ -19,36 +20,46 @@ Then the following command should install the needed dependencies when executed 
 
 npm i
 
-monSI uses blessed for drawing its TUI (Text User Interface)
+monSI uses blessed for drawing its TUI (Text User Interface) and ethers for blockchain RPC
 
 ## Configuring
 
-Currently you need to edit monSI.js to set your web sockets RPC provider on the goerli blockchain.   This is set on the first line
-of the file as rpcURL.
-
-You may also change the myOverlays array to specify your testnet node overlays.   These overlays will be highlighted whenever
-they participate in the storage incentives lottery.
-
-monSI can also go back in time to preload transactions from previously committed rounds.  You can specify how many rounds to go back in time via the preloadRounds variable.
-
-These parameterw will eventually be moved to command-line arguments.
+All parameters can be specified on the command line and some are supported in environment values (or .env file)
 
 ## Running
 
 Finally, to run monSI, use the following command in a shell or command prompt window:
 
-node monSI.js
+node --experimental-specifier-resolution=node --loader=ts-node/esm ./src/index.ts --rpc-endpoint ws://<YourGoerliRPCIP:port>
 
-### Manual Dependencies
+This command will compile the typescript application and run it.   Your screen should clear and boxes should appear with values.  monSI defaults to going back 4 complete Schelling game rounds at startup.  It also loads ALL stake events from the blockchain on every invocation.
 
-If "node monSI.js" shows errors even after "npm i" was executed, try these:
+## Usage
 
-npm install blessed
+```
+Monitor Storage Incentives for Swarm
 
-## Disclaimer
+Arguments:
+  overlays                   Overlay addresses for highlighting
 
-Note: This is only my third github repository and second public release of an open-source project.  I am NOT a JavaScript programmer, so please be gentle with any criticism.
+Options:
+  -V, --version              output the version number
+  --mainnet                  Use Swarm mainnet (default: false)
+  --rpc-endpoint <string>    RPC endpoint for the blockchain node (default: "ws://goerli-geth.dappnode:8546", env:
+                             RPC_URL)
+  -r, --rounds [rounds]      Load the last number of rounds from the blockchain (default: 4)
+  -b, --block [block]        Block number to start loading from
+  -R, --round [round]        Round number to start loading from
+  -S, --singleRound [round]  Load a single round and stop
+  -h, --help                 display help for command
+```
+
+## Acknowledgements
+
+monSI was originally written by ldeffenb and was heavily based on monBee.  mfw graciously offered to restructure the original grungy monolithic code into something much more understandable, extendible, and maintainable.   The result of this collaboration is the monSI that you see here.
 
 ## Warning
 
-Just don't run monSI for a long time if you use infura.io's (or any other provider's) free account because monSI monitors every single block and will eat up your 100,000 API hits in short order.  No gETH, but every query is counted at infura.io.
+Just don't run monSI for a long time if you use infura.io's (or any other provider's) free account because monSI monitors every single block and will eat up your 100,000 API hits in short order.  No gETH, but every query is counted at infura.io, and monSI does LOTS of blockchain queries!
+
+Having your own local goerli (gnosis in the future) RPC provider is **strongly** recommended!
