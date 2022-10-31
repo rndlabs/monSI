@@ -2,9 +2,9 @@ import { BigNumber, utils } from 'ethers'
 import { BlockWithTransactions } from '@ethersproject/abstract-provider'
 
 export class Gas {
-	private _history: string = ''
-	private _historyCount: number = 0
-	private _percent: number = 0
+	private _history = ''
+	private _historyCount = 0
+	private _percent = 0
 	private _lastPrice: BigNumber = BigNumber.from(0)
 	private _maxWidth: number
 
@@ -19,7 +19,7 @@ export class Gas {
 		return this._percent
 	}
 
-	public percentColor(trigger: number = 10) {
+	public percentColor(trigger = 10) {
 		let result = `${this._percent}`
 		if (this._percent >= trigger) result = `{red-fg}${this._percent}{/red-fg}`
 		else if (this._percent <= -trigger)

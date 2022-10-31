@@ -26,10 +26,12 @@ export function formatSi(num: BigNumber, options?: FormatUnitOptions): string {
 		}
 
 		const exponent = Math.min(
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			Math.floor(Math.log10(num.toString()) / 3),
 			units.length - 1
 		)
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		const n = Number(num.toString() / 1000 ** exponent).toPrecision(
 			options && options.precision ? options.precision : 3
@@ -44,7 +46,7 @@ export function formatSi(num: BigNumber, options?: FormatUnitOptions): string {
 	}
 }
 
-function wholeBZZ(bzz: string) {
+export function wholeBZZ(bzz: string) {
 	while (bzz.length <= 16) {
 		bzz = '0' + bzz
 	}

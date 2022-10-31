@@ -31,17 +31,17 @@ export function colorSpecificDelta(
 
 const lastValues: { [key: string]: BigNumber } = {}
 
-const clearDelta = (name: string) => {
-	delete lastValues[name]
-}
+// const clearDelta = (name: string) => {
+// 	delete lastValues[name]
+// }
 
-const isValueChanged = (name: string, value: BigNumber): boolean => {
-	const lastValue = lastValues[name]
-	if (lastValue === undefined) {
-		return true
-	}
-	return !BigNumber.from(value).eq(lastValue)
-}
+// const isValueChanged = (name: string, value: BigNumber): boolean => {
+// 	const lastValue = lastValues[name]
+// 	if (lastValue === undefined) {
+// 		return true
+// 	}
+// 	return !BigNumber.from(value).eq(lastValue)
+// }
 
 export function colorDelta(
 	name: string,

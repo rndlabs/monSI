@@ -7,7 +7,6 @@ import {
 	shortId,
 	colorDelta,
 	colorValue,
-	formatSi,
 	shortBZZ,
 } from '../../lib'
 import { Round } from './round'
@@ -19,9 +18,9 @@ export class Player {
 	private amount: BigNumber = BigNumber.from(0) // total amount won / lost
 	private stake?: BigNumber // Total stake (if tracking)
 	private stakeSlashed?: BigNumber // Total stake slashed (if tracking)
-	private stakeChangeCount: number = 0
+	private stakeChangeCount = 0
 	private line: number // where this player is in the players list TODO: -1 for not visible
-	private _isPlaying: boolean = false
+	private _isPlaying = false
 	private lastBlock: BlockDetails | undefined // block details of last interaction
 	private playCount?: number // don't initialize
 	private winCount = 0 // initialize as 0
@@ -46,7 +45,7 @@ export class Player {
 		}
 	}
 
-	public setLine(line: number, reRender: boolean = true) {
+	public setLine(line: number, reRender = true) {
 		this.line = line
 		if (reRender) this.render()
 	}

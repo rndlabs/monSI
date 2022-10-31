@@ -86,6 +86,7 @@ export default class Config {
 
 	static chainId = 5
 
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	private constructor() {}
 
 	static setChainId(chainId: number) {
