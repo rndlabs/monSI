@@ -1,3 +1,6 @@
 /dist
 /test/data
+/src/types/contracts
+.github
+README.md
 package-lock.json
