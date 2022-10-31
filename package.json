@@ -1,10 +1,10 @@
 {
-	"name": "monSI",
+	"name": "monsi",
 	"version": "1.0.0",
 	"description": "Monitor Bee Swarm Storage Incentives",
 	"main": "./dist/src/index.js",
 	"bin": {
-		"monSI": "dist/src/index.js"
+		"monsi": "dist/src/index.js"
 	},
 	"scripts": {
 		"prepare": "husky install && npm run typechain",
