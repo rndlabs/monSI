@@ -6,7 +6,6 @@ import config from './config'
 
 import { ChainSync } from './chain'
 import { SchellingGame, Ui } from './types/entities'
-import { Logging } from './utils'
 import { utils } from 'ethers'
 
 // sane defaults for the environment variables (if not set)
@@ -66,10 +65,10 @@ async function run(overlays: string[], options: CLIOptions) {
 	}
 
 	// start the TUI
-	const ui = Ui.getInstance()
+	Ui.getInstance()
 }
 
-function cliParseInt(value: string, dummyPrevious: unknown): number {
+function cliParseInt(value: string, _: unknown): number {
 	// parseInt takes a string and an optional radix
 	const parsedValue = parseInt(value, 10)
 	if (isNaN(parsedValue)) {

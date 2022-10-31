@@ -19,7 +19,7 @@ export class Ui {
 
 	private _screen: Widgets.Screen
 	private _boxes: Widgets.BoxElement[] = []
-	private _focusBox: number = -1
+	private _focusBox = -1
 
 	/**
 	 * Make the constructor private so that it can't be called.
@@ -34,7 +34,7 @@ export class Ui {
 		// --- key handlers
 
 		// Quit on Escape, q, or Control-C.
-		this._screen.key(['escape', 'q', 'C-c'], (ch, key) => {
+		this._screen.key(['escape', 'q', 'C-c'], (_ch, _key) => {
 			return process.exit(0)
 		})
 
@@ -117,7 +117,7 @@ export class Ui {
 	// --- box creator helper
 	private _createBox(
 		title?: string,
-		_border: boolean = true,
+		_border = true,
 		options?: Widgets.BoxOptions
 	): Widgets.BoxElement {
 		const box = blessed.box({

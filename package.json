@@ -81,12 +81,6 @@
 				"error"
 			],
 			"new-cap": "off",
-			"unicorn/filename-case": [
-				"error",
-				{
-					"case": "kebabCase"
-				}
-			],
 			"prefer-reflect": "off"
 		}
 	},

@@ -3,10 +3,11 @@ import { Ui, BOXES } from '../types/entities'
 
 export default class Logging {
 	private static instance: Logging
-	private _debugging: boolean = false // Controls all showError logging to stderr (extensive)
-	private _errorLogEnabled: boolean = false // Controls showLog* logging to stderr (less stuff)
-	private _lastErrorTag: string = ''
+	private _debugging = false // Controls all showError logging to stderr (extensive)
+	private _errorLogEnabled = false // Controls showLog* logging to stderr (less stuff)
+	private _lastErrorTag = ''
 
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	private constructor() {}
 
 	public static getInstance(): Logging {

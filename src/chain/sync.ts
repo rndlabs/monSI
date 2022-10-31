@@ -3,9 +3,8 @@ import {
 	BlockWithTransactions,
 	TransactionResponse,
 } from '@ethersproject/abstract-provider'
-import { BigNumber, providers, utils } from 'ethers'
+import { BigNumber, providers } from 'ethers'
 import invariant from 'tiny-invariant'
-import semaphore from 'semaphore'
 
 import config from '../config'
 import { Logging } from '../utils'
@@ -47,7 +46,7 @@ export type BlockDetails = {
 	baseFeePerGas?: BigNumber | null
 }
 
-const MAX_CONCURRENT = 500
+// const MAX_CONCURRENT = 500
 
 /**
  * A service to monitor blockchain events, subsequently updating the game state.
@@ -431,7 +430,7 @@ export class ChainSync {
 						this.redistribution.interface.getEventTopic('WinnerSelected')
 					) {
 						// below we destructure the Reveal struct
-						;[winner] = this.redistribution.interface.parseLog(log).args
+						winner = this.redistribution.interface.parseLog(log).args[0]
 					} else if (
 						log.topics[0] ===
 						this.stakeRegistry.interface.getEventTopic('StakeSlashed')
