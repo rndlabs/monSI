@@ -2,7 +2,7 @@
 
 A monitor for the upcoming Storage Incentives (SI) for the Ethersphere Bee swarm written in Typescript for node.js
 
-![monSI Terminal User Interface!](/assets/screenshot.png 'monSI TUI')
+![monsi Terminal User Interface!](/assets/screenshot.png 'monsi TUI')
 
 ## Installing node / npm packages
 
@@ -19,13 +19,15 @@ You'll also need git to clone this repository: https://git-scm.com/download/win
 
 ## Installation of monsi
 
-monSI is available for install as a standard `npmjs` package. Once you have `node` and `npm` installed, you can install `monsi` simply by:
+monsi is available for install as a standard `npmjs` package for *non-Windows* users. Once you have `node` and `npm` installed, you can install `monsi` simply by:
 
 ```bash
 npm install -g "@rndlabs/monsi"
 ```
 
 This will install the package and make available the `monsi` symlink on your command line environment's path.
+
+*Windows* users will need to follow the [Extending / developing monsi](#extending--developing-monsi) instructions below.
 
 ### Configuring
 
@@ -39,7 +41,7 @@ Finally, to run `monsi`, use the following command in a shell or command prompt 
 monsi --rpc-endpoint ws://<YourGoerliRPCIP:port>
 ```
 
-This command will compile the typescript application and run it. Your screen should clear and boxes should appear with values. monSI defaults to going back 4 complete Schelling game rounds at startup. It also loads ALL stake events from the blockchain on every invocation.
+This command will compile the typescript application and run it. Your screen should clear and boxes should appear with values. monsi defaults to going back 4 complete Schelling game rounds at startup. It also loads ALL stake events from the blockchain on every invocation.
 
 ### Usage
 
@@ -61,29 +63,29 @@ Options:
   -h, --help                 display help for command
 ```
 
-### Extending / developing monSI
+### Extending / developing monsi
 
-If you're developing and want to build / extend on monSI - first, thank you! Community development and pull requests are always appreciated ❤️. To get started quickly developing:
+If you're developing and want to build / extend on monsi - first, thank you! Community development and pull requests are always appreciated ❤️. To get started quickly developing:
 
 ```bash
-git clone https://github.com/rndlabs/monSI # clone the source to your disk
+git clone https://github.com/rndlabs/monsi # clone the source to your disk
 npm i # install npm dependencies
 ```
 
-After you have made the modifications for your PR / branch, you may start `monSI` using `ts-node` by:
+After you have made the modifications for your PR / branch, you may start `monsi` using `ts-node` by:
 
 ```bash
 node --experimental-specifier-resolution=node --loader=ts-node/esm ./src/index.ts --rpc-endpoint ws://<YourGoerliRPCIP:port>
 ```
 
-monSI uses [blessed](https://www.npmjs.com/package/blessed) for drawing its TUI (Text User Interface) and [ethers](https://docs.ethers.io/) for blockchain RPC
+monsi uses [blessed](https://www.npmjs.com/package/blessed) for drawing its TUI (Text User Interface) and [ethers](https://docs.ethers.io/) for blockchain RPC
 
 ## Acknowledgements
 
-monSI was originally written by @ldeffenb and was heavily based on monBee. @mfw78 graciously offered to restructure the original grungy monolithic code into something much more understandable, extendible, and maintainable. The result of this collaboration is the monSI that you see here.
+monsi was originally written by @ldeffenb and was heavily based on monBee. @mfw78 graciously offered to restructure the original grungy monolithic code into something much more understandable, extendible, and maintainable. The result of this collaboration is the monsi that you see here.
 
 ## Warning
 
-Just don't run monSI for a long time if you use infura.io's (or any other provider's) free account because monSI monitors every single block and will eat up your 100,000 API hits in short order. No gETH, but every query is counted at infura.io, and monSI does LOTS of blockchain queries!
+Just don't run monsi for a long time if you use infura.io's (or any other provider's) free account because monsi monitors every single block and will eat up your 100,000 API hits in short order. No gETH, but every query is counted at infura.io, and monsi does LOTS of blockchain queries!
 
 Having your own local goerli (gnosis in the future) RPC provider is **strongly** recommended!
