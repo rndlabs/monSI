@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  npm_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install dependencies
+        run: npx ci
+      - name: Install semantic-release extra plugins
+        run: npm install --save-dev @semantic-release/changelog
+      - name: Lint
+        run: npm run lint --if-present
+      - name: Test
+        run: npm run test --if-present
+      - name: Build
+        run: npm run build
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        run: npx semantic-release
