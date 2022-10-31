@@ -1,5 +1,5 @@
 {
-	"name": "monsi",
+	"name": "@rndlabs/monsi",
 	"version": "1.0.0",
 	"description": "Monitor Bee Swarm Storage Incentives",
 	"main": "./dist/src/index.js",
