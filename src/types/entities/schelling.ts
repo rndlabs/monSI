@@ -96,12 +96,18 @@ export class SchellingGame {
 	public newBlock(block: BlockDetails): string {
 		const roundNo = SchellingGame.roundFromBlockNo(block.blockNo)
 		if (roundNo != this.currentRoundNo) {
+			// When the round changes, by defintion, no one is playing
+			this.players.forEachPair((overlay, player) => {
+				player.notPlaying()
+			})
 			if (this.currentRoundNo != 0) {
 				const round = this.rounds.get(this.currentRoundNo)
-				if (round && !round.claim) {
-					round.lastBlock = this.lastBlock
-					round.unclaimed = true
-					round.render()
+				if (round) {
+					if (!round.claim) {
+						round.lastBlock = this.lastBlock
+						round.unclaimed = true
+					}
+					round.render() // Render here to clear the Round Players box
 				}
 			}
 			this.currentRoundNo = roundNo
