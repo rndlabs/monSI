@@ -22,6 +22,7 @@ export class Player {
 	private line: number // where this player is in the players list TODO: -1 for not visible
 	private _isPlaying = false
 	private lastBlock: BlockDetails | undefined // block details of last interaction
+	private lastAction: string | undefined // tracks last action which cannot be derived from blockNumber
 	private playCount?: number // don't initialize
 	private winCount = 0 // initialize as 0
 	private frozenThawBlock?: number // if true, this is a frozen overlay
@@ -65,8 +66,6 @@ export class Player {
 		this._account = account
 		this.line = line
 		this.lastBlock = _block
-
-		//Logging.showLogError('New player: ' + this.overlayString())
 
 		this.render(true)
 	}
@@ -121,7 +120,8 @@ export class Player {
 		let t = `${Round.roundString(
 			this.lastBlock!.blockNo
 		)} ${this.overlayString()}`
-		t += ` ${Round.roundPhaseFromBlock(this.lastBlock!.blockNo)}`
+		if (this.lastAction) t += ` ${this.lastAction}`
+		//t += ` ${Round.roundPhaseFromBlock(this.lastBlock!.blockNo)}`
 		if (this.reveals[round]) {
 			t += ` ^${this.reveals[round].depth} ${shortId(
 				this.reveals[round].hash,
@@ -138,6 +138,7 @@ export class Player {
 	 */
 	commit(block: BlockDetails) {
 		this.lastBlock = block
+		this.lastAction = 'commit'
 		this._isPlaying = true
 		this.playCount = (this.playCount || 0) + 1
 
@@ -151,6 +152,7 @@ export class Player {
 
 	reveal(block: BlockDetails, round: number, hash: string, depth: number) {
 		this.lastBlock = block
+		this.lastAction = 'reveal'
 		this._isPlaying = true
 		this.reveals[round] = { hash, depth }
 	}
@@ -162,6 +164,7 @@ export class Player {
 	 */
 	claim(block: BlockDetails, _amount: BigNumber) {
 		this.lastBlock = block
+		this.lastAction = 'claim'
 		this._isPlaying = true
 		this.amount = this.amount.add(_amount)
 		this.winCount++
@@ -176,11 +179,12 @@ export class Player {
 	 */
 	freeze(block: BlockDetails, thawBlock: number) {
 		this.lastBlock = block
+		this.lastAction = 'freeze'
 		this.frozenThawBlock = thawBlock
 		this.freezeCount++
 
-		Logging.showLogError(
-			`${this.overlayString()} Frozen for ${
+		Logging.showError(
+			`${this.overlayString()} {blue-fg}Frozen{/blue-fg} for ${
 				thawBlock - block.blockNo
 			} blocks @${block.blockNo}`
 		)
@@ -190,6 +194,7 @@ export class Player {
 
 	updateStake(block: BlockDetails, amount: BigNumber) {
 		this.lastBlock = block
+		this.lastAction = 'stake'
 
 		// don't set the below as the amount is only used to track winnings
 		// this.amount = amount
@@ -197,7 +202,7 @@ export class Player {
 		this.stake = amount
 		this.stakeChangeCount++
 
-		Logging.showLogError(
+		Logging.showError(
 			`${this.overlayString()} Stake Updated ${shortBZZ(amount)} now ${shortBZZ(
 				this.stake
 			)}(${this.stakeChangeCount}) @${block.blockNo}`
@@ -213,6 +218,7 @@ export class Player {
 	 */
 	slash(block: BlockDetails, amount: BigNumber) {
 		this.lastBlock = block
+		this.lastAction = 'slash'
 		if (!this.stakeSlashed) this.stakeSlashed = BigNumber.from(0)
 		if (this.stake) {
 			if (this.stake.gte(amount)) {
@@ -226,12 +232,12 @@ export class Player {
 		this.slashCount++
 		this.stakeChangeCount++
 
-		Logging.showLogError(
-			`${this.overlayString()} Slashed ${shortBZZ(amount)} now ${shortBZZ(
-				this.stake
-			)} (${this.stakeChangeCount}) {red-fg}-${shortBZZ(
-				this.stakeSlashed
-			)}{/red-fg} @${block.blockNo}`
+		Logging.showError(
+			`${this.overlayString()} {red-fg}Slashed{/red-fg} ${shortBZZ(
+				amount
+			)} now ${shortBZZ(this.stake)} (${
+				this.stakeChangeCount
+			}) {red-fg}-${shortBZZ(this.stakeSlashed)}{/red-fg} @${block.blockNo}`
 		)
 
 		this.render()
