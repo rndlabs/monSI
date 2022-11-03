@@ -67,7 +67,11 @@ export class Round {
 		for (const hash in this.hashes) {
 			const rh = this.hashes[hash]
 			r += i > 0 ? '+' : ' '
-			const color = this.claim && hash == this.claim.truth ? 'green' : 'red'
+			const color = this.claim
+				? hash == this.claim.truth
+					? 'green'
+					: 'red'
+				: 'white'
 			let term =
 				`{${color}-fg}${rh.count}` +
 				(!sameDepth ? `^${rh.depth}` : '') +
@@ -87,17 +91,22 @@ export class Round {
 				shortBZZ(this.claim.amount, { showPlus: true, suppressUnits: true }) +
 				'{/green-fg}'
 		} else if (this.unclaimed) {
-			r += ' {magenta-fg}UNCLAIMED{/magenta-fg}'
+			if (this.commits > 0 || this.reveals > 0)
+				r += ' {magenta-fg}UNCLAIMED{/magenta-fg}'
+			else r += ' {magenta-fg}NoPlayers{/magenta-fg}'
 		}
 		return r
 	}
 
 	formatRoundPlayers(): string {
 		let r = ''
-		for (const player of this.players) {
-			r += '\n' // Always start with a newline to have room for the current round at the top
-			const p = SchellingGame.getInstance().getPlayer(player)!
-			r += p.formatRound(this._id)
+		if (!this.unclaimed) {
+			// Unclaimed rounds, by definition, have no players
+			for (const player of this.players) {
+				r += '\n' // Always start with a newline to have room for the current round at the top
+				const p = SchellingGame.getInstance().getPlayer(player)!
+				r += p.formatRound(this._id)
+			}
 		}
 		return r
 	}
