@@ -323,7 +323,13 @@ export class ChainSync {
 					Logging.showError(
 						`Skipped from block ${this.lastBlock.blockNo} to ${block.number}`
 					)
-				await this.blockHandler(block)
+				let roundAnchor: string | undefined
+				try {
+					roundAnchor = await this.redistribution.currentRoundAnchor()
+				} catch (e) {
+					roundAnchor = undefined
+				}
+				await this.blockHandler(block, roundAnchor)
 
 				this.lastBlock = {
 					blockNo: block.number,
@@ -345,7 +351,10 @@ export class ChainSync {
 		return this._state
 	}
 
-	private async blockHandler(block: BlockWithTransactions) {
+	private async blockHandler(
+		block: BlockWithTransactions,
+		roundAnchor?: string
+	) {
 		this.baseGasMonitor.newSample(block.baseFeePerGas ?? BigNumber.from(1))
 		const deltaBlockTime =
 			this.lastBlock.blockTimestamp == 0
@@ -371,7 +380,7 @@ export class ChainSync {
 			blockNo: block.number,
 			blockTimestamp: block.timestamp * 1000, // always set to milliseconds
 		}
-		const line = game.newBlock(blockDetails)
+		const line = game.newBlock(blockDetails, roundAnchor)
 		Ui.getInstance().lineSetterCallback(BOXES.ROUND_PLAYERS)(
 			0,
 			line,

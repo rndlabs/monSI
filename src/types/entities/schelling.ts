@@ -4,7 +4,7 @@ const BTree = (BTree_ as any).default as typeof BTree_
 
 import config from '../../config'
 import { Logging } from '../../utils'
-import { leftId, shortId } from '../../lib'
+import { fmtAnchor, leftId, shortId } from '../../lib'
 import { BlockDetails } from '../../chain'
 
 import { Player } from './player'
@@ -74,10 +74,10 @@ export class SchellingGame {
 	public getOrCreateRound(roundNo: number, block: BlockDetails): Round {
 		// create the round if it doesn't exist
 		if (!this.rounds.has(roundNo)) {
-			this.rounds.set(roundNo, new Round(block))
 			this.players.forEachPair((overlay, player) => {
 				player.notPlaying()
 			})
+			this.rounds.set(roundNo, new Round(block))
 		}
 		const round = this.rounds.get(roundNo)
 		round!.lastBlock = block
@@ -93,7 +93,7 @@ export class SchellingGame {
 
 	// --- game logic ---
 
-	public newBlock(block: BlockDetails): string {
+	public newBlock(block: BlockDetails, roundAnchor?: string): string {
 		const roundNo = SchellingGame.roundFromBlockNo(block.blockNo)
 		if (roundNo != this.currentRoundNo) {
 			// When the round changes, by defintion, no one is playing
@@ -112,9 +112,12 @@ export class SchellingGame {
 			}
 			this.currentRoundNo = roundNo
 		}
+
+		const round = this.getOrCreateRound(roundNo, block)
 		this.lastBlock = block
 		const blocksPerRound = config.game.blocksPerRound // TODO use configured blocksPerRound
 		const offset = block.blockNo % blocksPerRound
+		const leftInRound = config.game.blocksPerRound - offset - 1
 		let phase
 		let length
 		let elapsed
@@ -122,10 +125,12 @@ export class SchellingGame {
 			phase = 'commit'
 			length = blocksPerRound / 4
 			elapsed = offset + 1
+			round.setAnchor(roundAnchor)
 		} else if (offset < blocksPerRound / 2) {
 			phase = 'reveal'
 			length = blocksPerRound / 4
 			elapsed = offset - blocksPerRound / 4 + 1
+			round.setAnchor(roundAnchor)
 		} else {
 			phase = 'claim'
 			length = blocksPerRound / 2
@@ -134,11 +139,12 @@ export class SchellingGame {
 		const remaining = length - elapsed
 		const percent = Math.floor((elapsed * 100) / length)
 
-		let line = `${Round.roundString(
-			block.blockNo
-		)} ${percent}% of ${phase}, ${remaining} blocks left`
-		if (config.game.blocksPerRound - offset - 1 != remaining)
-			line = line + `, ${config.game.blocksPerRound - offset - 1} in round`
+		let line = `${Round.roundString(block.blockNo)}`
+		if (leftInRound > 0) line += `+${leftInRound}`
+		line += ` ${percent}% of ${phase}`
+		if (remaining != leftInRound) line += ` +${remaining} blocks`
+		else if (phase == 'claim' && roundAnchor)
+			line += `, next anchor ${fmtAnchor(roundAnchor)}`
 		return line
 	}
 

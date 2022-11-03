@@ -1,7 +1,8 @@
 import { BigNumber, BigNumberish } from 'ethers'
+import { Logging } from '../../utils'
 import { BlockDetails } from '../../chain'
 import config from '../../config'
-import { fmtOverlay, shortBZZ } from '../../lib'
+import { fmtAnchor, fmtOverlay, shortBZZ } from '../../lib'
 import { SchellingGame } from './schelling'
 import { Ui, BOXES } from './ui'
 
@@ -20,6 +21,7 @@ export type Claim = {
 
 export class Round {
 	private _id: number
+	private _anchor: string | undefined = undefined
 	public lastBlock: BlockDetails
 	public commits = 0
 	public reveals = 0
@@ -36,6 +38,23 @@ export class Round {
 		return this._id
 	}
 
+	public get anchor() {
+		return this._anchor
+	}
+
+	public setAnchor(anchor?: string) {
+		if (anchor) {
+			if (this._anchor && this._anchor != anchor) {
+				Logging.showLogError(
+					`round ${this._id} anchor change from ${fmtAnchor(
+						this._anchor
+					)} to ${fmtAnchor(anchor)}`
+				)
+			}
+			this._anchor = anchor
+		}
+	}
+
 	constructor(block: BlockDetails) {
 		this._id = Round.roundFromBlock(block.blockNo)
 		this.lastBlock = block
@@ -48,7 +67,9 @@ export class Round {
 	 * @returns {string} The round as a string.
 	 */
 	format(): string {
-		let r = `${this.roundString()} ${this.commits}-${this.reveals}`
+		let r = `${this.roundString()}`
+		if (this._anchor) r += fmtAnchor(this._anchor)
+		r += ` ${this.commits}-${this.reveals}`
 		if (this.slashes > 0) r += `={red-fg}${this.slashes}{/red-fg}`
 
 		// iterate over all hashes and if the depth is not the same in all, set sameDepth to false
