@@ -64,7 +64,7 @@ export default class Logging {
 
 	private showLogError(err: string | object): void {
 		if (!this._debugging) this.showLog(err)
-		this.showError(err)
+		this.showError(`{blue-bg}${err}{/blue-bg}`)
 	}
 
 	/**
