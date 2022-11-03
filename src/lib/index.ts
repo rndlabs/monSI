@@ -8,7 +8,13 @@ import {
 	shortETH,
 } from './formatUnits'
 import { colorValue, colorSpecificDelta, colorDelta } from './formatUi'
-import { shortId, leftId, fmtAccount, fmtOverlay } from './formatText'
+import {
+	shortId,
+	leftId,
+	fmtAccount,
+	fmtOverlay,
+	fmtAnchor,
+} from './formatText'
 
 export {
 	chainName,
@@ -27,4 +33,5 @@ export {
 	leftId,
 	fmtAccount,
 	fmtOverlay,
+	fmtAnchor,
 }
