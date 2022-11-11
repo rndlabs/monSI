@@ -82,7 +82,7 @@ export class Gas {
 
 	public static gasUtilization(block: BlockWithTransactions): string {
 		return (
-			block.gasUsed.mul(10000).div(block.gasLimit).toNumber() / 10000
+			block.gasUsed.mul(10000).div(block.gasLimit).toNumber() / 100
 		).toFixed(2)
 	}
 
