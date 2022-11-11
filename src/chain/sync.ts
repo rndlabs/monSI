@@ -122,15 +122,6 @@ export class ChainSync {
 			this.provider
 		)
 
-		let stampContract = await this.redistribution.PostageContract()
-		Logging.showLogError(`stamps: ${stampContract}`)
-		let oracleContract = await this.redistribution.OracleContract()
-		Logging.showLogError(`oracle: ${oracleContract}`)
-		let stampContractRC4 = await this.redistributionRC4.PostageContract()
-		Logging.showLogError(`stampsRC4: ${stampContractRC4}`)
-		let oracleContractRC4 = await this.redistributionRC4.OracleContract()
-		Logging.showLogError(`oracleRC4: ${oracleContractRC4}`)
-
 		// mark as initialized
 		this._state = State.INIT
 	}
@@ -148,6 +139,15 @@ export class ChainSync {
 
 		// sync the blockchain - effectively backfilling the game state
 		await this.syncBlockchain(startFromBlock, endingBlock)
+
+		let stampContract = await this.redistribution.PostageContract()
+		Logging.showLogError(`stamps: ${stampContract}`)
+		let oracleContract = await this.redistribution.OracleContract()
+		Logging.showLogError(`oracle: ${oracleContract}`)
+		let stampContractRC4 = await this.redistributionRC4.PostageContract()
+		Logging.showLogError(`stampsRC4: ${stampContractRC4}`)
+		let oracleContractRC4 = await this.redistributionRC4.OracleContract()
+		Logging.showLogError(`oracleRC4: ${oracleContractRC4}`)
 
 		// change the state to running
 		this._state = State.RUNNING
