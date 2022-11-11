@@ -51,7 +51,10 @@ export class Round {
 					)} to ${fmtAnchor(anchor)}`
 				)
 			}
-			this._anchor = anchor
+			if (this._anchor != anchor) {
+				this._anchor = anchor
+				this.render()
+			}
 		}
 	}
 
@@ -68,7 +71,7 @@ export class Round {
 	 */
 	format(): string {
 		let r = `${this.roundString()}`
-		if (this._anchor) r += fmtAnchor(this._anchor)
+		if (this._anchor) r += ` ${fmtAnchor(this._anchor)}`
 		r += ` ${this.commits}-${this.reveals}`
 		if (this.slashes > 0) r += `={red-fg}${this.slashes}{/red-fg}`
 
