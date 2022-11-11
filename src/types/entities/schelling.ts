@@ -65,7 +65,14 @@ export class SchellingGame {
 			this.players.set(overlay, new Player(overlay, account, block, this.size))
 			let line = 0 // Reassign the lines to sort the new player into place
 			this.players.forEachPair((overlay, player) => {
-				player.setLine(line++)
+				if (this.isMyOverlay(player.overlay))
+					// First all of the highlighted overlays
+					player.setLine(line++)
+			})
+			this.players.forEachPair((overlay, player) => {
+				if (!this.isMyOverlay(player.overlay))
+					// Then everyone else
+					player.setLine(line++)
 			})
 		}
 		return this.players.get(overlay)!
@@ -80,7 +87,6 @@ export class SchellingGame {
 			this.rounds.set(roundNo, new Round(block))
 		}
 		const round = this.rounds.get(roundNo)
-		round!.lastBlock = block
 		return round!
 	}
 
@@ -141,10 +147,15 @@ export class SchellingGame {
 
 		let line = `${Round.roundString(block.blockNo)}`
 		if (leftInRound > 0) line += `+${leftInRound}`
+		if (round.anchor) line += ` ${fmtAnchor(round.anchor)}`
+		if (phase == 'claim' && roundAnchor) {
+			if (!round.anchor) line += ' next' // Fill in the gap before ->
+			line += `->${fmtAnchor(roundAnchor)}`
+		}
 		line += ` ${percent}% of ${phase}`
 		if (remaining != leftInRound) line += ` +${remaining} blocks`
-		else if (phase == 'claim' && roundAnchor)
-			line += `, next anchor ${fmtAnchor(roundAnchor)}`
+		// else if (phase == 'claim' && roundAnchor)
+		// 	line += `, next anchor ${fmtAnchor(roundAnchor)}`
 		return line
 	}
 
@@ -153,6 +164,7 @@ export class SchellingGame {
 		const roundNo = SchellingGame.roundFromBlockNo(block.blockNo)
 
 		const round = this.getOrCreateRound(roundNo, block)
+		round!.lastBlock = block
 
 		// update player state
 		const player = this.getOrCreatePlayer(overlay, owner, block)!
@@ -181,6 +193,7 @@ export class SchellingGame {
 		const roundNo = SchellingGame.roundFromBlockNo(block.blockNo)
 
 		const round = this.getOrCreateRound(roundNo, block)
+		round!.lastBlock = block
 
 		// update the player
 		const player = this.getOrCreatePlayer(overlay, owner, block)!
@@ -235,6 +248,7 @@ export class SchellingGame {
 		const roundNo = SchellingGame.roundFromBlockNo(block.blockNo)
 
 		const round = this.getOrCreateRound(roundNo, block)
+		round!.lastBlock = block
 
 		// update player state
 		const winningPlayer = this.getOrCreatePlayer(winner.overlay, owner, block)!
@@ -255,9 +269,6 @@ export class SchellingGame {
 				player.slash(block, wad)
 			}
 		})
-
-		// update the round state
-		round.lastBlock = block
 
 		round.claim = {
 			overlay: winner.overlay,
