@@ -3,7 +3,7 @@ import {
 	BlockWithTransactions,
 	TransactionResponse,
 } from '@ethersproject/abstract-provider'
-import { BigNumber, providers } from 'ethers'
+import { BigNumber, providers, utils } from 'ethers'
 import invariant from 'tiny-invariant'
 
 import config from '../config'
@@ -15,6 +15,8 @@ import {
 	BzzToken__factory,
 	Redistribution,
 	Redistribution__factory,
+	RedistributionRC4,
+	RedistributionRC4__factory,
 	StakeRegistry,
 	StakeRegistry__factory,
 } from '../types/contracts'
@@ -30,6 +32,7 @@ import {
 
 import { shortBZZ, fmtAccount, specificLocalTime } from '../lib'
 import { formatBlockDeltaColor } from '../lib/formatChain'
+import { Logger } from 'ethers/lib/utils'
 
 const game = SchellingGame.getInstance()
 
@@ -59,6 +62,7 @@ export class ChainSync {
 	private provider!: providers.WebSocketProvider
 	private stakeRegistry!: StakeRegistry
 	private redistribution!: Redistribution
+	private redistributionRC4!: RedistributionRC4
 	private bzzToken!: BzzToken
 
 	private _state: State = State.COLD
@@ -109,10 +113,23 @@ export class ChainSync {
 			config.contracts.redistribution,
 			this.provider
 		)
+		this.redistributionRC4 = RedistributionRC4__factory.connect(
+			config.contracts.redistributionRC4,
+			this.provider
+		)
 		this.bzzToken = BzzToken__factory.connect(
 			config.contracts.bzzToken,
 			this.provider
 		)
+
+		let stampContract = await this.redistribution.PostageContract()
+		Logging.showLogError(`stamps: ${stampContract}`)
+		let oracleContract = await this.redistribution.OracleContract()
+		Logging.showLogError(`oracle: ${oracleContract}`)
+		let stampContractRC4 = await this.redistributionRC4.PostageContract()
+		Logging.showLogError(`stampsRC4: ${stampContractRC4}`)
+		let oracleContractRC4 = await this.redistributionRC4.OracleContract()
+		Logging.showLogError(`oracleRC4: ${oracleContractRC4}`)
 
 		// mark as initialized
 		this._state = State.INIT
@@ -283,13 +300,22 @@ export class ChainSync {
 		this.provider.on('block', async (blockNumber: number) => {
 			const block = await this.provider.getBlockWithTransactions(blockNumber)
 
-			this.gasPriceMonitor.newSample(await this.provider.getGasPrice())
+			let feeData = await this.provider.getFeeData()
+			if (feeData.gasPrice) this.gasPriceMonitor.newSample(feeData.gasPrice)
+			else this.gasPriceMonitor.newSample(await this.provider.getGasPrice())
 
-			const priceText = `{left}${specificLocalTime(
+			let priceText = `{left}${specificLocalTime(
 				block.timestamp * 1000
 			)} ${blockNumber} ${
 				this.gasPriceMonitor.lastPrice
-			} ${this.gasPriceMonitor.percentColor()}%{/left}`
+			} ${this.gasPriceMonitor.percentColor()}%`
+			if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas) {
+				const base = feeData.maxFeePerGas.sub(feeData.maxPriorityFeePerGas)
+				priceText += ` ${Gas.gasPriceToString(base)} + ${Gas.gasPriceToString(
+					feeData.maxPriorityFeePerGas
+				)}`
+			}
+			priceText += '{/left}'
 			const offsetLine = game.size + 1 // Keep room for the getRpcUrl
 			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
 				offsetLine,
@@ -327,6 +353,7 @@ export class ChainSync {
 				try {
 					roundAnchor = await this.redistribution.currentRoundAnchor()
 				} catch (e) {
+					//Logging.showLog(`currentRoundAnchor: ${e}}`)
 					roundAnchor = undefined
 				}
 				await this.blockHandler(block, roundAnchor)
@@ -388,13 +415,31 @@ export class ChainSync {
 		)
 
 		block.transactions.forEach(async (tx) => {
-			if (tx.to === config.contracts.redistribution) {
-				await this.processRedistributionTx(tx, block.timestamp)
-			}
+			if (tx.to === config.contracts.redistribution)
+				// ToDo: Update redistribution contract once ABI is available
+				await this.processRedistributionTx(
+					this.redistribution.interface,
+					tx,
+					block.timestamp
+				)
+			if (tx.to === config.contracts.redistributionRC4)
+				// ToDo: Update redistribution contract once ABI is available
+				await this.processRedistributionTx(
+					this.redistributionRC4.interface,
+					tx,
+					block.timestamp
+				)
 		})
+		// I'd like to only refresh the top line if we processed something, but forEach precludes this
+		Ui.getInstance().lineSetterCallback(BOXES.ROUND_PLAYERS)(
+			0,
+			line,
+			block.timestamp * 1000
+		)
 	}
 
 	private async processRedistributionTx(
+		iface: utils.Interface,
 		tx: TransactionResponse,
 		blockTimestamp: number
 	) {
@@ -403,17 +448,68 @@ export class ChainSync {
 
 		// if tx failed, return
 		if (!receipt.status) {
+			const t = `${Round.roundFromBlock(receipt.blockNumber)} ${
+				receipt.blockNumber
+			} Failed ${tx.hash}`
+			Logging.showLogError(t)
+			Ui.getInstance().lineInserterCallback(BOXES.TRANSACTIONS)(
+				1,
+				t,
+				blockTimestamp * 1000
+			)
 			this.numFailedTransactions++
 			return
 		}
 
 		// decode the input data
-		const desc = this.redistribution.interface.parseTransaction(tx)
+		let desc
+		try {
+			desc = iface.parseTransaction(tx)
+		} catch (e) {
+			const t = `${Round.roundFromBlock(receipt.blockNumber)} ${
+				receipt.blockNumber
+			} NoParse ${tx.hash}`
+			Logging.showLogError(t)
+			Ui.getInstance().lineInserterCallback(BOXES.TRANSACTIONS)(
+				1,
+				t,
+				blockTimestamp * 1000
+			)
+			Logging.showLog(`parseTransaction(${tx.hash}) failed with ${e}`)
+			return
+		}
 
 		const blockDetails: BlockDetails = {
 			blockNo: receipt.blockNumber,
 			blockTimestamp: blockTimestamp * 1000, // always set to milliseconds
 		}
+
+		//Logging.showLogError(`${JSON.stringify(tx)}`)
+		//Logging.showLogError(`${JSON.stringify(receipt)}`)
+
+		let t = `${Round.roundFromBlock(receipt.blockNumber)} ${
+			receipt.blockNumber
+		} ${desc.name}`
+		if (receipt.effectiveGasPrice)
+			t += ` ${Gas.gasPriceToString(receipt.effectiveGasPrice)}`
+		t += ` ${receipt.gasUsed}/${tx.gasLimit}`
+		if (!tx.gasLimit.isZero()) {
+			t += `=${(
+				receipt.gasUsed.mul(10000).div(tx.gasLimit).toNumber() / 100
+			).toFixed(2)}%`
+		}
+		if (tx.maxPriorityFeePerGas && tx.maxFeePerGas) {
+			let baseFee = tx.maxFeePerGas.sub(tx.maxPriorityFeePerGas)
+			t += ` ${Gas.gasPriceToString(baseFee)} ${Gas.gasPriceToString(
+				tx.maxFeePerGas
+			)} ${Gas.gasPriceToString(tx.maxPriorityFeePerGas)}`
+		}
+		Logging.showLog(t)
+		Ui.getInstance().lineInserterCallback(BOXES.TRANSACTIONS)(
+			1,
+			t,
+			blockTimestamp * 1000
+		)
 
 		// determine what function is being called
 		switch (desc.name) {
@@ -434,12 +530,9 @@ export class ChainSync {
 
 				// Parse the logs for the winner / freezes / slashes
 				receipt.logs.forEach((log) => {
-					if (
-						log.topics[0] ===
-						this.redistribution.interface.getEventTopic('WinnerSelected')
-					) {
+					if (log.topics[0] === iface.getEventTopic('WinnerSelected')) {
 						// below we destructure the Reveal struct
-						winner = this.redistribution.interface.parseLog(log).args[0]
+						winner = iface.parseLog(log).args[0]
 					} else if (
 						log.topics[0] ===
 						this.stakeRegistry.interface.getEventTopic('StakeSlashed')
@@ -480,6 +573,8 @@ export class ChainSync {
 					slashes
 				)
 				break
+			default:
+				Logging.showLogError(`Unsupported Redistribution Tx ${desc.name}`)
 		}
 	}
 
