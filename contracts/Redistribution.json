@@ -1,10 +1,19 @@
 [
 	{
 		"inputs": [
-			{ "internalType": "address", "name": "staking", "type": "address" },
+			{
+				"internalType": "address",
+				"name": "staking",
+				"type": "address"
+			},
 			{
 				"internalType": "address",
 				"name": "postageContract",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "oracleContract",
 				"type": "address"
 			}
 		],
@@ -194,16 +203,36 @@
 		"inputs": [
 			{
 				"components": [
-					{ "internalType": "address", "name": "owner", "type": "address" },
-					{ "internalType": "bytes32", "name": "overlay", "type": "bytes32" },
-					{ "internalType": "uint256", "name": "stake", "type": "uint256" },
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "overlay",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint256",
+						"name": "stake",
+						"type": "uint256"
+					},
 					{
 						"internalType": "uint256",
 						"name": "stakeDensity",
 						"type": "uint256"
 					},
-					{ "internalType": "bytes32", "name": "hash", "type": "bytes32" },
-					{ "internalType": "uint8", "name": "depth", "type": "uint8" }
+					{
+						"internalType": "bytes32",
+						"name": "hash",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint8",
+						"name": "depth",
+						"type": "uint8"
+					}
 				],
 				"indexed": false,
 				"internalType": "struct Redistribution.Reveal",
@@ -217,14 +246,39 @@
 	{
 		"inputs": [],
 		"name": "DEFAULT_ADMIN_ROLE",
-		"outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "OracleContract",
+		"outputs": [
+			{
+				"internalType": "contract PriceOracle",
+				"name": "",
+				"type": "address"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [],
 		"name": "PAUSER_ROLE",
-		"outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
@@ -232,7 +286,11 @@
 		"inputs": [],
 		"name": "PostageContract",
 		"outputs": [
-			{ "internalType": "contract PostageStamp", "name": "", "type": "address" }
+			{
+				"internalType": "contract PostageStamp",
+				"name": "",
+				"type": "address"
+			}
 		],
 		"stateMutability": "view",
 		"type": "function"
@@ -264,7 +322,11 @@
 				"name": "_obfuscatedHash",
 				"type": "bytes32"
 			},
-			{ "internalType": "bytes32", "name": "_overlay", "type": "bytes32" }
+			{
+				"internalType": "bytes32",
+				"name": "_overlay",
+				"type": "bytes32"
+			}
 		],
 		"name": "commit",
 		"outputs": [],
@@ -274,30 +336,64 @@
 	{
 		"inputs": [],
 		"name": "currentClaimRound",
-		"outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [],
 		"name": "currentCommitRound",
-		"outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"name": "currentCommits",
 		"outputs": [
-			{ "internalType": "bytes32", "name": "overlay", "type": "bytes32" },
-			{ "internalType": "address", "name": "owner", "type": "address" },
-			{ "internalType": "uint256", "name": "stake", "type": "uint256" },
+			{
+				"internalType": "bytes32",
+				"name": "overlay",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "stake",
+				"type": "uint256"
+			},
 			{
 				"internalType": "bytes32",
 				"name": "obfuscatedHash",
 				"type": "bytes32"
 			},
-			{ "internalType": "bool", "name": "revealed", "type": "bool" }
+			{
+				"internalType": "bool",
+				"name": "revealed",
+				"type": "bool"
+			}
 		],
 		"stateMutability": "view",
 		"type": "function"
@@ -305,41 +401,95 @@
 	{
 		"inputs": [],
 		"name": "currentPhaseClaim",
-		"outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [],
 		"name": "currentPhaseCommit",
-		"outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [],
 		"name": "currentPhaseReveal",
-		"outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [],
 		"name": "currentRevealRound",
-		"outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"name": "currentReveals",
 		"outputs": [
-			{ "internalType": "address", "name": "owner", "type": "address" },
-			{ "internalType": "bytes32", "name": "overlay", "type": "bytes32" },
-			{ "internalType": "uint256", "name": "stake", "type": "uint256" },
-			{ "internalType": "uint256", "name": "stakeDensity", "type": "uint256" },
-			{ "internalType": "bytes32", "name": "hash", "type": "bytes32" },
-			{ "internalType": "uint8", "name": "depth", "type": "uint8" }
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "overlay",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "stake",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "stakeDensity",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "hash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint8",
+				"name": "depth",
+				"type": "uint8"
+			}
 		],
 		"stateMutability": "view",
 		"type": "function"
@@ -347,7 +497,13 @@
 	{
 		"inputs": [],
 		"name": "currentRound",
-		"outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
@@ -355,7 +511,11 @@
 		"inputs": [],
 		"name": "currentRoundAnchor",
 		"outputs": [
-			{ "internalType": "bytes32", "name": "returnVal", "type": "bytes32" }
+			{
+				"internalType": "bytes32",
+				"name": "returnVal",
+				"type": "bytes32"
+			}
 		],
 		"stateMutability": "view",
 		"type": "function"
@@ -366,16 +526,36 @@
 		"outputs": [
 			{
 				"components": [
-					{ "internalType": "address", "name": "owner", "type": "address" },
-					{ "internalType": "bytes32", "name": "overlay", "type": "bytes32" },
-					{ "internalType": "uint256", "name": "stake", "type": "uint256" },
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "overlay",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint256",
+						"name": "stake",
+						"type": "uint256"
+					},
 					{
 						"internalType": "uint256",
 						"name": "stakeDensity",
 						"type": "uint256"
 					},
-					{ "internalType": "bytes32", "name": "hash", "type": "bytes32" },
-					{ "internalType": "uint8", "name": "depth", "type": "uint8" }
+					{
+						"internalType": "bytes32",
+						"name": "hash",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint8",
+						"name": "depth",
+						"type": "uint8"
+					}
 				],
 				"internalType": "struct Redistribution.Reveal[]",
 				"name": "",
@@ -388,23 +568,47 @@
 	{
 		"inputs": [],
 		"name": "currentSeed",
-		"outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
-			{ "internalType": "bytes32", "name": "role", "type": "bytes32" }
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			}
 		],
 		"name": "getRoleAdmin",
-		"outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
-			{ "internalType": "bytes32", "name": "role", "type": "bytes32" },
-			{ "internalType": "address", "name": "account", "type": "address" }
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
 		],
 		"name": "grantRole",
 		"outputs": [],
@@ -413,69 +617,151 @@
 	},
 	{
 		"inputs": [
-			{ "internalType": "bytes32", "name": "role", "type": "bytes32" },
-			{ "internalType": "address", "name": "account", "type": "address" }
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
 		],
 		"name": "hasRole",
-		"outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
-			{ "internalType": "bytes32", "name": "A", "type": "bytes32" },
-			{ "internalType": "bytes32", "name": "B", "type": "bytes32" },
-			{ "internalType": "uint8", "name": "minimum", "type": "uint8" }
+			{
+				"internalType": "bytes32",
+				"name": "A",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "B",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint8",
+				"name": "minimum",
+				"type": "uint8"
+			}
 		],
 		"name": "inProximity",
-		"outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"stateMutability": "pure",
 		"type": "function"
 	},
 	{
 		"inputs": [
-			{ "internalType": "bytes32", "name": "overlay", "type": "bytes32" },
-			{ "internalType": "uint8", "name": "depth", "type": "uint8" }
+			{
+				"internalType": "bytes32",
+				"name": "overlay",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint8",
+				"name": "depth",
+				"type": "uint8"
+			}
 		],
 		"name": "isParticipatingInUpcomingRound",
-		"outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
-			{ "internalType": "bytes32", "name": "_overlay", "type": "bytes32" }
+			{
+				"internalType": "bytes32",
+				"name": "_overlay",
+				"type": "bytes32"
+			}
 		],
 		"name": "isWinner",
-		"outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [],
 		"name": "minimumStake",
-		"outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [],
 		"name": "nextSeed",
-		"outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [],
 		"name": "paused",
-		"outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
-			{ "internalType": "bytes32", "name": "role", "type": "bytes32" },
-			{ "internalType": "address", "name": "account", "type": "address" }
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
 		],
 		"name": "renounceRole",
 		"outputs": [],
@@ -484,10 +770,26 @@
 	},
 	{
 		"inputs": [
-			{ "internalType": "bytes32", "name": "_overlay", "type": "bytes32" },
-			{ "internalType": "uint8", "name": "_depth", "type": "uint8" },
-			{ "internalType": "bytes32", "name": "_hash", "type": "bytes32" },
-			{ "internalType": "bytes32", "name": "_revealNonce", "type": "bytes32" }
+			{
+				"internalType": "bytes32",
+				"name": "_overlay",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint8",
+				"name": "_depth",
+				"type": "uint8"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "_hash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "_revealNonce",
+				"type": "bytes32"
+			}
 		],
 		"name": "reveal",
 		"outputs": [],
@@ -496,8 +798,16 @@
 	},
 	{
 		"inputs": [
-			{ "internalType": "bytes32", "name": "role", "type": "bytes32" },
-			{ "internalType": "address", "name": "account", "type": "address" }
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
 		],
 		"name": "revokeRole",
 		"outputs": [],
@@ -507,16 +817,32 @@
 	{
 		"inputs": [],
 		"name": "roundLength",
-		"outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
-			{ "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" }
+			{
+				"internalType": "bytes4",
+				"name": "interfaceId",
+				"type": "bytes4"
+			}
 		],
 		"name": "supportsInterface",
-		"outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
@@ -524,25 +850,71 @@
 		"inputs": [],
 		"name": "winner",
 		"outputs": [
-			{ "internalType": "address", "name": "owner", "type": "address" },
-			{ "internalType": "bytes32", "name": "overlay", "type": "bytes32" },
-			{ "internalType": "uint256", "name": "stake", "type": "uint256" },
-			{ "internalType": "uint256", "name": "stakeDensity", "type": "uint256" },
-			{ "internalType": "bytes32", "name": "hash", "type": "bytes32" },
-			{ "internalType": "uint8", "name": "depth", "type": "uint8" }
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "overlay",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "stake",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "stakeDensity",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "hash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint8",
+				"name": "depth",
+				"type": "uint8"
+			}
 		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
-			{ "internalType": "bytes32", "name": "_overlay", "type": "bytes32" },
-			{ "internalType": "uint8", "name": "_depth", "type": "uint8" },
-			{ "internalType": "bytes32", "name": "_hash", "type": "bytes32" },
-			{ "internalType": "bytes32", "name": "revealNonce", "type": "bytes32" }
+			{
+				"internalType": "bytes32",
+				"name": "_overlay",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint8",
+				"name": "_depth",
+				"type": "uint8"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "_hash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "revealNonce",
+				"type": "bytes32"
+			}
 		],
 		"name": "wrapCommit",
-		"outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
 		"stateMutability": "pure",
 		"type": "function"
 	}
