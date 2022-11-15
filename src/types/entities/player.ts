@@ -39,6 +39,10 @@ export class Player {
 		return this._account
 	}
 
+	public setAccount(account: string) {
+		this._account = account
+	}
+
 	public notPlaying() {
 		if (this._isPlaying) {
 			// Saves a render() if it isn't changing

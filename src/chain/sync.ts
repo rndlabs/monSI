@@ -141,13 +141,21 @@ export class ChainSync {
 		await this.syncBlockchain(startFromBlock, endingBlock)
 
 		let stampContract = await this.redistribution.PostageContract()
-		Logging.showLogError(`stamps: ${stampContract}`)
+		Logging.showLogError(`pre-RC4 stamps: ${stampContract}`)
 		let oracleContract = await this.redistribution.OracleContract()
-		Logging.showLogError(`oracle: ${oracleContract}`)
+		Logging.showLogError(`pre-RC4 oracle: ${oracleContract}`)
+		let stakeContractRC4 = await this.redistributionRC4.Stakes()
+		Logging.showLogError(
+			`stakesRC4: ${stakeContractRC4} vs config ${config.contracts.stakeRegistry}`
+		)
 		let stampContractRC4 = await this.redistributionRC4.PostageContract()
-		Logging.showLogError(`stampsRC4: ${stampContractRC4}`)
+		Logging.showLogError(
+			`stampsRC4: ${stampContractRC4} vs config ${config.contracts.postageStamp}`
+		)
 		let oracleContractRC4 = await this.redistributionRC4.OracleContract()
-		Logging.showLogError(`oracleRC4: ${oracleContractRC4}`)
+		Logging.showLogError(
+			`oracleRC4: ${oracleContractRC4} vs config ${config.contracts.priceOracle}`
+		)
 
 		// change the state to running
 		this._state = State.RUNNING
@@ -158,7 +166,9 @@ export class ChainSync {
 			Math.floor(startFromBlock / config.game.blocksPerRound) *
 			config.game.blocksPerRound
 
-		Logging.showLogError(`Loading StakeRegistry logs from block 7716036`) // TODO: This should come from chain-config
+		Logging.showLogError(
+			`Loading StakeRegistry logs from block ${config.contracts.stakeDeployBlock}`
+		)
 		const start = Date.now()
 		// 1. Process all `StakeUpdated` and `StakeSlashed` events as this determines who is in the game.
 		const stakeLogs = await this.stakeRegistry.queryFilter(
@@ -170,7 +180,7 @@ export class ChainSync {
 					],
 				],
 			},
-			7716036
+			config.contracts.stakeDeployBlock
 		)
 
 		// now process the logs and add players to the game
@@ -419,6 +429,7 @@ export class ChainSync {
 				// ToDo: Update redistribution contract once ABI is available
 				await this.processRedistributionTx(
 					this.redistribution.interface,
+					false,
 					tx,
 					block.timestamp
 				)
@@ -426,6 +437,7 @@ export class ChainSync {
 				// ToDo: Update redistribution contract once ABI is available
 				await this.processRedistributionTx(
 					this.redistributionRC4.interface,
+					true,
 					tx,
 					block.timestamp
 				)
@@ -440,6 +452,7 @@ export class ChainSync {
 
 	private async processRedistributionTx(
 		iface: utils.Interface,
+		current: boolean,
 		tx: TransactionResponse,
 		blockTimestamp: number
 	) {
@@ -483,33 +496,6 @@ export class ChainSync {
 			blockNo: receipt.blockNumber,
 			blockTimestamp: blockTimestamp * 1000, // always set to milliseconds
 		}
-
-		//Logging.showLogError(`${JSON.stringify(tx)}`)
-		//Logging.showLogError(`${JSON.stringify(receipt)}`)
-
-		let t = `${Round.roundFromBlock(receipt.blockNumber)} ${
-			receipt.blockNumber
-		} ${desc.name}`
-		if (receipt.effectiveGasPrice)
-			t += ` ${Gas.gasPriceToString(receipt.effectiveGasPrice)}`
-		t += ` ${receipt.gasUsed}/${tx.gasLimit}`
-		if (!tx.gasLimit.isZero()) {
-			t += `=${(
-				receipt.gasUsed.mul(10000).div(tx.gasLimit).toNumber() / 100
-			).toFixed(2)}%`
-		}
-		if (tx.maxPriorityFeePerGas && tx.maxFeePerGas) {
-			let baseFee = tx.maxFeePerGas.sub(tx.maxPriorityFeePerGas)
-			t += ` ${Gas.gasPriceToString(baseFee)} ${Gas.gasPriceToString(
-				tx.maxFeePerGas
-			)} ${Gas.gasPriceToString(tx.maxPriorityFeePerGas)}`
-		}
-		Logging.showLog(t)
-		Ui.getInstance().lineInserterCallback(BOXES.TRANSACTIONS)(
-			1,
-			t,
-			blockTimestamp * 1000
-		)
 
 		// determine what function is being called
 		switch (desc.name) {
@@ -576,6 +562,34 @@ export class ChainSync {
 			default:
 				Logging.showLogError(`Unsupported Redistribution Tx ${desc.name}`)
 		}
+
+		// Update transactions AFTER processing to pick up adopted highlight accounts
+		let color = current ? 'white' : 'magenta'
+		let t = `{${color}-fg}${Round.roundFromBlock(
+			receipt.blockNumber
+		)}{/${color}-fg} ${receipt.blockNumber}`
+		if (game.isMyAccount(tx.from)) t += ` {yellow-fg}${desc.name}{/yellow-fg}`
+		else t += `  ${desc.name}`
+		if (receipt.effectiveGasPrice)
+			t += ` ${Gas.gasPriceToString(receipt.effectiveGasPrice)}`
+		t += ` ${receipt.gasUsed}/${tx.gasLimit}`
+		if (!tx.gasLimit.isZero()) {
+			t += `=${(
+				receipt.gasUsed.mul(10000).div(tx.gasLimit).toNumber() / 100
+			).toFixed(2)}%`
+		}
+		if (tx.maxPriorityFeePerGas && tx.maxFeePerGas) {
+			let baseFee = tx.maxFeePerGas.sub(tx.maxPriorityFeePerGas)
+			t += ` ${Gas.gasPriceToString(baseFee)} ${Gas.gasPriceToString(
+				tx.maxFeePerGas
+			)} ${Gas.gasPriceToString(tx.maxPriorityFeePerGas)}`
+		}
+		Logging.showLog(t)
+		Ui.getInstance().lineInserterCallback(BOXES.TRANSACTIONS)(
+			1,
+			t,
+			blockTimestamp * 1000
+		)
 	}
 
 	private async processStakeLog(logs: Log[]) {

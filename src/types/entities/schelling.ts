@@ -74,6 +74,16 @@ export class SchellingGame {
 					// Then everyone else
 					player.setLine(line++)
 			})
+		} else {
+			// See if we need to learn an account for an overlay
+			let player = this.players.get(overlay)!
+			if (!player.account && account) {
+				player.setAccount(account)
+				if (this.myOverlays.includes(overlay)) {
+					// If it is highlighted, highlight the account as well
+					this.myAccounts[this.myAccounts.length] = account
+				}
+			}
 		}
 		return this.players.get(overlay)!
 	}
