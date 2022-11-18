@@ -314,26 +314,21 @@ export class ChainSync {
 		this.provider.on('block', async (blockNumber: number) => {
 			const block = await this.provider.getBlockWithTransactions(blockNumber)
 
-			// This is actually not the best for getting the maxPriorityFeePerGas
-			// https://github.com/ethers-io/ethers.js/blob/master/packages/abstract-provider/src.ts/index.ts#L252
-			// https://github.com/ethereum/go-ethereum/blob/master/ethclient/ethclient.go#L500
-			// Probably need a raw call to eth_maxPriorityFeePerGas
-			// Also explore https://docs.ethers.io/v5/single-page/#/v5/api/providers/jsonrpc-provider/-%23-JsonRpcProvider-send
-			let feeData = await this.provider.getFeeData()
-			if (feeData.gasPrice) this.gasPriceMonitor.newSample(feeData.gasPrice)
-			else this.gasPriceMonitor.newSample(await this.provider.getGasPrice())
+			const gasPrice = await this.provider.getGasPrice()
+			const priorityFee = BigNumber.from(
+				await this.provider.send('eth_maxPriorityFeePerGas')
+			)
+
+			this.gasPriceMonitor.newSample(gasPrice)
 
 			let priceText = `{left}${specificLocalTime(
 				block.timestamp * 1000
 			)} ${blockNumber} ${
 				this.gasPriceMonitor.lastPrice
 			} ${this.gasPriceMonitor.percentColor()}%`
-			if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas) {
-				const base = feeData.maxFeePerGas.sub(feeData.maxPriorityFeePerGas)
-				priceText += ` ${Gas.gasPriceToString(base)} + ${Gas.gasPriceToString(
-					feeData.maxPriorityFeePerGas
-				)}`
-			}
+			priceText += ` ${Gas.gasPriceToString(gasPrice)} + ${Gas.gasPriceToString(
+				priorityFee
+			)}`
 			priceText += '{/left}'
 			const offsetLine = game.size + 1 // Keep room for the getRpcUrl
 			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
