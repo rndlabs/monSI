@@ -102,10 +102,7 @@ export class SchellingGame {
 				if (round) {
 					Logging.showLogError(`Clearing round ${this.currentRoundNo} players`)
 					for (const player of round.players) {
-						const p = this.players.get(player)
-						if (p)
-							p.notPlaying() // Previous round's players are no longer playing
-						else Logging.showLogError(`previous player ${player} not found?`)
+						this.players.get(player)?.notPlaying() // Previous round's players are no longer playing
 					}
 					if (!round.claim) {
 						round.lastBlock = this.lastBlock
