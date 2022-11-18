@@ -314,6 +314,11 @@ export class ChainSync {
 		this.provider.on('block', async (blockNumber: number) => {
 			const block = await this.provider.getBlockWithTransactions(blockNumber)
 
+			// This is actually not the best for getting the maxPriorityFeePerGas
+			// https://github.com/ethers-io/ethers.js/blob/master/packages/abstract-provider/src.ts/index.ts#L252
+			// https://github.com/ethereum/go-ethereum/blob/master/ethclient/ethclient.go#L500
+			// Probably need a raw call to eth_maxPriorityFeePerGas
+			// Also explore https://docs.ethers.io/v5/single-page/#/v5/api/providers/jsonrpc-provider/-%23-JsonRpcProvider-send
 			let feeData = await this.provider.getFeeData()
 			if (feeData.gasPrice) this.gasPriceMonitor.newSample(feeData.gasPrice)
 			else this.gasPriceMonitor.newSample(await this.provider.getGasPrice())
