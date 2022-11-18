@@ -140,6 +140,10 @@ export class ChainSync {
 		// sync the blockchain - effectively backfilling the game state
 		await this.syncBlockchain(startFromBlock, endingBlock)
 
+		Logging.showLogError(
+			`Redist:${config.contracts.redistribution} RC4:${config.contracts.redistributionRC4}`
+		)
+
 		let stampContract = await this.redistribution.PostageContract()
 		Logging.showLogError(`pre-RC4 stamps: ${stampContract}`)
 		let oracleContract = await this.redistribution.OracleContract()
@@ -361,7 +365,7 @@ export class ChainSync {
 					)
 				let roundAnchor: string | undefined
 				try {
-					roundAnchor = await this.redistribution.currentRoundAnchor()
+					roundAnchor = await this.redistributionRC4.currentRoundAnchor()
 				} catch (e) {
 					//Logging.showLog(`currentRoundAnchor: ${e}}`)
 					roundAnchor = undefined
@@ -425,22 +429,25 @@ export class ChainSync {
 		)
 
 		block.transactions.forEach(async (tx) => {
-			if (tx.to === config.contracts.redistribution)
-				// ToDo: Update redistribution contract once ABI is available
-				await this.processRedistributionTx(
-					this.redistribution.interface,
-					false,
-					tx,
-					block.timestamp
-				)
-			if (tx.to === config.contracts.redistributionRC4)
-				// ToDo: Update redistribution contract once ABI is available
-				await this.processRedistributionTx(
-					this.redistributionRC4.interface,
-					true,
-					tx,
-					block.timestamp
-				)
+			if (tx.to) {
+				let to = tx.to.toLowerCase()
+				if (to === config.contracts.redistribution)
+					// ToDo: Update redistribution contract once ABI is available
+					await this.processRedistributionTx(
+						this.redistribution.interface,
+						false,
+						tx,
+						block.timestamp
+					)
+				if (to === config.contracts.redistributionRC4)
+					// ToDo: Update redistribution contract once ABI is available
+					await this.processRedistributionTx(
+						this.redistributionRC4.interface,
+						true,
+						tx,
+						block.timestamp
+					)
+			}
 		})
 		// I'd like to only refresh the top line if we processed something, but forEach precludes this
 		Ui.getInstance().lineSetterCallback(BOXES.ROUND_PLAYERS)(
@@ -456,14 +463,19 @@ export class ChainSync {
 		tx: TransactionResponse,
 		blockTimestamp: number
 	) {
+		// colorize the round based on current contract or not
+		let color = current ? 'white' : 'magenta'
+
 		// get the receipt
 		const receipt = await this.provider.getTransactionReceipt(tx.hash)
 
 		// if tx failed, return
 		if (!receipt.status) {
-			const t = `${Round.roundFromBlock(receipt.blockNumber)} ${
+			const t = `{${color}-fg}${Round.roundFromBlock(
 				receipt.blockNumber
-			} Failed ${tx.hash}`
+			)}{/${color}-fg} ${receipt.blockNumber} {red-fg}Failed{/red-fg} ${
+				tx.hash
+			}`
 			Logging.showLogError(t)
 			Ui.getInstance().lineInserterCallback(BOXES.TRANSACTIONS)(
 				1,
@@ -479,9 +491,11 @@ export class ChainSync {
 		try {
 			desc = iface.parseTransaction(tx)
 		} catch (e) {
-			const t = `${Round.roundFromBlock(receipt.blockNumber)} ${
+			const t = `{${color}-fg}${Round.roundFromBlock(
 				receipt.blockNumber
-			} NoParse ${tx.hash}`
+			)}{/${color}-fg} ${receipt.blockNumber} {red-fg}NoParse{/red-fg} ${
+				tx.hash
+			}`
 			Logging.showLogError(t)
 			Ui.getInstance().lineInserterCallback(BOXES.TRANSACTIONS)(
 				1,
@@ -492,84 +506,90 @@ export class ChainSync {
 			return
 		}
 
-		const blockDetails: BlockDetails = {
-			blockNo: receipt.blockNumber,
-			blockTimestamp: blockTimestamp * 1000, // always set to milliseconds
-		}
+		if (current) {
+			const blockDetails: BlockDetails = {
+				blockNo: receipt.blockNumber,
+				blockTimestamp: blockTimestamp * 1000, // always set to milliseconds
+			}
 
-		// determine what function is being called
-		switch (desc.name) {
-			case 'commit': // commit
-				const [, overlayAddress] = desc.args
-				game.commit(overlayAddress, receipt.from, blockDetails)
-				break
-			case 'reveal': // reveal
-				const [overlay, depth, hash] = desc.args
-				game.reveal(overlay, receipt.from, hash, depth, blockDetails)
-				break
-			case 'claim': // claim
-				// check for a 'Winner' event
-				const freezes: StakeFreeze[] = []
-				const slashes: StakeSlash[] = []
-				let winner: Reveal | undefined = undefined
-				let amount = BigNumber.from(0)
+			// determine what function is being called
+			switch (desc.name) {
+				case 'commit': // commit
+					const [, overlayAddress] = desc.args
+					game.commit(overlayAddress, receipt.from, blockDetails)
+					break
+				case 'reveal': // reveal
+					const [overlay, depth, hash] = desc.args
+					game.reveal(overlay, receipt.from, hash, depth, blockDetails)
+					break
+				case 'claim': // claim
+					// check for a 'Winner' event
+					const freezes: StakeFreeze[] = []
+					const slashes: StakeSlash[] = []
+					let winner: Reveal | undefined = undefined
+					let amount = BigNumber.from(0)
 
-				// Parse the logs for the winner / freezes / slashes
-				receipt.logs.forEach((log) => {
-					if (log.topics[0] === iface.getEventTopic('WinnerSelected')) {
-						// below we destructure the Reveal struct
-						winner = iface.parseLog(log).args[0]
-					} else if (
-						log.topics[0] ===
-						this.stakeRegistry.interface.getEventTopic('StakeSlashed')
-					) {
-						const [slashed, amount] =
-							this.stakeRegistry.interface.parseLog(log).args
-						slashes.push({
-							overlay: slashed,
-							amount,
-						})
-					} else if (
-						log.topics[0] ===
-						this.stakeRegistry.interface.getEventTopic('StakeFrozen')
-					) {
-						const [slashed, time] =
-							this.stakeRegistry.interface.parseLog(log).args
-						freezes.push({
-							overlay: slashed,
-							numBlocks: time,
-						})
-					} else if (
-						log.topics[0] === this.bzzToken.interface.getEventTopic('Transfer')
-					) {
-						const [from, to, value] = this.bzzToken.interface.parseLog(log).args
-						if (from == config.contracts.postageStamp && to == receipt.from) {
-							amount = value
+					// Parse the logs for the winner / freezes / slashes
+					receipt.logs.forEach((log) => {
+						if (log.topics[0] === iface.getEventTopic('WinnerSelected')) {
+							// below we destructure the Reveal struct
+							winner = iface.parseLog(log).args[0]
+						} else if (
+							log.topics[0] ===
+							this.stakeRegistry.interface.getEventTopic('StakeSlashed')
+						) {
+							const [slashed, amount] =
+								this.stakeRegistry.interface.parseLog(log).args
+							slashes.push({
+								overlay: slashed,
+								amount,
+							})
+						} else if (
+							log.topics[0] ===
+							this.stakeRegistry.interface.getEventTopic('StakeFrozen')
+						) {
+							const [slashed, time] =
+								this.stakeRegistry.interface.parseLog(log).args
+							freezes.push({
+								overlay: slashed,
+								numBlocks: time,
+							})
+						} else if (
+							log.topics[0] ===
+							this.bzzToken.interface.getEventTopic('Transfer')
+						) {
+							const [from, to, value] =
+								this.bzzToken.interface.parseLog(log).args
+							if (
+								from.toLowerCase() == config.contracts.postageStamp &&
+								to == receipt.from
+							) {
+								amount = value
+							}
 						}
-					}
-				})
+					})
 
-				// make a claim on the game!
-				game.claim(
-					winner!,
-					receipt.from,
-					amount,
-					blockDetails,
-					freezes,
-					slashes
-				)
-				break
-			default:
-				Logging.showLogError(`Unsupported Redistribution Tx ${desc.name}`)
+					// make a claim on the game!
+					game.claim(
+						winner!,
+						receipt.from,
+						amount,
+						blockDetails,
+						freezes,
+						slashes
+					)
+					break
+				default:
+					Logging.showLogError(`Unsupported Redistribution Tx ${desc.name}`)
+			}
 		}
 
 		// Update transactions AFTER processing to pick up adopted highlight accounts
-		let color = current ? 'white' : 'magenta'
 		let t = `{${color}-fg}${Round.roundFromBlock(
 			receipt.blockNumber
 		)}{/${color}-fg} ${receipt.blockNumber}`
 		if (game.isMyAccount(tx.from)) t += ` {yellow-fg}${desc.name}{/yellow-fg}`
-		else t += `  ${desc.name}`
+		else t += ` ${desc.name}`
 		if (receipt.effectiveGasPrice)
 			t += ` ${Gas.gasPriceToString(receipt.effectiveGasPrice)}`
 		t += ` ${receipt.gasUsed}/${tx.gasLimit}`
