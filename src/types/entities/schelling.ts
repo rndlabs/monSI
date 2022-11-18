@@ -100,18 +100,27 @@ export class SchellingGame {
 			if (this.currentRoundNo != 0) {
 				const round = this.rounds.get(this.currentRoundNo)
 				if (round) {
+					Logging.showLogError(`Clearing round ${this.currentRoundNo} players`)
 					for (const player of round.players) {
-						this.players.get(player)?.notPlaying()	// Previous round's players are no longer playing
+						const p = this.players.get(player)
+						if (p)
+							p.notPlaying() // Previous round's players are no longer playing
+						else Logging.showLogError(`previous player ${player} not found?`)
 					}
 					if (!round.claim) {
 						round.lastBlock = this.lastBlock
 						round.unclaimed = true
 					}
 					round.render() // Render here to clear the Round Players box
-				}
-				else Logging.showLogError(`Previous round ${this.currentRoundNo} Not found?`)
+				} else
+					Logging.showLogError(
+						`Previous round ${this.currentRoundNo} Not found?`
+					)
 			}
 			this.currentRoundNo = roundNo
+			// ToDo: Remove the following two lines when anchor support is merged
+			const round = this.getOrCreateRound(roundNo, block) // Create the new round as a placeholder
+			round.render() // And get it on the boards
 		}
 		this.lastBlock = block
 		const blocksPerRound = config.game.blocksPerRound // TODO use configured blocksPerRound
