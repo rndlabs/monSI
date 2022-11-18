@@ -381,7 +381,7 @@ export class ChainSync {
 		)
 
 		block.transactions.forEach(async (tx) => {
-			if (tx.to && tx.to.toLowerCase() === config.contracts.redistribution) {
+			if (tx.to === config.contracts.redistribution) {
 				await this.processRedistributionTx(tx, block.timestamp)
 			}
 		})
@@ -457,10 +457,7 @@ export class ChainSync {
 						log.topics[0] === this.bzzToken.interface.getEventTopic('Transfer')
 					) {
 						const [from, to, value] = this.bzzToken.interface.parseLog(log).args
-						if (
-							from.toLowerCase() == config.contracts.postageStamp &&
-							to == receipt.from
-						) {
+						if (from == config.contracts.postageStamp && to == receipt.from) {
 							amount = value
 						}
 					}
