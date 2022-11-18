@@ -144,24 +144,26 @@ export class ChainSync {
 		Logging.showLogError(`Loading StakeRegistry logs from block 7716036`) // TODO: This should come from chain-config
 		const start = Date.now()
 		// 1. Process all `StakeUpdated` and `StakeSlashed` events as this determines who is in the game.
-		const stakeLogs = await this.stakeRegistry.queryFilter(
-			{
-				topics: [
-					[
-						this.stakeRegistry.interface.getEventTopic('StakeUpdated'),
-						this.stakeRegistry.interface.getEventTopic('StakeSlashed'),
+		if (config.contracts.stakeDeployBlock > 0) {
+			// Skip this if we don't have a deploy block yet
+			const stakeLogs = await this.stakeRegistry.queryFilter(
+				{
+					topics: [
+						[
+							this.stakeRegistry.interface.getEventTopic('StakeUpdated'),
+							this.stakeRegistry.interface.getEventTopic('StakeSlashed'),
+						],
 					],
-				],
-			},
-			7716036
-		)
-
-		// now process the logs and add players to the game
-		await this.processStakeLog(stakeLogs)
-		const elapsed = Date.now() - start
-		Logging.showLogError(
-			`Loaded ${stakeLogs.length} StakeRegistry logs in ${elapsed / 1000}s`
-		)
+				},
+				config.contracts.stakeDeployBlock
+			)
+			// now process the logs and add players to the game
+			await this.processStakeLog(stakeLogs)
+			const elapsed = Date.now() - start
+			Logging.showLogError(
+				`Loaded ${stakeLogs.length} StakeRegistry logs in ${elapsed / 1000}s`
+			)
+		}
 
 		// 2. Process all `commit`, `reveal`, and `claim` transactions to the Redistribution contract.
 
@@ -379,7 +381,7 @@ export class ChainSync {
 		)
 
 		block.transactions.forEach(async (tx) => {
-			if (tx.to === config.contracts.redistribution) {
+			if (tx.to && tx.to.toLowerCase() === config.contracts.redistribution) {
 				await this.processRedistributionTx(tx, block.timestamp)
 			}
 		})
@@ -455,7 +457,10 @@ export class ChainSync {
 						log.topics[0] === this.bzzToken.interface.getEventTopic('Transfer')
 					) {
 						const [from, to, value] = this.bzzToken.interface.parseLog(log).args
-						if (from == config.contracts.postageStamp && to == receipt.from) {
+						if (
+							from.toLowerCase() == config.contracts.postageStamp &&
+							to == receipt.from
+						) {
 							amount = value
 						}
 					}
