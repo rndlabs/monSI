@@ -23,9 +23,7 @@ export function leftId(id: string, n: number, ellipses = true) {
 }
 
 export function fmtAccount(acct: string, n = 12): string {
-	acct = acct.toLowerCase()
 	if (acct == config.contracts.redistribution) return 'Redistribution'
-	if (acct == config.contracts.redistributionRC4) return 'RedistributionRC4'
 	if (acct == config.contracts.stakeRegistry) return 'StakeRegistry'
 	if (acct == config.contracts.bzzToken) return config.units.BZZ + 'Token'
 	if (acct == config.contracts.postageStamp) return 'PostageStamp'

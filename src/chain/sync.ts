@@ -15,8 +15,6 @@ import {
 	BzzToken__factory,
 	Redistribution,
 	Redistribution__factory,
-	RedistributionRC4,
-	RedistributionRC4__factory,
 	StakeRegistry,
 	StakeRegistry__factory,
 } from '../types/contracts'
@@ -135,18 +133,21 @@ export class ChainSync {
 		// sync the blockchain - effectively backfilling the game state
 		await this.syncBlockchain(startFromBlock, endingBlock)
 
-		let stakeContractRC4 = await this.redistribution.Stakes()
-		Logging.showLogError(
-			`stakes: ${stakeContractRC4} vs config ${config.contracts.stakeRegistry}`
-		)
+		let stakeContract = await this.redistribution.Stakes()
+		if (stakeContract != config.contracts.stakeRegistry)
+			Logging.showLogError(
+				`stakes: ${stakeContract} vs config ${config.contracts.stakeRegistry}`
+			)
 		let stampContract = await this.redistribution.PostageContract()
-		Logging.showLogError(
-			`stamps: ${stampContract} vs config ${config.contracts.postageStamp}`
-		)
+		if (stampContract != config.contracts.postageStamp)
+			Logging.showLogError(
+				`stamps: ${stampContract} vs config ${config.contracts.postageStamp}`
+			)
 		let oracleContract = await this.redistribution.OracleContract()
-		Logging.showLogError(
-			`oracle: ${oracleContract} vs config ${config.contracts.priceOracle}`
-		)
+		if (oracleContract != config.contracts.priceOracle)
+			Logging.showLogError(
+				`oracle: ${oracleContract} vs config ${config.contracts.priceOracle}`
+			)
 
 		// change the state to running
 		this._state = State.RUNNING
@@ -162,24 +163,26 @@ export class ChainSync {
 		)
 		const start = Date.now()
 		// 1. Process all `StakeUpdated` and `StakeSlashed` events as this determines who is in the game.
-		const stakeLogs = await this.stakeRegistry.queryFilter(
-			{
-				topics: [
-					[
-						this.stakeRegistry.interface.getEventTopic('StakeUpdated'),
-						this.stakeRegistry.interface.getEventTopic('StakeSlashed'),
+		if (config.contracts.stakeDeployBlock > 0) {
+			// Skip this if we don't have a deploy block yet
+			const stakeLogs = await this.stakeRegistry.queryFilter(
+				{
+					topics: [
+						[
+							this.stakeRegistry.interface.getEventTopic('StakeUpdated'),
+							this.stakeRegistry.interface.getEventTopic('StakeSlashed'),
+						],
 					],
-				],
-			},
-			config.contracts.stakeDeployBlock
-		)
-
-		// now process the logs and add players to the game
-		await this.processStakeLog(stakeLogs)
-		const elapsed = Date.now() - start
-		Logging.showLogError(
-			`Loaded ${stakeLogs.length} StakeRegistry logs in ${elapsed / 1000}s`
-		)
+				},
+				config.contracts.stakeDeployBlock
+			)
+			// now process the logs and add players to the game
+			await this.processStakeLog(stakeLogs)
+			const elapsed = Date.now() - start
+			Logging.showLogError(
+				`Loaded ${stakeLogs.length} StakeRegistry logs in ${elapsed / 1000}s`
+			)
+		}
 
 		// 2. Process all `commit`, `reveal`, and `claim` transactions to the Redistribution contract.
 
@@ -417,8 +420,7 @@ export class ChainSync {
 
 		block.transactions.forEach(async (tx) => {
 			if (tx.to) {
-				let to = tx.to.toLowerCase()
-				if (to === config.contracts.redistribution)
+				if (tx.to === config.contracts.redistribution)
 					// ToDo: Update redistribution contract once ABI is available
 					await this.processRedistributionTx(
 						this.redistribution.interface,
@@ -539,10 +541,7 @@ export class ChainSync {
 						) {
 							const [from, to, value] =
 								this.bzzToken.interface.parseLog(log).args
-							if (
-								from.toLowerCase() == config.contracts.postageStamp &&
-								to == receipt.from
-							) {
+							if (from == config.contracts.postageStamp && to == receipt.from) {
 								amount = value
 							}
 						}
