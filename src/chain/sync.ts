@@ -62,7 +62,6 @@ export class ChainSync {
 	private provider!: providers.WebSocketProvider
 	private stakeRegistry!: StakeRegistry
 	private redistribution!: Redistribution
-	private redistributionRC4!: RedistributionRC4
 	private bzzToken!: BzzToken
 
 	private _state: State = State.COLD
@@ -113,10 +112,6 @@ export class ChainSync {
 			config.contracts.redistribution,
 			this.provider
 		)
-		this.redistributionRC4 = RedistributionRC4__factory.connect(
-			config.contracts.redistributionRC4,
-			this.provider
-		)
 		this.bzzToken = BzzToken__factory.connect(
 			config.contracts.bzzToken,
 			this.provider
@@ -140,25 +135,17 @@ export class ChainSync {
 		// sync the blockchain - effectively backfilling the game state
 		await this.syncBlockchain(startFromBlock, endingBlock)
 
+		let stakeContractRC4 = await this.redistribution.Stakes()
 		Logging.showLogError(
-			`Redist:${config.contracts.redistribution} RC4:${config.contracts.redistributionRC4}`
+			`stakes: ${stakeContractRC4} vs config ${config.contracts.stakeRegistry}`
 		)
-
 		let stampContract = await this.redistribution.PostageContract()
-		Logging.showLogError(`pre-RC4 stamps: ${stampContract}`)
+		Logging.showLogError(
+			`stamps: ${stampContract} vs config ${config.contracts.postageStamp}`
+		)
 		let oracleContract = await this.redistribution.OracleContract()
-		Logging.showLogError(`pre-RC4 oracle: ${oracleContract}`)
-		let stakeContractRC4 = await this.redistributionRC4.Stakes()
 		Logging.showLogError(
-			`stakesRC4: ${stakeContractRC4} vs config ${config.contracts.stakeRegistry}`
-		)
-		let stampContractRC4 = await this.redistributionRC4.PostageContract()
-		Logging.showLogError(
-			`stampsRC4: ${stampContractRC4} vs config ${config.contracts.postageStamp}`
-		)
-		let oracleContractRC4 = await this.redistributionRC4.OracleContract()
-		Logging.showLogError(
-			`oracleRC4: ${oracleContractRC4} vs config ${config.contracts.priceOracle}`
+			`oracle: ${oracleContract} vs config ${config.contracts.priceOracle}`
 		)
 
 		// change the state to running
@@ -365,7 +352,7 @@ export class ChainSync {
 					)
 				let roundAnchor: string | undefined
 				try {
-					roundAnchor = await this.redistributionRC4.currentRoundAnchor()
+					roundAnchor = await this.redistribution.currentRoundAnchor()
 				} catch (e) {
 					//Logging.showLog(`currentRoundAnchor: ${e}}`)
 					roundAnchor = undefined
@@ -435,14 +422,6 @@ export class ChainSync {
 					// ToDo: Update redistribution contract once ABI is available
 					await this.processRedistributionTx(
 						this.redistribution.interface,
-						false,
-						tx,
-						block.timestamp
-					)
-				if (to === config.contracts.redistributionRC4)
-					// ToDo: Update redistribution contract once ABI is available
-					await this.processRedistributionTx(
-						this.redistributionRC4.interface,
 						true,
 						tx,
 						block.timestamp

@@ -20,7 +20,6 @@ export type ChainConfig = {
 	}
 	contracts: {
 		redistribution: string
-		redistributionRC4: string
 		stakeRegistry: string
 		stakeDeployBlock: number
 		bzzToken: string
@@ -51,9 +50,7 @@ export const chainConfig: Configs = {
 		contracts: {
 			//			redistribution: '0xF4963031E8b9f9659CB6ed35E53c031D76480EAD',	// Pre 2022/10/28 10.0.0 rc1
 			redistribution:
-				'0x2e4ccEb9a88bcfbC7779Fa693714783A345c1343'.toLowerCase(), // obsolete pre-RC4
-			redistributionRC4:
-				'0x3174ed554247b3457922aecfcbdb17db123e519c'.toLowerCase(), // correct 2022/11/14 from pkg/config/chain.go
+				'0x3174ed554247b3457922aecfcbdb17db123e519c'.toLowerCase(), // obsolete pre-RC4
 			stakeRegistry: '0x39fc8db5d43c68379155b41451aa38190faa3498'.toLowerCase(), // correct 2022/11/14 from pkg/config/chain.go
 			stakeDeployBlock: 7951984,
 			bzzToken: '0x2aC3c1d3e24b45c6C310534Bc2Dd84B5ed576335'.toLowerCase(), // correct 2022/11/14 from PostageStamp & Stake constructors
@@ -78,8 +75,6 @@ export const chainConfig: Configs = {
 		},
 		contracts: {
 			redistribution:
-				'0xF4963031E8b9f9659CB6ed35E53c031D76480EAD'.toLowerCase(), // wrong
-			redistributionRC4:
 				'0xF4963031E8b9f9659CB6ed35E53c031D76480EAD'.toLowerCase(), // wrong
 			stakeRegistry: '0x18391158435582D5bE5ac1640ab5E2825F68d3a4'.toLowerCase(), // wrong
 			stakeDeployBlock: 0, // wrong (duh)

@@ -51,38 +51,6 @@
 		"inputs": [
 			{
 				"indexed": false,
-				"internalType": "string",
-				"name": "l",
-				"type": "string"
-			}
-		],
-		"name": "Log",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "l",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "bytes32",
-				"name": "b",
-				"type": "bytes32"
-			}
-		],
-		"name": "LogBytes32",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
 				"internalType": "address",
 				"name": "account",
 				"type": "address"
@@ -326,6 +294,11 @@
 				"internalType": "bytes32",
 				"name": "_overlay",
 				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_roundNumber",
+				"type": "uint256"
 			}
 		],
 		"name": "commit",
