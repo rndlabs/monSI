@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers'
 import { Logging } from '../../utils'
+import config from '../../config'
 import { BlockDetails } from '../../chain'
 import {
 	specificLocalTime,
@@ -36,6 +37,10 @@ export class Player {
 	}
 	public get account() {
 		return this._account
+	}
+
+	public setAccount(account: string) {
+		this._account = account
 	}
 
 	public notPlaying() {
@@ -182,11 +187,12 @@ export class Player {
 		this.lastAction = 'freeze'
 		this.frozenThawBlock = thawBlock
 		this.freezeCount++
+		const elapsed = thawBlock - block.blockNo
 
 		Logging.showError(
-			`${this.overlayString()} {blue-fg}Frozen{/blue-fg} for ${
-				thawBlock - block.blockNo
-			} blocks @${block.blockNo}`
+			`${this.overlayString()} {blue-fg}Frozen{/blue-fg} for ${elapsed} blocks or ${
+				elapsed / config.game.blocksPerRound
+			} rounds @${block.blockNo}`
 		)
 
 		this.render()

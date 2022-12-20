@@ -3,7 +3,7 @@ import {
 	BlockWithTransactions,
 	TransactionResponse,
 } from '@ethersproject/abstract-provider'
-import { BigNumber, providers } from 'ethers'
+import { BigNumber, providers, utils } from 'ethers'
 import invariant from 'tiny-invariant'
 
 import config from '../config'
@@ -30,6 +30,7 @@ import {
 
 import { shortBZZ, fmtAccount, specificLocalTime } from '../lib'
 import { formatBlockDeltaColor } from '../lib/formatChain'
+import { Logger } from 'ethers/lib/utils'
 
 const game = SchellingGame.getInstance()
 
@@ -132,6 +133,22 @@ export class ChainSync {
 		// sync the blockchain - effectively backfilling the game state
 		await this.syncBlockchain(startFromBlock, endingBlock)
 
+		let stakeContract = await this.redistribution.Stakes()
+		if (stakeContract != config.contracts.stakeRegistry)
+			Logging.showLogError(
+				`stakes: ${stakeContract} vs config ${config.contracts.stakeRegistry}`
+			)
+		let stampContract = await this.redistribution.PostageContract()
+		if (stampContract != config.contracts.postageStamp)
+			Logging.showLogError(
+				`stamps: ${stampContract} vs config ${config.contracts.postageStamp}`
+			)
+		let oracleContract = await this.redistribution.OracleContract()
+		if (oracleContract != config.contracts.priceOracle)
+			Logging.showLogError(
+				`oracle: ${oracleContract} vs config ${config.contracts.priceOracle}`
+			)
+
 		// change the state to running
 		this._state = State.RUNNING
 	}
@@ -141,7 +158,9 @@ export class ChainSync {
 			Math.floor(startFromBlock / config.game.blocksPerRound) *
 			config.game.blocksPerRound
 
-		Logging.showLogError(`Loading StakeRegistry logs from block 7716036`) // TODO: This should come from chain-config
+		Logging.showLogError(
+			`Loading StakeRegistry logs from block ${config.contracts.stakeDeployBlock}`
+		)
 		const start = Date.now()
 		// 1. Process all `StakeUpdated` and `StakeSlashed` events as this determines who is in the game.
 		if (config.contracts.stakeDeployBlock > 0) {
@@ -285,13 +304,22 @@ export class ChainSync {
 		this.provider.on('block', async (blockNumber: number) => {
 			const block = await this.provider.getBlockWithTransactions(blockNumber)
 
-			this.gasPriceMonitor.newSample(await this.provider.getGasPrice())
+			const gasPrice = await this.provider.getGasPrice()
+			const priorityFee = BigNumber.from(
+				await this.provider.send('eth_maxPriorityFeePerGas')
+			)
 
-			const priceText = `{left}${specificLocalTime(
+			this.gasPriceMonitor.newSample(gasPrice)
+
+			let priceText = `{left}${specificLocalTime(
 				block.timestamp * 1000
 			)} ${blockNumber} ${
 				this.gasPriceMonitor.lastPrice
-			} ${this.gasPriceMonitor.percentColor()}%{/left}`
+			} ${this.gasPriceMonitor.percentColor()}%`
+			priceText += ` ${Gas.gasPriceToString(gasPrice)} + ${Gas.gasPriceToString(
+				priorityFee
+			)}`
+			priceText += '{/left}'
 			const offsetLine = game.size + 1 // Keep room for the getRpcUrl
 			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
 				offsetLine,
@@ -325,7 +353,14 @@ export class ChainSync {
 					Logging.showError(
 						`Skipped from block ${this.lastBlock.blockNo} to ${block.number}`
 					)
-				await this.blockHandler(block)
+				let roundAnchor: string | undefined
+				try {
+					roundAnchor = await this.redistribution.currentRoundAnchor()
+				} catch (e) {
+					//Logging.showLog(`currentRoundAnchor: ${e}}`)
+					roundAnchor = undefined
+				}
+				await this.blockHandler(block, roundAnchor)
 
 				this.lastBlock = {
 					blockNo: block.number,
@@ -347,7 +382,10 @@ export class ChainSync {
 		return this._state
 	}
 
-	private async blockHandler(block: BlockWithTransactions) {
+	private async blockHandler(
+		block: BlockWithTransactions,
+		roundAnchor?: string
+	) {
 		this.baseGasMonitor.newSample(block.baseFeePerGas ?? BigNumber.from(1))
 		const deltaBlockTime =
 			this.lastBlock.blockTimestamp == 0
@@ -373,7 +411,7 @@ export class ChainSync {
 			blockNo: block.number,
 			blockTimestamp: block.timestamp * 1000, // always set to milliseconds
 		}
-		const line = game.newBlock(blockDetails)
+		const line = game.newBlock(blockDetails, roundAnchor)
 		Ui.getInstance().lineSetterCallback(BOXES.ROUND_PLAYERS)(
 			0,
 			line,
@@ -381,99 +419,175 @@ export class ChainSync {
 		)
 
 		block.transactions.forEach(async (tx) => {
-			if (tx.to === config.contracts.redistribution) {
-				await this.processRedistributionTx(tx, block.timestamp)
+			if (tx.to) {
+				if (tx.to === config.contracts.redistribution)
+					// ToDo: Update redistribution contract once ABI is available
+					await this.processRedistributionTx(
+						this.redistribution.interface,
+						true,
+						tx,
+						block.timestamp
+					)
 			}
 		})
+		// I'd like to only refresh the top line if we processed something, but forEach precludes this
+		Ui.getInstance().lineSetterCallback(BOXES.ROUND_PLAYERS)(
+			0,
+			line,
+			block.timestamp * 1000
+		)
 	}
 
 	private async processRedistributionTx(
+		iface: utils.Interface,
+		current: boolean,
 		tx: TransactionResponse,
 		blockTimestamp: number
 	) {
+		// colorize the round based on current contract or not
+		let color = current ? 'white' : 'magenta'
+
 		// get the receipt
 		const receipt = await this.provider.getTransactionReceipt(tx.hash)
 
 		// if tx failed, return
 		if (!receipt.status) {
+			const t = `{${color}-fg}${Round.roundFromBlock(
+				receipt.blockNumber
+			)}{/${color}-fg} ${receipt.blockNumber} {red-fg}Failed{/red-fg} ${
+				tx.hash
+			}`
+			Logging.showLogError(t)
+			Ui.getInstance().lineInserterCallback(BOXES.TRANSACTIONS)(
+				1,
+				t,
+				blockTimestamp * 1000
+			)
 			this.numFailedTransactions++
 			return
 		}
 
 		// decode the input data
-		const desc = this.redistribution.interface.parseTransaction(tx)
-
-		const blockDetails: BlockDetails = {
-			blockNo: receipt.blockNumber,
-			blockTimestamp: blockTimestamp * 1000, // always set to milliseconds
+		let desc
+		try {
+			desc = iface.parseTransaction(tx)
+		} catch (e) {
+			const t = `{${color}-fg}${Round.roundFromBlock(
+				receipt.blockNumber
+			)}{/${color}-fg} ${receipt.blockNumber} {red-fg}NoParse{/red-fg} ${
+				tx.hash
+			}`
+			Logging.showLogError(t)
+			Ui.getInstance().lineInserterCallback(BOXES.TRANSACTIONS)(
+				1,
+				t,
+				blockTimestamp * 1000
+			)
+			Logging.showLog(`parseTransaction(${tx.hash}) failed with ${e}`)
+			return
 		}
 
-		// determine what function is being called
-		switch (desc.name) {
-			case 'commit': // commit
-				const [, overlayAddress] = desc.args
-				game.commit(overlayAddress, receipt.from, blockDetails)
-				break
-			case 'reveal': // reveal
-				const [overlay, depth, hash] = desc.args
-				game.reveal(overlay, receipt.from, hash, depth, blockDetails)
-				break
-			case 'claim': // claim
-				// check for a 'Winner' event
-				const freezes: StakeFreeze[] = []
-				const slashes: StakeSlash[] = []
-				let winner: Reveal | undefined = undefined
-				let amount = BigNumber.from(0)
+		if (current) {
+			const blockDetails: BlockDetails = {
+				blockNo: receipt.blockNumber,
+				blockTimestamp: blockTimestamp * 1000, // always set to milliseconds
+			}
 
-				// Parse the logs for the winner / freezes / slashes
-				receipt.logs.forEach((log) => {
-					if (
-						log.topics[0] ===
-						this.redistribution.interface.getEventTopic('WinnerSelected')
-					) {
-						// below we destructure the Reveal struct
-						winner = this.redistribution.interface.parseLog(log).args[0]
-					} else if (
-						log.topics[0] ===
-						this.stakeRegistry.interface.getEventTopic('StakeSlashed')
-					) {
-						const [slashed, amount] =
-							this.stakeRegistry.interface.parseLog(log).args
-						slashes.push({
-							overlay: slashed,
-							amount,
-						})
-					} else if (
-						log.topics[0] ===
-						this.stakeRegistry.interface.getEventTopic('StakeFrozen')
-					) {
-						const [slashed, time] =
-							this.stakeRegistry.interface.parseLog(log).args
-						freezes.push({
-							overlay: slashed,
-							numBlocks: time,
-						})
-					} else if (
-						log.topics[0] === this.bzzToken.interface.getEventTopic('Transfer')
-					) {
-						const [from, to, value] = this.bzzToken.interface.parseLog(log).args
-						if (from == config.contracts.postageStamp && to == receipt.from) {
-							amount = value
+			// determine what function is being called
+			switch (desc.name) {
+				case 'commit': // commit
+					const [, overlayAddress] = desc.args
+					game.commit(overlayAddress, receipt.from, blockDetails)
+					break
+				case 'reveal': // reveal
+					const [overlay, depth, hash] = desc.args
+					game.reveal(overlay, receipt.from, hash, depth, blockDetails)
+					break
+				case 'claim': // claim
+					// check for a 'Winner' event
+					const freezes: StakeFreeze[] = []
+					const slashes: StakeSlash[] = []
+					let winner: Reveal | undefined = undefined
+					let amount = BigNumber.from(0)
+
+					// Parse the logs for the winner / freezes / slashes
+					receipt.logs.forEach((log) => {
+						if (log.topics[0] === iface.getEventTopic('WinnerSelected')) {
+							// below we destructure the Reveal struct
+							winner = iface.parseLog(log).args[0]
+						} else if (
+							log.topics[0] ===
+							this.stakeRegistry.interface.getEventTopic('StakeSlashed')
+						) {
+							const [slashed, amount] =
+								this.stakeRegistry.interface.parseLog(log).args
+							slashes.push({
+								overlay: slashed,
+								amount,
+							})
+						} else if (
+							log.topics[0] ===
+							this.stakeRegistry.interface.getEventTopic('StakeFrozen')
+						) {
+							const [slashed, time] =
+								this.stakeRegistry.interface.parseLog(log).args
+							freezes.push({
+								overlay: slashed,
+								numBlocks: time,
+							})
+						} else if (
+							log.topics[0] ===
+							this.bzzToken.interface.getEventTopic('Transfer')
+						) {
+							const [from, to, value] =
+								this.bzzToken.interface.parseLog(log).args
+							if (from == config.contracts.postageStamp && to == receipt.from) {
+								amount = value
+							}
 						}
-					}
-				})
+					})
 
-				// make a claim on the game!
-				game.claim(
-					winner!,
-					receipt.from,
-					amount,
-					blockDetails,
-					freezes,
-					slashes
-				)
-				break
+					// make a claim on the game!
+					game.claim(
+						winner!,
+						receipt.from,
+						amount,
+						blockDetails,
+						freezes,
+						slashes
+					)
+					break
+				default:
+					Logging.showLogError(`Unsupported Redistribution Tx ${desc.name}`)
+			}
 		}
+
+		// Update transactions AFTER processing to pick up adopted highlight accounts
+		let t = `{${color}-fg}${Round.roundFromBlock(
+			receipt.blockNumber
+		)}{/${color}-fg} ${receipt.blockNumber}`
+		if (game.isMyAccount(tx.from)) t += ` {yellow-fg}${desc.name}{/yellow-fg}`
+		else t += ` ${desc.name}`
+		if (receipt.effectiveGasPrice)
+			t += ` ${Gas.gasPriceToString(receipt.effectiveGasPrice)}`
+		t += ` ${receipt.gasUsed}/${tx.gasLimit}`
+		if (!tx.gasLimit.isZero()) {
+			t += `=${(
+				receipt.gasUsed.mul(10000).div(tx.gasLimit).toNumber() / 100
+			).toFixed(2)}%`
+		}
+		if (tx.maxPriorityFeePerGas && tx.maxFeePerGas) {
+			let baseFee = tx.maxFeePerGas.sub(tx.maxPriorityFeePerGas)
+			t += ` ${Gas.gasPriceToString(baseFee)} ${Gas.gasPriceToString(
+				tx.maxFeePerGas
+			)} ${Gas.gasPriceToString(tx.maxPriorityFeePerGas)}`
+		}
+		Logging.showLog(t)
+		Ui.getInstance().lineInserterCallback(BOXES.TRANSACTIONS)(
+			1,
+			t,
+			blockTimestamp * 1000
+		)
 	}
 
 	private async processStakeLog(logs: Log[]) {

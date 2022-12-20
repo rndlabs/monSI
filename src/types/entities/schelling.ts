@@ -4,7 +4,7 @@ const BTree = (BTree_ as any).default as typeof BTree_
 
 import config from '../../config'
 import { Logging } from '../../utils'
-import { leftId, shortId } from '../../lib'
+import { fmtAnchor, leftId, shortId } from '../../lib'
 import { BlockDetails } from '../../chain'
 
 import { Player } from './player'
@@ -65,8 +65,25 @@ export class SchellingGame {
 			this.players.set(overlay, new Player(overlay, account, block, this.size))
 			let line = 0 // Reassign the lines to sort the new player into place
 			this.players.forEachPair((overlay, player) => {
-				player.setLine(line++)
+				if (this.isMyOverlay(player.overlay))
+					// First all of the highlighted overlays
+					player.setLine(line++)
 			})
+			this.players.forEachPair((overlay, player) => {
+				if (!this.isMyOverlay(player.overlay))
+					// Then everyone else
+					player.setLine(line++)
+			})
+		} else {
+			// See if we need to learn an account for an overlay
+			let player = this.players.get(overlay)!
+			if (!player.account && account) {
+				player.setAccount(account)
+				if (this.myOverlays.includes(overlay)) {
+					// If it is highlighted, highlight the account as well
+					this.myAccounts[this.myAccounts.length] = account
+				}
+			}
 		}
 		return this.players.get(overlay)!
 	}
@@ -74,13 +91,12 @@ export class SchellingGame {
 	public getOrCreateRound(roundNo: number, block: BlockDetails): Round {
 		// create the round if it doesn't exist
 		if (!this.rounds.has(roundNo)) {
-			this.rounds.set(roundNo, new Round(block))
 			this.players.forEachPair((overlay, player) => {
 				player.notPlaying()
 			})
+			this.rounds.set(roundNo, new Round(block))
 		}
 		const round = this.rounds.get(roundNo)
-		round!.lastBlock = block
 		return round!
 	}
 
@@ -93,14 +109,13 @@ export class SchellingGame {
 
 	// --- game logic ---
 
-	public newBlock(block: BlockDetails): string {
+	public newBlock(block: BlockDetails, roundAnchor?: string): string {
 		const roundNo = SchellingGame.roundFromBlockNo(block.blockNo)
 		if (roundNo != this.currentRoundNo) {
 			// When the round changes, by defintion, no one is playing
 			if (this.currentRoundNo != 0) {
 				const round = this.rounds.get(this.currentRoundNo)
 				if (round) {
-					Logging.showLogError(`Clearing round ${this.currentRoundNo} players`)
 					for (const player of round.players) {
 						this.players.get(player)?.notPlaying() // Previous round's players are no longer playing
 					}
@@ -115,13 +130,13 @@ export class SchellingGame {
 					)
 			}
 			this.currentRoundNo = roundNo
-			// ToDo: Remove the following two lines when anchor support is merged
-			const round = this.getOrCreateRound(roundNo, block) // Create the new round as a placeholder
-			round.render() // And get it on the boards
 		}
+
+		const round = this.getOrCreateRound(roundNo, block)
 		this.lastBlock = block
 		const blocksPerRound = config.game.blocksPerRound // TODO use configured blocksPerRound
 		const offset = block.blockNo % blocksPerRound
+		const leftInRound = config.game.blocksPerRound - offset - 1
 		let phase
 		let length
 		let elapsed
@@ -129,10 +144,12 @@ export class SchellingGame {
 			phase = 'commit'
 			length = blocksPerRound / 4
 			elapsed = offset + 1
+			round.setAnchor(roundAnchor)
 		} else if (offset < blocksPerRound / 2) {
 			phase = 'reveal'
 			length = blocksPerRound / 4
 			elapsed = offset - blocksPerRound / 4 + 1
+			round.setAnchor(roundAnchor)
 		} else {
 			phase = 'claim'
 			length = blocksPerRound / 2
@@ -141,11 +158,17 @@ export class SchellingGame {
 		const remaining = length - elapsed
 		const percent = Math.floor((elapsed * 100) / length)
 
-		let line = `${Round.roundString(
-			block.blockNo
-		)} ${percent}% of ${phase}, ${remaining} blocks left`
-		if (config.game.blocksPerRound - offset - 1 != remaining)
-			line = line + `, ${config.game.blocksPerRound - offset - 1} in round`
+		let line = `${Round.roundString(block.blockNo)}`
+		if (leftInRound > 0) line += `+${leftInRound}`
+		if (round.anchor) line += ` ${fmtAnchor(round.anchor)}`
+		if (phase == 'claim' && roundAnchor) {
+			if (!round.anchor) line += ' next' // Fill in the gap before ->
+			line += `->${fmtAnchor(roundAnchor)}`
+		}
+		line += ` ${percent}% of ${phase}`
+		if (remaining != leftInRound) line += ` +${remaining} blocks`
+		// else if (phase == 'claim' && roundAnchor)
+		// 	line += `, next anchor ${fmtAnchor(roundAnchor)}`
 		return line
 	}
 
@@ -154,6 +177,7 @@ export class SchellingGame {
 		const roundNo = SchellingGame.roundFromBlockNo(block.blockNo)
 
 		const round = this.getOrCreateRound(roundNo, block)
+		round!.lastBlock = block
 
 		// update player state
 		const player = this.getOrCreatePlayer(overlay, owner, block)!
@@ -182,6 +206,7 @@ export class SchellingGame {
 		const roundNo = SchellingGame.roundFromBlockNo(block.blockNo)
 
 		const round = this.getOrCreateRound(roundNo, block)
+		round!.lastBlock = block
 
 		// update the player
 		const player = this.getOrCreatePlayer(overlay, owner, block)!
@@ -236,6 +261,7 @@ export class SchellingGame {
 		const roundNo = SchellingGame.roundFromBlockNo(block.blockNo)
 
 		const round = this.getOrCreateRound(roundNo, block)
+		round!.lastBlock = block
 
 		// update player state
 		const winningPlayer = this.getOrCreatePlayer(winner.overlay, owner, block)!
@@ -256,9 +282,6 @@ export class SchellingGame {
 				player.slash(block, wad)
 			}
 		})
-
-		// update the round state
-		round.lastBlock = block
 
 		round.claim = {
 			overlay: winner.overlay,

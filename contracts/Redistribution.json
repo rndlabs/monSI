@@ -26,6 +26,25 @@
 			{
 				"indexed": false,
 				"internalType": "uint256",
+				"name": "roundNumber",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "overlay",
+				"type": "bytes32"
+			}
+		],
+		"name": "Committed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
 				"name": "_count",
 				"type": "uint256"
 			}
@@ -57,6 +76,49 @@
 			}
 		],
 		"name": "Paused",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "roundNumber",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "overlay",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "stake",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "stakeDensity",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "reserveCommitment",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint8",
+				"name": "depth",
+				"type": "uint8"
+			}
+		],
+		"name": "Revealed",
 		"type": "event"
 	},
 	{
@@ -366,6 +428,11 @@
 				"internalType": "bool",
 				"name": "revealed",
 				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "revealIndex",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -712,12 +779,45 @@
 	},
 	{
 		"inputs": [],
+		"name": "pause",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "paused",
 		"outputs": [
 			{
 				"internalType": "bool",
 				"name": "",
 				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "penaltyMultiplierDisagreement",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "penaltyMultiplierNonRevealed",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -817,6 +917,13 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "unPause",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
