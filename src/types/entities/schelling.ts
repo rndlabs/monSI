@@ -76,7 +76,7 @@ export class SchellingGame {
 			})
 		} else {
 			// See if we need to learn an account for an overlay
-			let player = this.players.get(overlay)!
+			const player = this.players.get(overlay)!
 			if (!player.account && account) {
 				player.setAccount(account)
 				if (this.myOverlays.includes(overlay)) {

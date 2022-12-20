@@ -30,7 +30,6 @@ import {
 
 import { shortBZZ, fmtAccount, specificLocalTime } from '../lib'
 import { formatBlockDeltaColor } from '../lib/formatChain'
-import { Logger } from 'ethers/lib/utils'
 
 const game = SchellingGame.getInstance()
 
@@ -133,17 +132,17 @@ export class ChainSync {
 		// sync the blockchain - effectively backfilling the game state
 		await this.syncBlockchain(startFromBlock, endingBlock)
 
-		let stakeContract = await this.redistribution.Stakes()
+		const stakeContract = await this.redistribution.Stakes()
 		if (stakeContract != config.contracts.stakeRegistry)
 			Logging.showLogError(
 				`stakes: ${stakeContract} vs config ${config.contracts.stakeRegistry}`
 			)
-		let stampContract = await this.redistribution.PostageContract()
+		const stampContract = await this.redistribution.PostageContract()
 		if (stampContract != config.contracts.postageStamp)
 			Logging.showLogError(
 				`stamps: ${stampContract} vs config ${config.contracts.postageStamp}`
 			)
-		let oracleContract = await this.redistribution.OracleContract()
+		const oracleContract = await this.redistribution.OracleContract()
 		if (oracleContract != config.contracts.priceOracle)
 			Logging.showLogError(
 				`oracle: ${oracleContract} vs config ${config.contracts.priceOracle}`
@@ -445,7 +444,7 @@ export class ChainSync {
 		blockTimestamp: number
 	) {
 		// colorize the round based on current contract or not
-		let color = current ? 'white' : 'magenta'
+		const color = current ? 'white' : 'magenta'
 
 		// get the receipt
 		const receipt = await this.provider.getTransactionReceipt(tx.hash)
@@ -577,7 +576,7 @@ export class ChainSync {
 			).toFixed(2)}%`
 		}
 		if (tx.maxPriorityFeePerGas && tx.maxFeePerGas) {
-			let baseFee = tx.maxFeePerGas.sub(tx.maxPriorityFeePerGas)
+			const baseFee = tx.maxFeePerGas.sub(tx.maxPriorityFeePerGas)
 			t += ` ${Gas.gasPriceToString(baseFee)} ${Gas.gasPriceToString(
 				tx.maxFeePerGas
 			)} ${Gas.gasPriceToString(tx.maxPriorityFeePerGas)}`
