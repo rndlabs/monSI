@@ -10,8 +10,9 @@ export enum BOXES {
 	ALL_PLAYERS = 0,
 	ROUNDS = 1,
 	ROUND_PLAYERS = 2,
-	BLOCKS = 3,
-	OUTPUT = 4,
+	TRANSACTIONS = 3,
+	BLOCKS = 4,
+	OUTPUT = 5,
 }
 
 export class Ui {
@@ -79,10 +80,22 @@ export class Ui {
 			top: 0,
 			left: 0,
 			width: '40%',
-			height: '75%',
+			height: '30%',
 
 			content: '',
 			scrollable: false,
+			tags: true,
+		})
+
+		// Transactions box
+		this._createBox('Transactions', true, {
+			top: '30%',
+			left: 0,
+			width: '40%',
+			height: '45%',
+			content:
+				'  When   Round  Block   Name     Price      Used            Fees: Base     Max    Priority',
+			scrollable: true,
 			tags: true,
 		})
 
