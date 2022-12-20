@@ -50,33 +50,28 @@ export const chainConfig: Configs = {
 			revealPhaseBlocks: 152 / 4,
 		},
 		contracts: {
-			bzzToken: utils.getAddress('0x2aC3c1d3e24b45c6C310534Bc2Dd84B5ed576335'), // correct 2022/11/14 from PostageStamp & Stake constructors
+			bzzToken: utils.getAddress('0x2aC3c1d3e24b45c6C310534Bc2Dd84B5ed576335'),
 
+			// for deployment addresses, see https://github.com/ethersphere/go-storage-incentives-abi/blob/master/abi/abi_testnet.go
 			stakeRegistry: utils.getAddress(
-				//'0x39fc8db5d43c68379155b41451aa38190faa3498'	// From 2022/11/14 from pkg/config/chain.go
-				'0xca024239DA477781f833858825602Cd249106882' // From 2022/12/12 https://github.com/ethersphere/go-storage-incentives-abi/blob/master/abi/abi_testnet.go
+				'0xca024239DA477781f833858825602Cd249106882'
 			),
-			stakeDeployBlock: 8133404, // 7951984, // 2022/11/14
+			stakeDeployBlock: 8133404,
 
 			postageStamp: utils.getAddress(
-				//'0xf0a7e63f72a73bd339a7ee814aefa80995e532a0'	// From 2022/11/14 from pkg/config/chain.go
-				'0x721E733E472f1531cDA23279E364f08869E2Bfa9' // From 2022/12/14 https://github.com/ethersphere/go-storage-incentives-abi/blob/master/abi/abi_testnet.go
+				'0x721E733E472f1531cDA23279E364f08869E2Bfa9'
 			),
 
 			priceOracle: utils.getAddress(
-				//'0x2b308ceb1ff7398e93b008c9a9ea82ffcf6a7a24'	// From 2022/11/14 from Redistribution constructor
-				'0x0d34297977123D55f64D109bB8D2C74e0358F83a' // From 2022/12/14 https://github.com/ethersphere/go-storage-incentives-abi/blob/master/abi/abi_testnet.go
+				'0x0d34297977123D55f64D109bB8D2C74e0358F83a'
 			),
 
-			//			redistribution: '0xF4963031E8b9f9659CB6ed35E53c031D76480EAD',	// Pre 2022/10/28 10.0.0 rc1
 			redistribution: utils.getAddress(
-				//'0x3174ed554247b3457922aecfcbdb17db123e519c'	// From 2022/11/14 in pkg/config/chain.go
-				'0x8a0c1DA07261042f5aADa47ab9efa489Ee5A3e4b' // From 2022/12/14 https://github.com/ethersphere/go-storage-incentives-abi/blob/master/abi/abi_testnet.go
+				'0x8a0c1DA07261042f5aADa47ab9efa489Ee5A3e4b'
 			),
 		},
 	},
 	'100': {
-		// TODO: Correct these values once gnosis is deployed
 		chain: {
 			name: 'gnosis',
 			secondsPerBlock: 5,
@@ -91,8 +86,9 @@ export const chainConfig: Configs = {
 			revealPhaseBlocks: 152 / 4,
 		},
 		contracts: {
-			// 2022/12/19 from https://github.com/ethersphere/go-storage-incentives-abi/blob/master/abi/abi_mainnet.go
 			bzzToken: utils.getAddress('0xdBF3Ea6F5beE45c02255B2c26a16F300502F68da'),
+
+			// for deployment addresses, see https://github.com/ethersphere/go-storage-incentives-abi/blob/master/abi/abi_mainnet.go
 			stakeRegistry: utils.getAddress(
 				'0x781c6D1f0eaE6F1Da1F604c6cDCcdB8B76428ba7'
 			),
