@@ -1,6 +1,6 @@
 import blessed, { Widgets } from 'blessed'
-import { ChainSync } from '../../chain'
-import { currentLocalTime, specificLocalTime } from '../../lib'
+import { ChainSync } from '../../chain/index.js'
+import { currentLocalTime, specificLocalTime } from '../../lib/index.js'
 
 /**
  * A singleton class for managing the user interface

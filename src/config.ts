@@ -4,7 +4,7 @@
 
 import { utils } from 'ethers'
 
-import { ChainSync } from './chain'
+import { ChainSync } from './chain/index.js'
 
 export type ChainConfig = {
 	chain: {

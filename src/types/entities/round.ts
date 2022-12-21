@@ -1,10 +1,10 @@
 import { BigNumber, BigNumberish } from 'ethers'
-import { Logging } from '../../utils'
-import { BlockDetails } from '../../chain'
-import config from '../../config'
-import { fmtAnchor, fmtOverlay, shortBZZ } from '../../lib'
-import { SchellingGame } from './schelling'
-import { Ui, BOXES } from './ui'
+import { Logging } from '../../utils/index.js'
+import { BlockDetails } from '../../chain/index.js'
+import config from '../../config.js'
+import { fmtAnchor, fmtOverlay, shortBZZ } from '../../lib/index.js'
+import { SchellingGame } from './schelling.js'
+import { Ui, BOXES } from './ui.js'
 
 export type RoundHash = {
 	depth: number

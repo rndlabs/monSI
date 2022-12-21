@@ -1,20 +1,20 @@
-import { chainName, formatBlockDeltaColor } from './formatChain'
-import { specificLocalTime, currentLocalTime } from './formatDate'
+import { chainName, formatBlockDeltaColor } from './formatChain.js'
+import { specificLocalTime, currentLocalTime } from './formatDate.js'
 import {
 	wholeBZZ,
 	shortBZZ,
 	formatSi,
 	shortCurrency,
 	shortETH,
-} from './formatUnits'
-import { colorValue, colorSpecificDelta, colorDelta } from './formatUi'
+} from './formatUnits.js'
+import { colorValue, colorSpecificDelta, colorDelta } from './formatUi.js'
 import {
 	shortId,
 	leftId,
 	fmtAccount,
 	fmtOverlay,
 	fmtAnchor,
-} from './formatText'
+} from './formatText.js'
 
 export {
 	chainName,

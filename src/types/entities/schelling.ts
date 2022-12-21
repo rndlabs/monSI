@@ -2,13 +2,13 @@ import { BigNumber } from 'ethers'
 import BTree_ from 'sorted-btree'
 const BTree = (BTree_ as any).default as typeof BTree_
 
-import config from '../../config'
-import { Logging } from '../../utils'
-import { fmtAnchor, leftId, shortId } from '../../lib'
-import { BlockDetails } from '../../chain'
+import config from '../../config.js'
+import { Logging } from '../../utils/index.js'
+import { fmtAnchor, leftId, shortId } from '../../lib/index.js'
+import { BlockDetails } from '../../chain/index.js'
 
-import { Player } from './player'
-import { Round } from './round'
+import { Player } from './player.js'
+import { Round } from './round.js'
 
 export type StakeFreeze = {
 	overlay: string

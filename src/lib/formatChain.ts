@@ -1,4 +1,4 @@
-import config from '../config'
+import config from '../config.js'
 
 export function chainName(id: number) {
 	switch (id) {

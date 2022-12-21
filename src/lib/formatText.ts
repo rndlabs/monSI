@@ -1,5 +1,5 @@
-import config from '../config'
-import { SchellingGame } from '../types/entities/schelling'
+import config from '../config.js'
+import { SchellingGame } from '../types/entities/schelling.js'
 
 /**
  * Library for short formatting of text.

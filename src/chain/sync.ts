@@ -6,9 +6,9 @@ import {
 import { BigNumber, providers, utils } from 'ethers'
 import invariant from 'tiny-invariant'
 
-import config from '../config'
-import { Logging } from '../utils'
-import { Gas } from './gas'
+import config from '../config.js'
+import { Logging } from '../utils/index.js'
+import { Gas } from './gas.js'
 
 import {
 	BzzToken,
@@ -17,7 +17,7 @@ import {
 	Redistribution__factory,
 	StakeRegistry,
 	StakeRegistry__factory,
-} from '../types/contracts'
+} from '../types/contracts/index.js'
 import {
 	Reveal,
 	SchellingGame,
@@ -26,10 +26,10 @@ import {
 	StakeSlash,
 	Ui,
 	BOXES,
-} from '../types/entities'
+} from '../types/entities/index.js'
 
-import { shortBZZ, fmtAccount, specificLocalTime } from '../lib'
-import { formatBlockDeltaColor } from '../lib/formatChain'
+import { shortBZZ, fmtAccount, specificLocalTime } from '../lib/index.js'
+import { formatBlockDeltaColor } from '../lib/formatChain.js'
 
 const game = SchellingGame.getInstance()
 
