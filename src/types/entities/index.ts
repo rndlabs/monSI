@@ -1,7 +1,7 @@
-import { Player } from './player'
-import { Round, Claim, RoundHash } from './round'
-import { SchellingGame, Reveal, StakeFreeze, StakeSlash } from './schelling'
-import { Ui, BOXES } from './ui'
+import { Player } from './player.js'
+import { Round, Claim, RoundHash } from './round.js'
+import { SchellingGame, Reveal, StakeFreeze, StakeSlash } from './schelling.js'
+import { Ui, BOXES } from './ui.js'
 
 export {
 	Player,

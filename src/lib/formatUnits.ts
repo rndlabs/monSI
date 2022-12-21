@@ -2,7 +2,7 @@
  * Formats a string of numbers into a string with SI suffixes.
  */
 
-import config from '../config'
+import config from '../config.js'
 import { BigNumber, utils } from 'ethers'
 
 export type FormatUnitOptions = {
