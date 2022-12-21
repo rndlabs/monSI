@@ -2,10 +2,10 @@
 
 import { Command, Option, InvalidOptionArgumentError } from 'commander'
 import pack from '../package.json' assert { type: 'json' }
-import config from './config'
+import config from './config.js'
 
-import { ChainSync } from './chain'
-import { SchellingGame, Ui } from './types/entities'
+import { ChainSync } from './chain/index.js'
+import { SchellingGame, Ui } from './types/entities/index.js'
 import { utils } from 'ethers'
 
 // sane defaults for the environment variables (if not set)

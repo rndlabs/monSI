@@ -1,3 +1,3 @@
-import Logging from './logging'
+import Logging from './logging.js'
 
 export { Logging }

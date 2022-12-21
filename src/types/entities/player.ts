@@ -1,7 +1,7 @@
 import { BigNumber } from 'ethers'
-import { Logging } from '../../utils'
-import config from '../../config'
-import { BlockDetails } from '../../chain'
+import { Logging } from '../../utils/index.js'
+import config from '../../config.js'
+import { BlockDetails } from '../../chain/index.js'
 import {
 	specificLocalTime,
 	fmtOverlay,
@@ -9,9 +9,9 @@ import {
 	colorDelta,
 	colorValue,
 	shortBZZ,
-} from '../../lib'
-import { Round } from './round'
-import { Ui } from './ui'
+} from '../../lib/index.js'
+import { Round } from './round.js'
+import { Ui } from './ui.js'
 
 export class Player {
 	private _overlay: string // overlay of the bee node

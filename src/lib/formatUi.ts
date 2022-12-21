@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers'
-import { formatSi, FormatUnitOptions } from './formatUnits'
+import { formatSi, FormatUnitOptions } from './formatUnits.js'
 
 export function colorValue(
 	value: BigNumber,

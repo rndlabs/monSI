@@ -1,5 +1,5 @@
-import { currentLocalTime, specificLocalTime } from '../lib'
-import { Ui, BOXES } from '../types/entities'
+import { currentLocalTime, specificLocalTime } from '../lib/index.js'
+import { Ui, BOXES } from '../types/entities/index.js'
 
 export default class Logging {
 	private static instance: Logging
