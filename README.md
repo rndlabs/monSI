@@ -4,6 +4,20 @@ A monitor for the upcoming Storage Incentives (SI) for the Ethersphere Bee swarm
 
 ![monsi Terminal User Interface!](/assets/screenshot.png 'monsi TUI')
 
+## Docker 
+
+Build the image
+
+```
+docker build . -t monsi
+```
+
+Run the monsi image
+
+```
+docker run --rm monsi
+```
+
 ## Installing node / npm packages
 
 To get started the following commands, or their equivalents, should work if you don't already have node and/or `npm`
