@@ -89,5 +89,9 @@
 	"eslintIgnore": [
 		"build/*"
 	],
-	"type": "module"
+	"type": "module",
+	"engines": {
+		"npm": ">=8.0.0 <9.0.0",
+		"node": ">=16.14.0"
+	}
 }
