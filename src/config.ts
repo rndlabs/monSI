@@ -54,20 +54,20 @@ export const chainConfig: Configs = {
 
 			// for deployment addresses, see https://github.com/ethersphere/go-storage-incentives-abi/blob/master/abi/abi_testnet.go
 			stakeRegistry: utils.getAddress(
-				'0xca024239DA477781f833858825602Cd249106882'
+				'0xCb07bf0603da228C8ec602bf12b973b8A94f9bac'
 			),
-			stakeDeployBlock: 8133404,
+			stakeDeployBlock: 8139930,
 
 			postageStamp: utils.getAddress(
-				'0x721E733E472f1531cDA23279E364f08869E2Bfa9'
+				'0x1f87FEDa43e6ABFe1058E96A07d0ea182e7dc9BD'
 			),
 
 			priceOracle: utils.getAddress(
-				'0x0d34297977123D55f64D109bB8D2C74e0358F83a'
+				'0x3e475aEAB162E28fee46E69225af446D3c4f3Bd3'
 			),
 
 			redistribution: utils.getAddress(
-				'0x8a0c1DA07261042f5aADa47ab9efa489Ee5A3e4b'
+				'0x90317dC80F6A9327ee728c68955a9Cef90b29f5c'
 			),
 		},
 	},

@@ -162,7 +162,7 @@ export class ChainSync {
 		)
 		const start = Date.now()
 		// 1. Process all `StakeUpdated` and `StakeSlashed` events as this determines who is in the game.
-		if (config.contracts.stakeDeployBlock > 0) {
+		if (false && config.contracts.stakeDeployBlock > 0) {
 			// Skip this if we don't have a deploy block yet
 			const stakeLogs = await this.stakeRegistry.queryFilter(
 				{
@@ -303,38 +303,40 @@ export class ChainSync {
 		this.provider.on('block', async (blockNumber: number) => {
 			const block = await this.provider.getBlockWithTransactions(blockNumber)
 
-			const gasPrice = await this.provider.getGasPrice()
-			const priorityFee = BigNumber.from(
-				await this.provider.send('eth_maxPriorityFeePerGas')
-			)
+			if (false) {
+				const gasPrice = await this.provider.getGasPrice()
+				const priorityFee = BigNumber.from(
+					await this.provider.send('eth_maxPriorityFeePerGas')
+				)
 
-			this.gasPriceMonitor.newSample(gasPrice)
+				this.gasPriceMonitor.newSample(gasPrice)
 
-			let priceText = `{left}${specificLocalTime(
-				block.timestamp * 1000
-			)} ${blockNumber} ${
-				this.gasPriceMonitor.lastPrice
-			} ${this.gasPriceMonitor.percentColor()}%`
-			priceText += ` ${Gas.gasPriceToString(gasPrice)} + ${Gas.gasPriceToString(
-				priorityFee
-			)}`
-			priceText += '{/left}'
-			const offsetLine = game.size + 1 // Keep room for the getRpcUrl
-			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
-				offsetLine,
-				`{center}${config.chain.name} getGasPrice{/center}`,
-				-1
-			)
-			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
-				offsetLine + 1,
-				`{center}${this.gasPriceMonitor.history}{/center}`,
-				-1
-			)
-			Ui.getInstance().lineInserterCallback(BOXES.ALL_PLAYERS)(
-				offsetLine + 2,
-				priceText,
-				-1
-			)
+				let priceText = `{left}${specificLocalTime(
+					block.timestamp * 1000
+				)} ${blockNumber} ${
+					this.gasPriceMonitor.lastPrice
+				} ${this.gasPriceMonitor.percentColor()}%`
+				priceText += ` ${Gas.gasPriceToString(
+					gasPrice
+				)} + ${Gas.gasPriceToString(priorityFee)}`
+				priceText += '{/left}'
+				const offsetLine = game.size + 1 // Keep room for the getRpcUrl
+				Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
+					offsetLine,
+					`{center}${config.chain.name} getGasPrice{/center}`,
+					-1
+				)
+				Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
+					offsetLine + 1,
+					`{center}${this.gasPriceMonitor.history}{/center}`,
+					-1
+				)
+				Ui.getInstance().lineInserterCallback(BOXES.ALL_PLAYERS)(
+					offsetLine + 2,
+					priceText,
+					-1
+				)
+			}
 
 			const dt = new Date(block.timestamp * 1000).toISOString()
 			const gas = `${Gas.gasUtilization(block)}% ${Gas.gasPriceToString(
@@ -385,26 +387,28 @@ export class ChainSync {
 		block: BlockWithTransactions,
 		roundAnchor?: string
 	) {
-		this.baseGasMonitor.newSample(block.baseFeePerGas ?? BigNumber.from(1))
-		const deltaBlockTime =
-			this.lastBlock.blockTimestamp == 0
-				? ''
-				: `${formatBlockDeltaColor(
-						block.timestamp - this.lastBlock.blockTimestamp / 1000
-				  )}s`
+		if (false) {
+			this.baseGasMonitor.newSample(block.baseFeePerGas ?? BigNumber.from(1))
+			const deltaBlockTime =
+				this.lastBlock.blockTimestamp == 0
+					? ''
+					: `${formatBlockDeltaColor(
+							block.timestamp - this.lastBlock.blockTimestamp / 1000
+					  )}s`
 
-		Ui.getInstance().lineSetterCallback(BOXES.BLOCKS)(
-			0,
-			`{center}${this.baseGasMonitor.history}{/center}`,
-			-1 // Don't timestamp this line
-		)
-		Ui.getInstance().lineInserterCallback(BOXES.BLOCKS)(
-			1,
-			`${block.number} ${deltaBlockTime} ${
-				this.baseGasMonitor.lastPrice
-			} ${this.baseGasMonitor.percentColor()}%`,
-			block.timestamp * 1000
-		)
+			Ui.getInstance().lineSetterCallback(BOXES.BLOCKS)(
+				0,
+				`{center}${this.baseGasMonitor.history}{/center}`,
+				-1 // Don't timestamp this line
+			)
+			Ui.getInstance().lineInserterCallback(BOXES.BLOCKS)(
+				1,
+				`${block.number} ${deltaBlockTime} ${
+					this.baseGasMonitor.lastPrice
+				} ${this.baseGasMonitor.percentColor()}%`,
+				block.timestamp * 1000
+			)
+		}
 
 		const blockDetails: BlockDetails = {
 			blockNo: block.number,
