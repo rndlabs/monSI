@@ -1,7 +1,7 @@
 #!/usr/bin/env -S node --experimental-specifier-resolution=node
 
 import { Command, Option, InvalidOptionArgumentError } from 'commander'
-import pack from '../package.json' assert { type: 'json' }
+import pack from '../package.json'
 import config from './config'
 
 import { ChainSync } from './chain'

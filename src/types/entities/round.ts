@@ -109,7 +109,9 @@ export class Round {
 		if (this.freezes > 0) r = r + `={blue-fg}${this.freezes}{/blue-fg}`
 		if (this.claim) {
 			r += ` ${fmtOverlay(this.claim.overlay, 12)}`
-			r += ` ^${this.claim.depth}`
+			if (this.claim.depth == 0)
+				r += ` {yellow-fg}^${this.claim.depth}{/yellow-fg}`
+			else r += ` ^${this.claim.depth}`
 			r +=
 				' {green-fg}' +
 				shortBZZ(this.claim.amount, { showPlus: true, suppressUnits: true }) +

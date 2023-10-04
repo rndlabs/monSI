@@ -24,7 +24,7 @@ export class Player {
 	private _isPlaying = false
 	private lastBlock: BlockDetails | undefined // block details of last interaction
 	private lastAction: string | undefined // tracks last action which cannot be derived from blockNumber
-	private playCount?: number // don't initialize
+	private _playCount?: number // don't initialize
 	private winCount = 0 // initialize as 0
 	private frozenThawBlock?: number // if true, this is a frozen overlay
 	private freezeCount = 0 // initialize as 0
@@ -37,6 +37,12 @@ export class Player {
 	}
 	public get account() {
 		return this._account
+	}
+	public get isPlaying() {
+		return this._isPlaying
+	}
+	public get playCount() {
+		return this._playCount
 	}
 
 	public setAccount(account: string) {
@@ -90,7 +96,8 @@ export class Player {
 	format(): string {
 		let result = this.overlayString()
 		if (this._isPlaying) result = '{blue-bg}' + result + '{/blue-bg}'
-		if (this.playCount) result = result + ` ${this.winCount}/${this.playCount}`
+		if (this._playCount)
+			result = result + ` ${this.winCount}/${this._playCount}`
 		if (this.freezeCount > 0)
 			result += ` {blue-fg}${this.freezeCount}{/blue-fg}`
 		if (this.slashCount > 0) result += ` {red-fg}${this.slashCount}{/red-fg}`
@@ -145,7 +152,7 @@ export class Player {
 		this.lastBlock = block
 		this.lastAction = 'commit'
 		this._isPlaying = true
-		this.playCount = (this.playCount || 0) + 1
+		this._playCount = (this._playCount || 0) + 1
 
 		// if the player is frozen, check if they should be thawed
 		if (this.frozenThawBlock) {
@@ -205,14 +212,23 @@ export class Player {
 		// don't set the below as the amount is only used to track winnings
 		// this.amount = amount
 
-		this.stake = amount
 		this.stakeChangeCount++
 
-		Logging.showError(
-			`${this.overlayString()} Stake Updated ${shortBZZ(amount)} now ${shortBZZ(
-				this.stake
-			)}(${this.stakeChangeCount}) @${block.blockNo}`
-		)
+		if (this.stakeChangeCount == 1)
+			Logging.showError(
+				`${this.overlayString()} Stake Updated ${shortBZZ(
+					amount
+				)} now ${shortBZZ(amount)}(${this.stakeChangeCount}) @${block.blockNo}`
+			)
+		else if (this.stake)
+			Logging.showError(
+				`${this._overlay} Stake Updated ${shortBZZ(
+					amount.sub(this.stake)
+				)} now ${shortBZZ(this.stake)}(${this.stakeChangeCount}) @${
+					block.blockNo
+				}`
+			)
+		this.stake = amount
 
 		this.render()
 	}

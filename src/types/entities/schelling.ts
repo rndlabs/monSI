@@ -56,6 +56,52 @@ export class SchellingGame {
 		this.lastBlock = { blockNo: 0, blockTimestamp: 0 }
 	}
 
+	private sortPlayers() {
+		const emitted: BTree_<string, Player> = new BTree()
+		let line = 0 // Reassign the lines to sort the new player into place
+		this.players.forEachPair((overlay, player) => {
+			if (!emitted.has(overlay)) {
+				if (this.isMyOverlay(player.overlay)) {
+					// First all of the highlighted overlays
+					player.setLine(line++)
+					emitted.set(player.overlay, player)
+				}
+			}
+		})
+
+		if (false) {
+			this.players.forEachPair((overlay, player) => {
+				if (!emitted.has(overlay)) {
+					if (player.isPlaying) {
+						// Then the current players
+						player.setLine(line++)
+						emitted.set(player.overlay, player)
+					}
+				}
+			})
+		}
+
+		if (false) {
+			this.players.forEachPair((overlay, player) => {
+				if (!emitted.has(overlay)) {
+					if (player.playCount && player.playCount > 0) {
+						// Then anyone that has played
+						player.setLine(line++)
+						emitted.set(player.overlay, player)
+					}
+				}
+			})
+		}
+
+		this.players.forEachPair((overlay, player) => {
+			if (!emitted.has(overlay)) {
+				// Then everyone else
+				player.setLine(line++)
+				emitted.set(player.overlay, player)
+			}
+		})
+	}
+
 	private getOrCreatePlayer(
 		overlay: string,
 		account?: string,
@@ -63,17 +109,7 @@ export class SchellingGame {
 	): Player {
 		if (!this.players.has(overlay)) {
 			this.players.set(overlay, new Player(overlay, account, block, this.size))
-			let line = 0 // Reassign the lines to sort the new player into place
-			this.players.forEachPair((overlay, player) => {
-				if (this.isMyOverlay(player.overlay))
-					// First all of the highlighted overlays
-					player.setLine(line++)
-			})
-			this.players.forEachPair((overlay, player) => {
-				if (!this.isMyOverlay(player.overlay))
-					// Then everyone else
-					player.setLine(line++)
-			})
+			this.sortPlayers()
 		} else {
 			// See if we need to learn an account for an overlay
 			const player = this.players.get(overlay)!
@@ -94,6 +130,7 @@ export class SchellingGame {
 			this.players.forEachPair((overlay, player) => {
 				player.notPlaying()
 			})
+			this.sortPlayers()
 			this.rounds.set(roundNo, new Round(block))
 		}
 		const round = this.rounds.get(roundNo)
@@ -119,6 +156,7 @@ export class SchellingGame {
 					for (const player of round.players) {
 						this.players.get(player)?.notPlaying() // Previous round's players are no longer playing
 					}
+					this.sortPlayers()
 					if (!round.claim) {
 						round.lastBlock = this.lastBlock
 						round.unclaimed = true
@@ -182,6 +220,7 @@ export class SchellingGame {
 		// update player state
 		const player = this.getOrCreatePlayer(overlay, owner, block)!
 		player.commit(block)
+		this.sortPlayers()
 
 		// update the round state
 		round.commits++
@@ -211,6 +250,7 @@ export class SchellingGame {
 		// update the player
 		const player = this.getOrCreatePlayer(overlay, owner, block)!
 		player.reveal(block, roundNo, hash, depth)
+		this.sortPlayers()
 
 		// update the round state
 		round.reveals++
@@ -266,6 +306,7 @@ export class SchellingGame {
 		// update player state
 		const winningPlayer = this.getOrCreatePlayer(winner.overlay, owner, block)!
 		winningPlayer.claim(block, amount)
+		this.sortPlayers()
 
 		// freeze any players
 		freezes.forEach(({ overlay, numBlocks }) => {
@@ -291,6 +332,8 @@ export class SchellingGame {
 		}
 		round.freezes = freezes.length
 		round.slashes = slashes.length
+
+		if (round.claim.depth == 0) this.highlightOverlay(round.claim.overlay)
 
 		if (SchellingGame._showLogs)
 			Logging.showError(
