@@ -80,7 +80,7 @@ export class Ui {
 			top: 0,
 			left: 0,
 			width: '40%',
-			height: '30%',
+			height: '40%',
 
 			content: '',
 			scrollable: false,
@@ -89,10 +89,10 @@ export class Ui {
 
 		// Transactions box
 		this._createBox('Transactions', true, {
-			top: '30%',
+			top: '40%',
 			left: 0,
 			width: '40%',
-			height: '45%',
+			height: '35%',
 			content:
 				'  When   Round  Block   Name     Price      Used            Fees: Base     Max    Priority',
 			scrollable: true,
