@@ -59,8 +59,8 @@ Options:
   -b, --block [block]        Block number to start loading from
   -R, --round [round]        Round number to start loading from
   -S, --singleRound [round]  Load a single round and stop
-  -g, --gas                  Track gas statistics per block (chatty) (default: false)
-  -s, --stakes               Preload all stakes (takes a LONG time) (default: false)
+      --showGas              Track gas statistics per block (chatty) (default: false)
+      --loadStakes           Preload all stakes (takes a LONG time) (default: false)
   -h, --help                 display help for command
 ```
 

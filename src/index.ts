@@ -19,8 +19,8 @@ interface CLIOptions {
 	block?: number
 	round?: number
 	singleRound?: number
-	gas: boolean
-	stakes: boolean
+	showGas: boolean
+	loadStakes: boolean
 }
 
 /**
@@ -36,8 +36,8 @@ async function run(overlays: string[], options: CLIOptions) {
 		block,
 		round,
 		singleRound,
-		gas,
-		stakes,
+		showGas,
+		loadStakes,
 	} = options
 
 	// Set the chain ID
@@ -64,7 +64,7 @@ async function run(overlays: string[], options: CLIOptions) {
 	else if (rounds) startBlock -= rounds * config.game.blocksPerRound
 
 	// start the chain sync
-	chainsync.start(gas, stakes, startBlock, endBlock)
+	chainsync.start(showGas, loadStakes, startBlock, endBlock)
 
 	// start the game
 	const game = SchellingGame.getInstance()
@@ -155,13 +155,13 @@ async function main() {
 		)
 		.addOption(
 			new Option(
-				'-g, --gas',
+				'    --showGas',
 				'Track gas statistics per block (chatty)'
 			).default(false)
 		)
 		.addOption(
 			new Option(
-				'-s, --stakes',
+				'    --loadStakes',
 				'Preload all stakes (takes a LONG time)'
 			).default(false)
 		)
