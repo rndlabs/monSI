@@ -118,7 +118,12 @@ export class ChainSync {
 		this._state = State.INIT
 	}
 
-	public async start(startFromBlock: number, endingBlock?: number) {
+	public async start(
+		showGas: boolean,
+		preloadStakes: boolean,
+		startFromBlock: number,
+		endingBlock?: number
+	) {
 		invariant(this._state === State.INIT, 'ChainSync must be initialized')
 
 		Logging.showLogError(`Starting ChainSync...`)
@@ -127,10 +132,15 @@ export class ChainSync {
 		this._state = State.WARMUP
 
 		// we are synced to the tip of the chain, activate the listeners
-		if (!endingBlock) this.setupEventListeners()
+		if (!endingBlock) this.setupEventListeners(showGas)
 
 		// sync the blockchain - effectively backfilling the game state
-		await this.syncBlockchain(startFromBlock, endingBlock)
+		await this.syncBlockchain(
+			showGas,
+			preloadStakes,
+			startFromBlock,
+			endingBlock
+		)
 
 		const stakeContract = await this.redistribution.Stakes()
 		if (stakeContract != config.contracts.stakeRegistry)
@@ -152,35 +162,19 @@ export class ChainSync {
 		this._state = State.RUNNING
 	}
 
-	private async syncBlockchain(startFromBlock: number, endingBlock?: number) {
+	private async syncBlockchain(
+		showGas: boolean,
+		preloadStakes: boolean,
+		startFromBlock: number,
+		endingBlock?: number
+	) {
 		startFromBlock =
 			Math.floor(startFromBlock / config.game.blocksPerRound) *
 			config.game.blocksPerRound
 
-		Logging.showLogError(
-			`Loading StakeRegistry logs from block ${config.contracts.stakeDeployBlock}`
-		)
-		const start = Date.now()
 		// 1. Process all `StakeUpdated` and `StakeSlashed` events as this determines who is in the game.
-		if (config.contracts.stakeDeployBlock > 0) {
-			// Skip this if we don't have a deploy block yet
-			const stakeLogs = await this.stakeRegistry.queryFilter(
-				{
-					topics: [
-						[
-							this.stakeRegistry.interface.getEventTopic('StakeUpdated'),
-							this.stakeRegistry.interface.getEventTopic('StakeSlashed'),
-						],
-					],
-				},
-				config.contracts.stakeDeployBlock
-			)
-			// now process the logs and add players to the game
-			await this.processStakeLog(stakeLogs)
-			const elapsed = Date.now() - start
-			Logging.showLogError(
-				`Loaded ${stakeLogs.length} StakeRegistry logs in ${elapsed / 1000}s`
-			)
+		if (preloadStakes && config.contracts.stakeDeployBlock > 0) {
+			this.preloadStakeLog()
 		}
 
 		// 2. Process all `commit`, `reveal`, and `claim` transactions to the Redistribution contract.
@@ -212,7 +206,7 @@ export class ChainSync {
 					'sync'
 				)
 
-			await this.blockHandler(block)
+			await this.blockHandler(showGas, block)
 
 			this.lastBlock = {
 				blockNo: block.number,
@@ -257,7 +251,7 @@ export class ChainSync {
 		// }
 	}
 
-	private setupEventListeners() {
+	private setupEventListeners(showGas: boolean) {
 		// setup the event listeners
 
 		// stake registry - only needed for new players / updated stakes
@@ -308,33 +302,35 @@ export class ChainSync {
 				await this.provider.send('eth_maxPriorityFeePerGas')
 			)
 
-			this.gasPriceMonitor.newSample(gasPrice)
+			if (showGas) {
+				this.gasPriceMonitor.newSample(gasPrice)
 
-			let priceText = `{left}${specificLocalTime(
-				block.timestamp * 1000
-			)} ${blockNumber} ${
-				this.gasPriceMonitor.lastPrice
-			} ${this.gasPriceMonitor.percentColor()}%`
-			priceText += ` ${Gas.gasPriceToString(gasPrice)} + ${Gas.gasPriceToString(
-				priorityFee
-			)}`
-			priceText += '{/left}'
-			const offsetLine = game.size + 1 // Keep room for the getRpcUrl
-			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
-				offsetLine,
-				`{center}${config.chain.name} getGasPrice{/center}`,
-				-1
-			)
-			Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
-				offsetLine + 1,
-				`{center}${this.gasPriceMonitor.history}{/center}`,
-				-1
-			)
-			Ui.getInstance().lineInserterCallback(BOXES.ALL_PLAYERS)(
-				offsetLine + 2,
-				priceText,
-				-1
-			)
+				let priceText = `{left}${specificLocalTime(
+					block.timestamp * 1000
+				)} ${blockNumber} ${
+					this.gasPriceMonitor.lastPrice
+				} ${this.gasPriceMonitor.percentColor()}%`
+				priceText += ` ${Gas.gasPriceToString(
+					gasPrice
+				)} + ${Gas.gasPriceToString(priorityFee)}`
+				priceText += '{/left}'
+				const offsetLine = game.size + 1 // Keep room for the getRpcUrl
+				Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
+					offsetLine,
+					`{center}${config.chain.name} getGasPrice{/center}`,
+					-1
+				)
+				Ui.getInstance().lineSetterCallback(BOXES.ALL_PLAYERS)(
+					offsetLine + 1,
+					`{center}${this.gasPriceMonitor.history}{/center}`,
+					-1
+				)
+				Ui.getInstance().lineInserterCallback(BOXES.ALL_PLAYERS)(
+					offsetLine + 2,
+					priceText,
+					-1
+				)
+			}
 
 			const dt = new Date(block.timestamp * 1000).toISOString()
 			const gas = `${Gas.gasUtilization(block)}% ${Gas.gasPriceToString(
@@ -359,7 +355,7 @@ export class ChainSync {
 					//Logging.showLog(`currentRoundAnchor: ${e}}`)
 					roundAnchor = undefined
 				}
-				await this.blockHandler(block, roundAnchor)
+				await this.blockHandler(showGas, block, roundAnchor)
 
 				this.lastBlock = {
 					blockNo: block.number,
@@ -382,6 +378,7 @@ export class ChainSync {
 	}
 
 	private async blockHandler(
+		showGas: boolean,
 		block: BlockWithTransactions,
 		roundAnchor?: string
 	) {
@@ -398,13 +395,14 @@ export class ChainSync {
 			`{center}${this.baseGasMonitor.history}{/center}`,
 			-1 // Don't timestamp this line
 		)
-		Ui.getInstance().lineInserterCallback(BOXES.BLOCKS)(
-			1,
-			`${block.number} ${deltaBlockTime} ${
-				this.baseGasMonitor.lastPrice
-			} ${this.baseGasMonitor.percentColor()}%`,
-			block.timestamp * 1000
-		)
+		if (showGas)
+			Ui.getInstance().lineInserterCallback(BOXES.BLOCKS)(
+				1,
+				`${block.number} ${deltaBlockTime} ${
+					this.baseGasMonitor.lastPrice
+				} ${this.baseGasMonitor.percentColor()}%`,
+				block.timestamp * 1000
+			)
 
 		const blockDetails: BlockDetails = {
 			blockNo: block.number,
@@ -589,8 +587,38 @@ export class ChainSync {
 		)
 	}
 
+	private async preloadStakeLog() {
+		Logging.showLogError(
+			`Loading StakeRegistry logs from block ${config.contracts.stakeDeployBlock}`
+		)
+		const start = Date.now()
+		const stakeLogs = await this.stakeRegistry.queryFilter(
+			{
+				topics: [
+					[
+						this.stakeRegistry.interface.getEventTopic('StakeUpdated'),
+						this.stakeRegistry.interface.getEventTopic('StakeSlashed'),
+					],
+				],
+			},
+			config.contracts.stakeDeployBlock
+		)
+		const elapsed = Date.now() - start
+		Logging.showLogError(
+			`Loaded ${stakeLogs.length} StakeRegistry logs in ${elapsed / 1000}s`
+		)
+		// now process the logs and add players to the game
+		const start2 = Date.now()
+		await this.processStakeLog(stakeLogs)
+		const elapsed2 = Date.now() - start2
+		Logging.showLogError(
+			`Processed ${stakeLogs.length} StakeRegistry logs in ${elapsed2 / 1000}s`
+		)
+	}
+
 	private async processStakeLog(logs: Log[]) {
 		// process the logs
+		Logging.showLogError(`Processing ${logs.length} StakeRegistry logs`)
 		for (let i = 0; i < logs.length; i++) {
 			const log = logs[i]
 
