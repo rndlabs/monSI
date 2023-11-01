@@ -19,6 +19,8 @@ interface CLIOptions {
 	block?: number
 	round?: number
 	singleRound?: number
+	showGas: boolean
+	loadStakes: boolean
 }
 
 /**
@@ -27,7 +29,16 @@ interface CLIOptions {
  * @param options CLI options
  */
 async function run(overlays: string[], options: CLIOptions) {
-	const { mainnet, rpcEndpoint, rounds, block, round, singleRound } = options
+	const {
+		mainnet,
+		rpcEndpoint,
+		rounds,
+		block,
+		round,
+		singleRound,
+		showGas,
+		loadStakes,
+	} = options
 
 	// Set the chain ID
 	config.setChainId(mainnet ? 100 : 5)
@@ -53,7 +64,7 @@ async function run(overlays: string[], options: CLIOptions) {
 	else if (rounds) startBlock -= rounds * config.game.blocksPerRound
 
 	// start the chain sync
-	chainsync.start(startBlock, endBlock)
+	chainsync.start(showGas, loadStakes, startBlock, endBlock)
 
 	// start the game
 	const game = SchellingGame.getInstance()
@@ -141,6 +152,18 @@ async function main() {
 			new Option('-S, --singleRound [round]', 'Load a single round and stop')
 				.conflicts(['rounds, round, block'])
 				.argParser(cliParseInt)
+		)
+		.addOption(
+			new Option(
+				'    --showGas',
+				'Track gas statistics per block (chatty)'
+			).default(false)
+		)
+		.addOption(
+			new Option(
+				'    --loadStakes',
+				'Preload all stakes (takes a LONG time)'
+			).default(false)
 		)
 		.action(run)
 

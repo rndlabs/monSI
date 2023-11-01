@@ -68,12 +68,13 @@ Arguments:
 Options:
   -V, --version              output the version number
   --mainnet                  Use Swarm mainnet (default: false)
-  --rpc-endpoint <string>    RPC endpoint for the blockchain node (default: "ws://goerli-geth.dappnode:8546", env:
-                             RPC_URL)
+  --rpc-endpoint <string>    RPC endpoint for the blockchain node (default: "ws://goerli-geth.dappnode:8546", env: RPC_URL)
   -r, --rounds [rounds]      Load the last number of rounds from the blockchain (default: 4)
   -b, --block [block]        Block number to start loading from
   -R, --round [round]        Round number to start loading from
   -S, --singleRound [round]  Load a single round and stop
+      --showGas              Track gas statistics per block (chatty) (default: false)
+      --loadStakes           Preload all stakes (takes a LONG time) (default: false)
   -h, --help                 display help for command
 ```
 
