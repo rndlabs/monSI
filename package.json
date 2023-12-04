@@ -15,6 +15,7 @@
 		"test": "echo \"Warning: no tests specified\" && exit 0",
 		"lint": "eslint . --ext .ts && prettier -c .",
 		"lint:fix": "eslint . --ext .ts --fix && prettier -w .",
+		"typechain": "typechain --show-stack-traces --target ethers-v5 --out-dir src/types/contracts \"./contracts/**/*.json\"",
 		"commit": "git-cz",
 		"changelog": "conventional-changelog -p angular -r 2 -i CHANGELOG.md -s"
 	},
