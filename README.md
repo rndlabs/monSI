@@ -102,7 +102,7 @@ This package is written as an ES6 module and `typechain` to generate ethers bind
 Steps:
 
 1. If contract ABI is modified, remove all previously generated bindings in `src/types/contracts`.
-2. Generate the bindings using: `npm run typechain --target ethers-v5 --out-dir src/types/contracts "./contracts/**/*.json"`
+2. Generate the bindings using: `npx typechain --target ethers-v5 --out-dir src/types/contracts "./contracts/**/*.json"`
 3. Manually edit the generated bindings to ensure that all import paths include the `.js` suffix, or when importing a directory, they import the `index.js` within that directory.
 
 ## Acknowledgements

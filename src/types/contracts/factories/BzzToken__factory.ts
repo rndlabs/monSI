@@ -4,7 +4,7 @@
 
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
-import type { BzzToken, BzzTokenInterface } from "../BzzToken.js";
+import type { BzzToken, BzzTokenInterface } from "../BzzToken";
 
 const _abi = [
   {
