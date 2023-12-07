@@ -96,13 +96,13 @@ export const chainConfig: Configs = {
 			),
 			stakeDeployBlock: 25527075,
 			postageStamp: utils.getAddress(
-				'0x30d155478eF27Ab32A1D578BE7b84BC5988aF381'
+				'0x45a1502382541Cd610CC9068e88727426b696293'
 			),
 			priceOracle: utils.getAddress(
 				'0x344A2CC7304B32A87EfDC5407cD4bEC7cf98F035'
 			),
 			redistribution: utils.getAddress(
-				'0x1F9a1FDe5c6350E949C5E4aa163B4c97011199B4'
+				'0x0964c834C660C44E0afd3B7F10F19f275ee31411'
 			),
 		},
 	},
