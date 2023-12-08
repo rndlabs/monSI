@@ -4,7 +4,7 @@
 
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
-import type { StakeRegistry, StakeRegistryInterface } from "../StakeRegistry.js";
+import type { StakeRegistry, StakeRegistryInterface } from "../StakeRegistry";
 
 const _abi = [
   {
