@@ -33,6 +33,7 @@ export interface StakeRegistryInterface extends utils.Interface {
     "PAUSER_ROLE()": FunctionFragment;
     "REDISTRIBUTOR_ROLE()": FunctionFragment;
     "bzzToken()": FunctionFragment;
+    "changeNetworkId(uint64)": FunctionFragment;
     "depositStake(address,bytes32,uint256)": FunctionFragment;
     "freezeDeposit(bytes32,uint256)": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
@@ -59,6 +60,7 @@ export interface StakeRegistryInterface extends utils.Interface {
       | "PAUSER_ROLE"
       | "REDISTRIBUTOR_ROLE"
       | "bzzToken"
+      | "changeNetworkId"
       | "depositStake"
       | "freezeDeposit"
       | "getRoleAdmin"
@@ -92,6 +94,10 @@ export interface StakeRegistryInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "bzzToken", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "changeNetworkId",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
   encodeFunctionData(
     functionFragment: "depositStake",
     values: [
@@ -173,6 +179,10 @@ export interface StakeRegistryInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "bzzToken", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "changeNetworkId",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "depositStake",
     data: BytesLike
@@ -367,6 +377,11 @@ export interface StakeRegistry extends BaseContract {
 
     bzzToken(overrides?: CallOverrides): Promise<[string]>;
 
+    changeNetworkId(
+      _NetworkId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     depositStake(
       _owner: PromiseOrValue<string>,
       nonce: PromiseOrValue<BytesLike>,
@@ -478,6 +493,11 @@ export interface StakeRegistry extends BaseContract {
 
   bzzToken(overrides?: CallOverrides): Promise<string>;
 
+  changeNetworkId(
+    _NetworkId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   depositStake(
     _owner: PromiseOrValue<string>,
     nonce: PromiseOrValue<BytesLike>,
@@ -588,6 +608,11 @@ export interface StakeRegistry extends BaseContract {
     REDISTRIBUTOR_ROLE(overrides?: CallOverrides): Promise<string>;
 
     bzzToken(overrides?: CallOverrides): Promise<string>;
+
+    changeNetworkId(
+      _NetworkId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     depositStake(
       _owner: PromiseOrValue<string>,
@@ -763,6 +788,11 @@ export interface StakeRegistry extends BaseContract {
 
     bzzToken(overrides?: CallOverrides): Promise<BigNumber>;
 
+    changeNetworkId(
+      _NetworkId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     depositStake(
       _owner: PromiseOrValue<string>,
       nonce: PromiseOrValue<BytesLike>,
@@ -870,6 +900,11 @@ export interface StakeRegistry extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     bzzToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    changeNetworkId(
+      _NetworkId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     depositStake(
       _owner: PromiseOrValue<string>,

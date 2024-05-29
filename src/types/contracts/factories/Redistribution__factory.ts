@@ -1426,6 +1426,11 @@ const _abi = [
         name: "_penaltyMultiplierNonRevealed",
         type: "uint8",
       },
+      {
+        internalType: "uint8",
+        name: "_penaltyRandomFactor",
+        type: "uint8",
+      },
     ],
     name: "setFreezingParams",
     outputs: [],

@@ -248,6 +248,19 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "uint64",
+        name: "_NetworkId",
+        type: "uint64",
+      },
+    ],
+    name: "changeNetworkId",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "_owner",
         type: "address",

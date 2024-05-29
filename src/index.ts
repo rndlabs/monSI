@@ -41,7 +41,7 @@ async function run(overlays: string[], options: CLIOptions) {
 	} = options
 
 	// Set the chain ID
-	config.setChainId(mainnet ? 100 : 5)
+	config.setChainId(mainnet ? 100 : 11155111)
 
 	const chainsync = ChainSync.getInstance()
 

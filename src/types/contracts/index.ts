@@ -2,11 +2,13 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { BzzToken } from "./BzzToken";
+export type { Postage } from "./Postage";
 export type { PostageStamp } from "./PostageStamp";
 export type { Redistribution } from "./Redistribution";
 export type { StakeRegistry } from "./StakeRegistry";
 export * as factories from "./factories";
 export { BzzToken__factory } from "./factories/BzzToken__factory";
+export { Postage__factory } from "./factories/Postage__factory";
 export { PostageStamp__factory } from "./factories/PostageStamp__factory";
 export { Redistribution__factory } from "./factories/Redistribution__factory";
 export { StakeRegistry__factory } from "./factories/StakeRegistry__factory";

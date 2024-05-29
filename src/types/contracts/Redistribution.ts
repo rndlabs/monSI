@@ -151,7 +151,7 @@ export interface RedistributionInterface extends utils.Interface {
     "renounceRole(bytes32,address)": FunctionFragment;
     "reveal(bytes32,uint8,bytes32,bytes32)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
-    "setFreezingParams(uint8,uint8)": FunctionFragment;
+    "setFreezingParams(uint8,uint8,uint8)": FunctionFragment;
     "setSampleMaxValue(uint256)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "unPause()": FunctionFragment;
@@ -331,7 +331,11 @@ export interface RedistributionInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "setFreezingParams",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "setSampleMaxValue",
@@ -813,6 +817,7 @@ export interface Redistribution extends BaseContract {
     setFreezingParams(
       _penaltyMultiplierDisagreement: PromiseOrValue<BigNumberish>,
       _penaltyMultiplierNonRevealed: PromiseOrValue<BigNumberish>,
+      _penaltyRandomFactor: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -992,6 +997,7 @@ export interface Redistribution extends BaseContract {
   setFreezingParams(
     _penaltyMultiplierDisagreement: PromiseOrValue<BigNumberish>,
     _penaltyMultiplierNonRevealed: PromiseOrValue<BigNumberish>,
+    _penaltyRandomFactor: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -1169,6 +1175,7 @@ export interface Redistribution extends BaseContract {
     setFreezingParams(
       _penaltyMultiplierDisagreement: PromiseOrValue<BigNumberish>,
       _penaltyMultiplierNonRevealed: PromiseOrValue<BigNumberish>,
+      _penaltyRandomFactor: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1427,6 +1434,7 @@ export interface Redistribution extends BaseContract {
     setFreezingParams(
       _penaltyMultiplierDisagreement: PromiseOrValue<BigNumberish>,
       _penaltyMultiplierNonRevealed: PromiseOrValue<BigNumberish>,
+      _penaltyRandomFactor: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1592,6 +1600,7 @@ export interface Redistribution extends BaseContract {
     setFreezingParams(
       _penaltyMultiplierDisagreement: PromiseOrValue<BigNumberish>,
       _penaltyMultiplierNonRevealed: PromiseOrValue<BigNumberish>,
+      _penaltyRandomFactor: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

@@ -72,6 +72,43 @@ export const chainConfig: Configs = {
 			),
 		},
 	},
+	'11155111': {
+		// Sepolia Testnet
+		chain: {
+			name: 'sepolia',
+			secondsPerBlock: 12,
+		},
+		units: {
+			BZZ: 'sBZZ',
+			ETH: 'sETH',
+		},
+		game: {
+			blocksPerRound: 152,
+			commitPhaseBlocks: 152 / 4,
+			revealPhaseBlocks: 152 / 4,
+		},
+		contracts: {
+			bzzToken: utils.getAddress('0x543dDb01Ba47acB11de34891cD86B675F04840db'),
+
+			// for deployment addresses, see https://github.com/ethersphere/go-storage-incentives-abi/blob/master/abi/abi_testnet.go
+			stakeRegistry: utils.getAddress(
+				'0x41379955a216968996D10614B74b31AA48a0624A'
+			),
+			stakeDeployBlock: 4660478,
+
+			postageStamp: utils.getAddress(
+				'0x794532C50c6EfA070Cd206b82178E98433046996'
+			),
+
+			priceOracle: utils.getAddress(
+				'0x201dcde5c2D14CE03Fa74b0158488122FcA673B8'
+			),
+
+			redistribution: utils.getAddress(
+				'0xd4621827301E26645Ae3887f7172d6a372782F69'
+			),
+		},
+	},
 	'100': {
 		// gnosis mainnet
 		chain: {
@@ -99,10 +136,10 @@ export const chainConfig: Configs = {
 				'0x45a1502382541Cd610CC9068e88727426b696293'
 			),
 			priceOracle: utils.getAddress(
-				'0x344A2CC7304B32A87EfDC5407cD4bEC7cf98F035'
+				'0x86DE783Bf23Bc13DaeF5A55ec531C198da8f10cF'
 			),
 			redistribution: utils.getAddress(
-				'0x0964c834C660C44E0afd3B7F10F19f275ee31411'
+				'0xD9dFE7b0ddc7CcA41304FE9507ed823faD3bdBab'
 			),
 		},
 	},

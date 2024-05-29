@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export { BzzToken__factory } from "./BzzToken__factory";
+export { Postage__factory } from "./Postage__factory";
 export { PostageStamp__factory } from "./PostageStamp__factory";
 export { Redistribution__factory } from "./Redistribution__factory";
 export { StakeRegistry__factory } from "./StakeRegistry__factory";
