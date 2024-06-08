@@ -4,7 +4,7 @@
 
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
-import type { StakeRegistry, StakeRegistryInterface } from "../StakeRegistry.js";
+import type { StakeRegistry, StakeRegistryInterface } from "../StakeRegistry";
 
 const _abi = [
   {
@@ -243,6 +243,19 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint64",
+        name: "_NetworkId",
+        type: "uint64",
+      },
+    ],
+    name: "changeNetworkId",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

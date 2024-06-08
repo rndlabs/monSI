@@ -7,7 +7,7 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   Redistribution,
   RedistributionInterface,
-} from "../Redistribution.js";
+} from "../Redistribution";
 
 const _abi = [
   {
@@ -30,6 +30,249 @@ const _abi = [
     ],
     stateMutability: "nonpayable",
     type: "constructor",
+  },
+  {
+    inputs: [],
+    name: "AlreadyClaimed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "AlreadyCommited",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "AlreadyRevealed",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    name: "BatchDoesNotExist",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "BelowMinimumStake",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    name: "BucketDiffers",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "CommitRoundNotStarted",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "CommitRoundOver",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "FirstRevealDone",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint8",
+        name: "",
+        type: "uint8",
+      },
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    name: "InclusionProofFailed",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    name: "IndexOutsideSet",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InvalidSignatureLength",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "LastElementCheckFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "MustStake2Rounds",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NoCommitsReceived",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NoMatchingCommit",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NoReveals",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NotAdmin",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NotClaimPhase",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NotCommitPhase",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NotMatchingOwner",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NotRevealPhase",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "OnlyPauser",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "OutOfDepth",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint8",
+        name: "",
+        type: "uint8",
+      },
+    ],
+    name: "OutOfDepthClaim",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    name: "OutOfDepthReveal",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "PhaseLastBlock",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "RandomElementCheckFailed",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "trALast",
+        type: "bytes32",
+      },
+    ],
+    name: "ReserveCheckFailed",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    name: "SigRecoveryFailed",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    name: "SocCalcNotMatching",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    name: "SocVerificationFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "WrongPhase",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "validChunkCount",
+        type: "uint256",
+      },
+    ],
+    name: "ChunkCount",
+    type: "event",
   },
   {
     anonymous: false,
@@ -74,6 +317,25 @@ const _abi = [
       },
     ],
     name: "CountReveals",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "roundNumber",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "anchor",
+        type: "bytes32",
+      },
+    ],
+    name: "CurrentRevealAnchor",
     type: "event",
   },
   {
@@ -245,14 +507,19 @@ const _abi = [
       {
         components: [
           {
+            internalType: "bytes32",
+            name: "overlay",
+            type: "bytes32",
+          },
+          {
             internalType: "address",
             name: "owner",
             type: "address",
           },
           {
-            internalType: "bytes32",
-            name: "overlay",
-            type: "bytes32",
+            internalType: "uint8",
+            name: "depth",
+            type: "uint8",
           },
           {
             internalType: "uint256",
@@ -269,11 +536,6 @@ const _abi = [
             name: "hash",
             type: "bytes32",
           },
-          {
-            internalType: "uint8",
-            name: "depth",
-            type: "uint8",
-          },
         ],
         indexed: false,
         internalType: "struct Redistribution.Reveal",
@@ -282,6 +544,25 @@ const _abi = [
       },
     ],
     name: "WinnerSelected",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "indexInRC",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "chunkAddress",
+        type: "bytes32",
+      },
+    ],
+    name: "transformedChunkAddressFromInclusionProof",
     type: "event",
   },
   {
@@ -302,22 +583,9 @@ const _abi = [
     name: "OracleContract",
     outputs: [
       {
-        internalType: "contract PriceOracle",
+        internalType: "contract IPriceOracle",
         name: "",
         type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "PAUSER_ROLE",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
       },
     ],
     stateMutability: "view",
@@ -328,7 +596,7 @@ const _abi = [
     name: "PostageContract",
     outputs: [
       {
-        internalType: "contract PostageStamp",
+        internalType: "contract IPostageStamp",
         name: "",
         type: "address",
       },
@@ -341,7 +609,7 @@ const _abi = [
     name: "Stakes",
     outputs: [
       {
-        internalType: "contract StakeRegistry",
+        internalType: "contract IStakeRegistry",
         name: "",
         type: "address",
       },
@@ -350,7 +618,281 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "bytes32[]",
+            name: "proofSegments",
+            type: "bytes32[]",
+          },
+          {
+            internalType: "bytes32",
+            name: "proveSegment",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32[]",
+            name: "proofSegments2",
+            type: "bytes32[]",
+          },
+          {
+            internalType: "bytes32",
+            name: "proveSegment2",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint64",
+            name: "chunkSpan",
+            type: "uint64",
+          },
+          {
+            internalType: "bytes32[]",
+            name: "proofSegments3",
+            type: "bytes32[]",
+          },
+          {
+            components: [
+              {
+                internalType: "bytes",
+                name: "signature",
+                type: "bytes",
+              },
+              {
+                internalType: "bytes32",
+                name: "postageId",
+                type: "bytes32",
+              },
+              {
+                internalType: "uint64",
+                name: "index",
+                type: "uint64",
+              },
+              {
+                internalType: "uint64",
+                name: "timeStamp",
+                type: "uint64",
+              },
+            ],
+            internalType: "struct Redistribution.PostageProof",
+            name: "postageProof",
+            type: "tuple",
+          },
+          {
+            components: [
+              {
+                internalType: "address",
+                name: "signer",
+                type: "address",
+              },
+              {
+                internalType: "bytes",
+                name: "signature",
+                type: "bytes",
+              },
+              {
+                internalType: "bytes32",
+                name: "identifier",
+                type: "bytes32",
+              },
+              {
+                internalType: "bytes32",
+                name: "chunkAddr",
+                type: "bytes32",
+              },
+            ],
+            internalType: "struct Redistribution.SOCProof[]",
+            name: "socProof",
+            type: "tuple[]",
+          },
+        ],
+        internalType: "struct Redistribution.ChunkInclusionProof",
+        name: "entryProof1",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "bytes32[]",
+            name: "proofSegments",
+            type: "bytes32[]",
+          },
+          {
+            internalType: "bytes32",
+            name: "proveSegment",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32[]",
+            name: "proofSegments2",
+            type: "bytes32[]",
+          },
+          {
+            internalType: "bytes32",
+            name: "proveSegment2",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint64",
+            name: "chunkSpan",
+            type: "uint64",
+          },
+          {
+            internalType: "bytes32[]",
+            name: "proofSegments3",
+            type: "bytes32[]",
+          },
+          {
+            components: [
+              {
+                internalType: "bytes",
+                name: "signature",
+                type: "bytes",
+              },
+              {
+                internalType: "bytes32",
+                name: "postageId",
+                type: "bytes32",
+              },
+              {
+                internalType: "uint64",
+                name: "index",
+                type: "uint64",
+              },
+              {
+                internalType: "uint64",
+                name: "timeStamp",
+                type: "uint64",
+              },
+            ],
+            internalType: "struct Redistribution.PostageProof",
+            name: "postageProof",
+            type: "tuple",
+          },
+          {
+            components: [
+              {
+                internalType: "address",
+                name: "signer",
+                type: "address",
+              },
+              {
+                internalType: "bytes",
+                name: "signature",
+                type: "bytes",
+              },
+              {
+                internalType: "bytes32",
+                name: "identifier",
+                type: "bytes32",
+              },
+              {
+                internalType: "bytes32",
+                name: "chunkAddr",
+                type: "bytes32",
+              },
+            ],
+            internalType: "struct Redistribution.SOCProof[]",
+            name: "socProof",
+            type: "tuple[]",
+          },
+        ],
+        internalType: "struct Redistribution.ChunkInclusionProof",
+        name: "entryProof2",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "bytes32[]",
+            name: "proofSegments",
+            type: "bytes32[]",
+          },
+          {
+            internalType: "bytes32",
+            name: "proveSegment",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32[]",
+            name: "proofSegments2",
+            type: "bytes32[]",
+          },
+          {
+            internalType: "bytes32",
+            name: "proveSegment2",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint64",
+            name: "chunkSpan",
+            type: "uint64",
+          },
+          {
+            internalType: "bytes32[]",
+            name: "proofSegments3",
+            type: "bytes32[]",
+          },
+          {
+            components: [
+              {
+                internalType: "bytes",
+                name: "signature",
+                type: "bytes",
+              },
+              {
+                internalType: "bytes32",
+                name: "postageId",
+                type: "bytes32",
+              },
+              {
+                internalType: "uint64",
+                name: "index",
+                type: "uint64",
+              },
+              {
+                internalType: "uint64",
+                name: "timeStamp",
+                type: "uint64",
+              },
+            ],
+            internalType: "struct Redistribution.PostageProof",
+            name: "postageProof",
+            type: "tuple",
+          },
+          {
+            components: [
+              {
+                internalType: "address",
+                name: "signer",
+                type: "address",
+              },
+              {
+                internalType: "bytes",
+                name: "signature",
+                type: "bytes",
+              },
+              {
+                internalType: "bytes32",
+                name: "identifier",
+                type: "bytes32",
+              },
+              {
+                internalType: "bytes32",
+                name: "chunkAddr",
+                type: "bytes32",
+              },
+            ],
+            internalType: "struct Redistribution.SOCProof[]",
+            name: "socProof",
+            type: "tuple[]",
+          },
+        ],
+        internalType: "struct Redistribution.ChunkInclusionProof",
+        name: "entryProofLast",
+        type: "tuple",
+      },
+    ],
     name: "claim",
     outputs: [],
     stateMutability: "nonpayable",
@@ -369,9 +911,9 @@ const _abi = [
         type: "bytes32",
       },
       {
-        internalType: "uint256",
+        internalType: "uint64",
         name: "_roundNumber",
-        type: "uint256",
+        type: "uint64",
       },
     ],
     name: "commit",
@@ -384,9 +926,9 @@ const _abi = [
     name: "currentClaimRound",
     outputs: [
       {
-        internalType: "uint256",
+        internalType: "uint64",
         name: "",
-        type: "uint256",
+        type: "uint64",
       },
     ],
     stateMutability: "view",
@@ -397,9 +939,9 @@ const _abi = [
     name: "currentCommitRound",
     outputs: [
       {
-        internalType: "uint256",
+        internalType: "uint64",
         name: "",
-        type: "uint256",
+        type: "uint64",
       },
     ],
     stateMutability: "view",
@@ -426,6 +968,11 @@ const _abi = [
         type: "address",
       },
       {
+        internalType: "bool",
+        name: "revealed",
+        type: "bool",
+      },
+      {
         internalType: "uint256",
         name: "stake",
         type: "uint256",
@@ -436,14 +983,22 @@ const _abi = [
         type: "bytes32",
       },
       {
-        internalType: "bool",
-        name: "revealed",
-        type: "bool",
-      },
-      {
         internalType: "uint256",
         name: "revealIndex",
         type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "currentMinimumDepth",
+    outputs: [
+      {
+        internalType: "uint8",
+        name: "",
+        type: "uint8",
       },
     ],
     stateMutability: "view",
@@ -493,9 +1048,9 @@ const _abi = [
     name: "currentRevealRound",
     outputs: [
       {
-        internalType: "uint256",
+        internalType: "uint64",
         name: "",
-        type: "uint256",
+        type: "uint64",
       },
     ],
     stateMutability: "view",
@@ -512,14 +1067,19 @@ const _abi = [
     name: "currentReveals",
     outputs: [
       {
+        internalType: "bytes32",
+        name: "overlay",
+        type: "bytes32",
+      },
+      {
         internalType: "address",
         name: "owner",
         type: "address",
       },
       {
-        internalType: "bytes32",
-        name: "overlay",
-        type: "bytes32",
+        internalType: "uint8",
+        name: "depth",
+        type: "uint8",
       },
       {
         internalType: "uint256",
@@ -536,11 +1096,6 @@ const _abi = [
         name: "hash",
         type: "bytes32",
       },
-      {
-        internalType: "uint8",
-        name: "depth",
-        type: "uint8",
-      },
     ],
     stateMutability: "view",
     type: "function",
@@ -550,9 +1105,9 @@ const _abi = [
     name: "currentRound",
     outputs: [
       {
-        internalType: "uint256",
+        internalType: "uint64",
         name: "",
-        type: "uint256",
+        type: "uint64",
       },
     ],
     stateMutability: "view",
@@ -578,14 +1133,19 @@ const _abi = [
       {
         components: [
           {
+            internalType: "bytes32",
+            name: "overlay",
+            type: "bytes32",
+          },
+          {
             internalType: "address",
             name: "owner",
             type: "address",
           },
           {
-            internalType: "bytes32",
-            name: "overlay",
-            type: "bytes32",
+            internalType: "uint8",
+            name: "depth",
+            type: "uint8",
           },
           {
             internalType: "uint256",
@@ -601,11 +1161,6 @@ const _abi = [
             internalType: "bytes32",
             name: "hash",
             type: "bytes32",
-          },
-          {
-            internalType: "uint8",
-            name: "depth",
-            type: "uint8",
           },
         ],
         internalType: "struct Redistribution.Reveal[]",
@@ -764,19 +1319,6 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "minimumStake",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
     name: "nextSeed",
     outputs: [
       {
@@ -803,32 +1345,6 @@ const _abi = [
         internalType: "bool",
         name: "",
         type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "penaltyMultiplierDisagreement",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "penaltyMultiplierNonRevealed",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -899,16 +1415,39 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "roundLength",
-    outputs: [
+    inputs: [
+      {
+        internalType: "uint8",
+        name: "_penaltyMultiplierDisagreement",
+        type: "uint8",
+      },
+      {
+        internalType: "uint8",
+        name: "_penaltyMultiplierNonRevealed",
+        type: "uint8",
+      },
+      {
+        internalType: "uint8",
+        name: "_penaltyRandomFactor",
+        type: "uint8",
+      },
+    ],
+    name: "setFreezingParams",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
       {
         internalType: "uint256",
-        name: "",
+        name: "_sampleMaxValue",
         type: "uint256",
       },
     ],
-    stateMutability: "view",
+    name: "setSampleMaxValue",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -942,14 +1481,19 @@ const _abi = [
     name: "winner",
     outputs: [
       {
+        internalType: "bytes32",
+        name: "overlay",
+        type: "bytes32",
+      },
+      {
         internalType: "address",
         name: "owner",
         type: "address",
       },
       {
-        internalType: "bytes32",
-        name: "overlay",
-        type: "bytes32",
+        internalType: "uint8",
+        name: "depth",
+        type: "uint8",
       },
       {
         internalType: "uint256",
@@ -965,11 +1509,6 @@ const _abi = [
         internalType: "bytes32",
         name: "hash",
         type: "bytes32",
-      },
-      {
-        internalType: "uint8",
-        name: "depth",
-        type: "uint8",
       },
     ],
     stateMutability: "view",

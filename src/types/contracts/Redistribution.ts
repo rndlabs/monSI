@@ -25,32 +25,96 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "./common.js";
+} from "./common";
 
 export declare namespace Redistribution {
   export type RevealStruct = {
-    owner: PromiseOrValue<string>;
     overlay: PromiseOrValue<BytesLike>;
+    owner: PromiseOrValue<string>;
+    depth: PromiseOrValue<BigNumberish>;
     stake: PromiseOrValue<BigNumberish>;
     stakeDensity: PromiseOrValue<BigNumberish>;
     hash: PromiseOrValue<BytesLike>;
-    depth: PromiseOrValue<BigNumberish>;
   };
 
   export type RevealStructOutput = [
     string,
     string,
+    number,
     BigNumber,
     BigNumber,
-    string,
-    number
+    string
   ] & {
-    owner: string;
     overlay: string;
+    owner: string;
+    depth: number;
     stake: BigNumber;
     stakeDensity: BigNumber;
     hash: string;
-    depth: number;
+  };
+
+  export type PostageProofStruct = {
+    signature: PromiseOrValue<BytesLike>;
+    postageId: PromiseOrValue<BytesLike>;
+    index: PromiseOrValue<BigNumberish>;
+    timeStamp: PromiseOrValue<BigNumberish>;
+  };
+
+  export type PostageProofStructOutput = [
+    string,
+    string,
+    BigNumber,
+    BigNumber
+  ] & {
+    signature: string;
+    postageId: string;
+    index: BigNumber;
+    timeStamp: BigNumber;
+  };
+
+  export type SOCProofStruct = {
+    signer: PromiseOrValue<string>;
+    signature: PromiseOrValue<BytesLike>;
+    identifier: PromiseOrValue<BytesLike>;
+    chunkAddr: PromiseOrValue<BytesLike>;
+  };
+
+  export type SOCProofStructOutput = [string, string, string, string] & {
+    signer: string;
+    signature: string;
+    identifier: string;
+    chunkAddr: string;
+  };
+
+  export type ChunkInclusionProofStruct = {
+    proofSegments: PromiseOrValue<BytesLike>[];
+    proveSegment: PromiseOrValue<BytesLike>;
+    proofSegments2: PromiseOrValue<BytesLike>[];
+    proveSegment2: PromiseOrValue<BytesLike>;
+    chunkSpan: PromiseOrValue<BigNumberish>;
+    proofSegments3: PromiseOrValue<BytesLike>[];
+    postageProof: Redistribution.PostageProofStruct;
+    socProof: Redistribution.SOCProofStruct[];
+  };
+
+  export type ChunkInclusionProofStructOutput = [
+    string[],
+    string,
+    string[],
+    string,
+    BigNumber,
+    string[],
+    Redistribution.PostageProofStructOutput,
+    Redistribution.SOCProofStructOutput[]
+  ] & {
+    proofSegments: string[];
+    proveSegment: string;
+    proofSegments2: string[];
+    proveSegment2: string;
+    chunkSpan: BigNumber;
+    proofSegments3: string[];
+    postageProof: Redistribution.PostageProofStructOutput;
+    socProof: Redistribution.SOCProofStructOutput[];
   };
 }
 
@@ -58,14 +122,14 @@ export interface RedistributionInterface extends utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
     "OracleContract()": FunctionFragment;
-    "PAUSER_ROLE()": FunctionFragment;
     "PostageContract()": FunctionFragment;
     "Stakes()": FunctionFragment;
-    "claim()": FunctionFragment;
-    "commit(bytes32,bytes32,uint256)": FunctionFragment;
+    "claim((bytes32[],bytes32,bytes32[],bytes32,uint64,bytes32[],(bytes,bytes32,uint64,uint64),(address,bytes,bytes32,bytes32)[]),(bytes32[],bytes32,bytes32[],bytes32,uint64,bytes32[],(bytes,bytes32,uint64,uint64),(address,bytes,bytes32,bytes32)[]),(bytes32[],bytes32,bytes32[],bytes32,uint64,bytes32[],(bytes,bytes32,uint64,uint64),(address,bytes,bytes32,bytes32)[]))": FunctionFragment;
+    "commit(bytes32,bytes32,uint64)": FunctionFragment;
     "currentClaimRound()": FunctionFragment;
     "currentCommitRound()": FunctionFragment;
     "currentCommits(uint256)": FunctionFragment;
+    "currentMinimumDepth()": FunctionFragment;
     "currentPhaseClaim()": FunctionFragment;
     "currentPhaseCommit()": FunctionFragment;
     "currentPhaseReveal()": FunctionFragment;
@@ -81,16 +145,14 @@ export interface RedistributionInterface extends utils.Interface {
     "inProximity(bytes32,bytes32,uint8)": FunctionFragment;
     "isParticipatingInUpcomingRound(bytes32,uint8)": FunctionFragment;
     "isWinner(bytes32)": FunctionFragment;
-    "minimumStake()": FunctionFragment;
     "nextSeed()": FunctionFragment;
     "pause()": FunctionFragment;
     "paused()": FunctionFragment;
-    "penaltyMultiplierDisagreement()": FunctionFragment;
-    "penaltyMultiplierNonRevealed()": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
     "reveal(bytes32,uint8,bytes32,bytes32)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
-    "roundLength()": FunctionFragment;
+    "setFreezingParams(uint8,uint8,uint8)": FunctionFragment;
+    "setSampleMaxValue(uint256)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "unPause()": FunctionFragment;
     "winner()": FunctionFragment;
@@ -101,7 +163,6 @@ export interface RedistributionInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "DEFAULT_ADMIN_ROLE"
       | "OracleContract"
-      | "PAUSER_ROLE"
       | "PostageContract"
       | "Stakes"
       | "claim"
@@ -109,6 +170,7 @@ export interface RedistributionInterface extends utils.Interface {
       | "currentClaimRound"
       | "currentCommitRound"
       | "currentCommits"
+      | "currentMinimumDepth"
       | "currentPhaseClaim"
       | "currentPhaseCommit"
       | "currentPhaseReveal"
@@ -124,16 +186,14 @@ export interface RedistributionInterface extends utils.Interface {
       | "inProximity"
       | "isParticipatingInUpcomingRound"
       | "isWinner"
-      | "minimumStake"
       | "nextSeed"
       | "pause"
       | "paused"
-      | "penaltyMultiplierDisagreement"
-      | "penaltyMultiplierNonRevealed"
       | "renounceRole"
       | "reveal"
       | "revokeRole"
-      | "roundLength"
+      | "setFreezingParams"
+      | "setSampleMaxValue"
       | "supportsInterface"
       | "unPause"
       | "winner"
@@ -149,15 +209,18 @@ export interface RedistributionInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "PAUSER_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "PostageContract",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "Stakes", values?: undefined): string;
-  encodeFunctionData(functionFragment: "claim", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "claim",
+    values: [
+      Redistribution.ChunkInclusionProofStruct,
+      Redistribution.ChunkInclusionProofStruct,
+      Redistribution.ChunkInclusionProofStruct
+    ]
+  ): string;
   encodeFunctionData(
     functionFragment: "commit",
     values: [
@@ -177,6 +240,10 @@ export interface RedistributionInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "currentCommits",
     values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "currentMinimumDepth",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "currentPhaseClaim",
@@ -242,21 +309,9 @@ export interface RedistributionInterface extends utils.Interface {
     functionFragment: "isWinner",
     values: [PromiseOrValue<BytesLike>]
   ): string;
-  encodeFunctionData(
-    functionFragment: "minimumStake",
-    values?: undefined
-  ): string;
   encodeFunctionData(functionFragment: "nextSeed", values?: undefined): string;
   encodeFunctionData(functionFragment: "pause", values?: undefined): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "penaltyMultiplierDisagreement",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "penaltyMultiplierNonRevealed",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "renounceRole",
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
@@ -275,8 +330,16 @@ export interface RedistributionInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "roundLength",
-    values?: undefined
+    functionFragment: "setFreezingParams",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setSampleMaxValue",
+    values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
@@ -303,10 +366,6 @@ export interface RedistributionInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "PAUSER_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "PostageContract",
     data: BytesLike
   ): Result;
@@ -323,6 +382,10 @@ export interface RedistributionInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "currentCommits",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "currentMinimumDepth",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -376,21 +439,9 @@ export interface RedistributionInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "isWinner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "minimumStake",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "nextSeed", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "pause", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "penaltyMultiplierDisagreement",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "penaltyMultiplierNonRevealed",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "renounceRole",
     data: BytesLike
@@ -398,7 +449,11 @@ export interface RedistributionInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "reveal", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "roundLength",
+    functionFragment: "setFreezingParams",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setSampleMaxValue",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -410,9 +465,11 @@ export interface RedistributionInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "wrapCommit", data: BytesLike): Result;
 
   events: {
+    "ChunkCount(uint256)": EventFragment;
     "Committed(uint256,bytes32)": EventFragment;
     "CountCommits(uint256)": EventFragment;
     "CountReveals(uint256)": EventFragment;
+    "CurrentRevealAnchor(uint256,bytes32)": EventFragment;
     "Paused(address)": EventFragment;
     "Revealed(uint256,bytes32,uint256,uint256,bytes32,uint8)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
@@ -421,11 +478,14 @@ export interface RedistributionInterface extends utils.Interface {
     "TruthSelected(bytes32,uint8)": EventFragment;
     "Unpaused(address)": EventFragment;
     "WinnerSelected(tuple)": EventFragment;
+    "transformedChunkAddressFromInclusionProof(uint256,bytes32)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "ChunkCount"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Committed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "CountCommits"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "CountReveals"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "CurrentRevealAnchor"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Revealed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
@@ -434,7 +494,17 @@ export interface RedistributionInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "TruthSelected"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WinnerSelected"): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "transformedChunkAddressFromInclusionProof"
+  ): EventFragment;
 }
+
+export interface ChunkCountEventObject {
+  validChunkCount: BigNumber;
+}
+export type ChunkCountEvent = TypedEvent<[BigNumber], ChunkCountEventObject>;
+
+export type ChunkCountEventFilter = TypedEventFilter<ChunkCountEvent>;
 
 export interface CommittedEventObject {
   roundNumber: BigNumber;
@@ -466,6 +536,18 @@ export type CountRevealsEvent = TypedEvent<
 >;
 
 export type CountRevealsEventFilter = TypedEventFilter<CountRevealsEvent>;
+
+export interface CurrentRevealAnchorEventObject {
+  roundNumber: BigNumber;
+  anchor: string;
+}
+export type CurrentRevealAnchorEvent = TypedEvent<
+  [BigNumber, string],
+  CurrentRevealAnchorEventObject
+>;
+
+export type CurrentRevealAnchorEventFilter =
+  TypedEventFilter<CurrentRevealAnchorEvent>;
 
 export interface PausedEventObject {
   account: string;
@@ -554,6 +636,18 @@ export type WinnerSelectedEvent = TypedEvent<
 
 export type WinnerSelectedEventFilter = TypedEventFilter<WinnerSelectedEvent>;
 
+export interface transformedChunkAddressFromInclusionProofEventObject {
+  indexInRC: BigNumber;
+  chunkAddress: string;
+}
+export type transformedChunkAddressFromInclusionProofEvent = TypedEvent<
+  [BigNumber, string],
+  transformedChunkAddressFromInclusionProofEventObject
+>;
+
+export type transformedChunkAddressFromInclusionProofEventFilter =
+  TypedEventFilter<transformedChunkAddressFromInclusionProofEvent>;
+
 export interface Redistribution extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
@@ -585,13 +679,14 @@ export interface Redistribution extends BaseContract {
 
     OracleContract(overrides?: CallOverrides): Promise<[string]>;
 
-    PAUSER_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
     PostageContract(overrides?: CallOverrides): Promise<[string]>;
 
     Stakes(overrides?: CallOverrides): Promise<[string]>;
 
     claim(
+      entryProof1: Redistribution.ChunkInclusionProofStruct,
+      entryProof2: Redistribution.ChunkInclusionProofStruct,
+      entryProofLast: Redistribution.ChunkInclusionProofStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -610,15 +705,17 @@ export interface Redistribution extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [string, string, BigNumber, string, boolean, BigNumber] & {
+      [string, string, boolean, BigNumber, string, BigNumber] & {
         overlay: string;
         owner: string;
+        revealed: boolean;
         stake: BigNumber;
         obfuscatedHash: string;
-        revealed: boolean;
         revealIndex: BigNumber;
       }
     >;
+
+    currentMinimumDepth(overrides?: CallOverrides): Promise<[number]>;
 
     currentPhaseClaim(overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -632,13 +729,13 @@ export interface Redistribution extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [string, string, BigNumber, BigNumber, string, number] & {
-        owner: string;
+      [string, string, number, BigNumber, BigNumber, string] & {
         overlay: string;
+        owner: string;
+        depth: number;
         stake: BigNumber;
         stakeDensity: BigNumber;
         hash: string;
-        depth: number;
       }
     >;
 
@@ -689,8 +786,6 @@ export interface Redistribution extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    minimumStake(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     nextSeed(overrides?: CallOverrides): Promise<[string]>;
 
     pause(
@@ -698,14 +793,6 @@ export interface Redistribution extends BaseContract {
     ): Promise<ContractTransaction>;
 
     paused(overrides?: CallOverrides): Promise<[boolean]>;
-
-    penaltyMultiplierDisagreement(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    penaltyMultiplierNonRevealed(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
 
     renounceRole(
       role: PromiseOrValue<BytesLike>,
@@ -727,7 +814,17 @@ export interface Redistribution extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    roundLength(overrides?: CallOverrides): Promise<[BigNumber]>;
+    setFreezingParams(
+      _penaltyMultiplierDisagreement: PromiseOrValue<BigNumberish>,
+      _penaltyMultiplierNonRevealed: PromiseOrValue<BigNumberish>,
+      _penaltyRandomFactor: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    setSampleMaxValue(
+      _sampleMaxValue: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
@@ -741,13 +838,13 @@ export interface Redistribution extends BaseContract {
     winner(
       overrides?: CallOverrides
     ): Promise<
-      [string, string, BigNumber, BigNumber, string, number] & {
-        owner: string;
+      [string, string, number, BigNumber, BigNumber, string] & {
         overlay: string;
+        owner: string;
+        depth: number;
         stake: BigNumber;
         stakeDensity: BigNumber;
         hash: string;
-        depth: number;
       }
     >;
 
@@ -764,13 +861,14 @@ export interface Redistribution extends BaseContract {
 
   OracleContract(overrides?: CallOverrides): Promise<string>;
 
-  PAUSER_ROLE(overrides?: CallOverrides): Promise<string>;
-
   PostageContract(overrides?: CallOverrides): Promise<string>;
 
   Stakes(overrides?: CallOverrides): Promise<string>;
 
   claim(
+    entryProof1: Redistribution.ChunkInclusionProofStruct,
+    entryProof2: Redistribution.ChunkInclusionProofStruct,
+    entryProofLast: Redistribution.ChunkInclusionProofStruct,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -789,15 +887,17 @@ export interface Redistribution extends BaseContract {
     arg0: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<
-    [string, string, BigNumber, string, boolean, BigNumber] & {
+    [string, string, boolean, BigNumber, string, BigNumber] & {
       overlay: string;
       owner: string;
+      revealed: boolean;
       stake: BigNumber;
       obfuscatedHash: string;
-      revealed: boolean;
       revealIndex: BigNumber;
     }
   >;
+
+  currentMinimumDepth(overrides?: CallOverrides): Promise<number>;
 
   currentPhaseClaim(overrides?: CallOverrides): Promise<boolean>;
 
@@ -811,13 +911,13 @@ export interface Redistribution extends BaseContract {
     arg0: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<
-    [string, string, BigNumber, BigNumber, string, number] & {
-      owner: string;
+    [string, string, number, BigNumber, BigNumber, string] & {
       overlay: string;
+      owner: string;
+      depth: number;
       stake: BigNumber;
       stakeDensity: BigNumber;
       hash: string;
-      depth: number;
     }
   >;
 
@@ -866,8 +966,6 @@ export interface Redistribution extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  minimumStake(overrides?: CallOverrides): Promise<BigNumber>;
-
   nextSeed(overrides?: CallOverrides): Promise<string>;
 
   pause(
@@ -875,10 +973,6 @@ export interface Redistribution extends BaseContract {
   ): Promise<ContractTransaction>;
 
   paused(overrides?: CallOverrides): Promise<boolean>;
-
-  penaltyMultiplierDisagreement(overrides?: CallOverrides): Promise<BigNumber>;
-
-  penaltyMultiplierNonRevealed(overrides?: CallOverrides): Promise<BigNumber>;
 
   renounceRole(
     role: PromiseOrValue<BytesLike>,
@@ -900,7 +994,17 @@ export interface Redistribution extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  roundLength(overrides?: CallOverrides): Promise<BigNumber>;
+  setFreezingParams(
+    _penaltyMultiplierDisagreement: PromiseOrValue<BigNumberish>,
+    _penaltyMultiplierNonRevealed: PromiseOrValue<BigNumberish>,
+    _penaltyRandomFactor: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  setSampleMaxValue(
+    _sampleMaxValue: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   supportsInterface(
     interfaceId: PromiseOrValue<BytesLike>,
@@ -914,13 +1018,13 @@ export interface Redistribution extends BaseContract {
   winner(
     overrides?: CallOverrides
   ): Promise<
-    [string, string, BigNumber, BigNumber, string, number] & {
-      owner: string;
+    [string, string, number, BigNumber, BigNumber, string] & {
       overlay: string;
+      owner: string;
+      depth: number;
       stake: BigNumber;
       stakeDensity: BigNumber;
       hash: string;
-      depth: number;
     }
   >;
 
@@ -937,13 +1041,16 @@ export interface Redistribution extends BaseContract {
 
     OracleContract(overrides?: CallOverrides): Promise<string>;
 
-    PAUSER_ROLE(overrides?: CallOverrides): Promise<string>;
-
     PostageContract(overrides?: CallOverrides): Promise<string>;
 
     Stakes(overrides?: CallOverrides): Promise<string>;
 
-    claim(overrides?: CallOverrides): Promise<void>;
+    claim(
+      entryProof1: Redistribution.ChunkInclusionProofStruct,
+      entryProof2: Redistribution.ChunkInclusionProofStruct,
+      entryProofLast: Redistribution.ChunkInclusionProofStruct,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     commit(
       _obfuscatedHash: PromiseOrValue<BytesLike>,
@@ -960,15 +1067,17 @@ export interface Redistribution extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [string, string, BigNumber, string, boolean, BigNumber] & {
+      [string, string, boolean, BigNumber, string, BigNumber] & {
         overlay: string;
         owner: string;
+        revealed: boolean;
         stake: BigNumber;
         obfuscatedHash: string;
-        revealed: boolean;
         revealIndex: BigNumber;
       }
     >;
+
+    currentMinimumDepth(overrides?: CallOverrides): Promise<number>;
 
     currentPhaseClaim(overrides?: CallOverrides): Promise<boolean>;
 
@@ -982,13 +1091,13 @@ export interface Redistribution extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [string, string, BigNumber, BigNumber, string, number] & {
-        owner: string;
+      [string, string, number, BigNumber, BigNumber, string] & {
         overlay: string;
+        owner: string;
+        depth: number;
         stake: BigNumber;
         stakeDensity: BigNumber;
         hash: string;
-        depth: number;
       }
     >;
 
@@ -1037,19 +1146,11 @@ export interface Redistribution extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    minimumStake(overrides?: CallOverrides): Promise<BigNumber>;
-
     nextSeed(overrides?: CallOverrides): Promise<string>;
 
     pause(overrides?: CallOverrides): Promise<void>;
 
     paused(overrides?: CallOverrides): Promise<boolean>;
-
-    penaltyMultiplierDisagreement(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    penaltyMultiplierNonRevealed(overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceRole(
       role: PromiseOrValue<BytesLike>,
@@ -1071,7 +1172,17 @@ export interface Redistribution extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    roundLength(overrides?: CallOverrides): Promise<BigNumber>;
+    setFreezingParams(
+      _penaltyMultiplierDisagreement: PromiseOrValue<BigNumberish>,
+      _penaltyMultiplierNonRevealed: PromiseOrValue<BigNumberish>,
+      _penaltyRandomFactor: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setSampleMaxValue(
+      _sampleMaxValue: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
@@ -1083,13 +1194,13 @@ export interface Redistribution extends BaseContract {
     winner(
       overrides?: CallOverrides
     ): Promise<
-      [string, string, BigNumber, BigNumber, string, number] & {
-        owner: string;
+      [string, string, number, BigNumber, BigNumber, string] & {
         overlay: string;
+        owner: string;
+        depth: number;
         stake: BigNumber;
         stakeDensity: BigNumber;
         hash: string;
-        depth: number;
       }
     >;
 
@@ -1103,6 +1214,9 @@ export interface Redistribution extends BaseContract {
   };
 
   filters: {
+    "ChunkCount(uint256)"(validChunkCount?: null): ChunkCountEventFilter;
+    ChunkCount(validChunkCount?: null): ChunkCountEventFilter;
+
     "Committed(uint256,bytes32)"(
       roundNumber?: null,
       overlay?: null
@@ -1114,6 +1228,15 @@ export interface Redistribution extends BaseContract {
 
     "CountReveals(uint256)"(_count?: null): CountRevealsEventFilter;
     CountReveals(_count?: null): CountRevealsEventFilter;
+
+    "CurrentRevealAnchor(uint256,bytes32)"(
+      roundNumber?: null,
+      anchor?: null
+    ): CurrentRevealAnchorEventFilter;
+    CurrentRevealAnchor(
+      roundNumber?: null,
+      anchor?: null
+    ): CurrentRevealAnchorEventFilter;
 
     "Paused(address)"(account?: null): PausedEventFilter;
     Paused(account?: null): PausedEventFilter;
@@ -1179,6 +1302,15 @@ export interface Redistribution extends BaseContract {
 
     "WinnerSelected(tuple)"(winner?: null): WinnerSelectedEventFilter;
     WinnerSelected(winner?: null): WinnerSelectedEventFilter;
+
+    "transformedChunkAddressFromInclusionProof(uint256,bytes32)"(
+      indexInRC?: null,
+      chunkAddress?: null
+    ): transformedChunkAddressFromInclusionProofEventFilter;
+    transformedChunkAddressFromInclusionProof(
+      indexInRC?: null,
+      chunkAddress?: null
+    ): transformedChunkAddressFromInclusionProofEventFilter;
   };
 
   estimateGas: {
@@ -1186,13 +1318,14 @@ export interface Redistribution extends BaseContract {
 
     OracleContract(overrides?: CallOverrides): Promise<BigNumber>;
 
-    PAUSER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
     PostageContract(overrides?: CallOverrides): Promise<BigNumber>;
 
     Stakes(overrides?: CallOverrides): Promise<BigNumber>;
 
     claim(
+      entryProof1: Redistribution.ChunkInclusionProofStruct,
+      entryProof2: Redistribution.ChunkInclusionProofStruct,
+      entryProofLast: Redistribution.ChunkInclusionProofStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1211,6 +1344,8 @@ export interface Redistribution extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    currentMinimumDepth(overrides?: CallOverrides): Promise<BigNumber>;
 
     currentPhaseClaim(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1268,8 +1403,6 @@ export interface Redistribution extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    minimumStake(overrides?: CallOverrides): Promise<BigNumber>;
-
     nextSeed(overrides?: CallOverrides): Promise<BigNumber>;
 
     pause(
@@ -1277,12 +1410,6 @@ export interface Redistribution extends BaseContract {
     ): Promise<BigNumber>;
 
     paused(overrides?: CallOverrides): Promise<BigNumber>;
-
-    penaltyMultiplierDisagreement(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    penaltyMultiplierNonRevealed(overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceRole(
       role: PromiseOrValue<BytesLike>,
@@ -1304,7 +1431,17 @@ export interface Redistribution extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    roundLength(overrides?: CallOverrides): Promise<BigNumber>;
+    setFreezingParams(
+      _penaltyMultiplierDisagreement: PromiseOrValue<BigNumberish>,
+      _penaltyMultiplierNonRevealed: PromiseOrValue<BigNumberish>,
+      _penaltyRandomFactor: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    setSampleMaxValue(
+      _sampleMaxValue: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
 
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
@@ -1333,13 +1470,14 @@ export interface Redistribution extends BaseContract {
 
     OracleContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    PAUSER_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     PostageContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     Stakes(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     claim(
+      entryProof1: Redistribution.ChunkInclusionProofStruct,
+      entryProof2: Redistribution.ChunkInclusionProofStruct,
+      entryProofLast: Redistribution.ChunkInclusionProofStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1358,6 +1496,10 @@ export interface Redistribution extends BaseContract {
 
     currentCommits(
       arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    currentMinimumDepth(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1427,8 +1569,6 @@ export interface Redistribution extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    minimumStake(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     nextSeed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     pause(
@@ -1436,14 +1576,6 @@ export interface Redistribution extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    penaltyMultiplierDisagreement(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    penaltyMultiplierNonRevealed(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
 
     renounceRole(
       role: PromiseOrValue<BytesLike>,
@@ -1465,7 +1597,17 @@ export interface Redistribution extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    roundLength(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    setFreezingParams(
+      _penaltyMultiplierDisagreement: PromiseOrValue<BigNumberish>,
+      _penaltyMultiplierNonRevealed: PromiseOrValue<BigNumberish>,
+      _penaltyRandomFactor: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setSampleMaxValue(
+      _sampleMaxValue: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,

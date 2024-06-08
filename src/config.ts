@@ -55,20 +55,57 @@ export const chainConfig: Configs = {
 
 			// for deployment addresses, see https://github.com/ethersphere/go-storage-incentives-abi/blob/master/abi/abi_testnet.go
 			stakeRegistry: utils.getAddress(
-				'0xCb07bf0603da228C8ec602bf12b973b8A94f9bac'
+				'0xE39AD1Ea8232ea525d061125433890fCA0260d04'
 			),
-			stakeDeployBlock: 8139930,
+			stakeDeployBlock: 10115421,
 
 			postageStamp: utils.getAddress(
-				'0x1f87FEDa43e6ABFe1058E96A07d0ea182e7dc9BD'
+				'0x74A21593321dDb9a1dB2ae0718e1a0F20D8896Fd'
 			),
 
 			priceOracle: utils.getAddress(
-				'0x3e475aEAB162E28fee46E69225af446D3c4f3Bd3'
+				'0x6003e7f976c87934EBeB4f8B240269f56Ac3a1df'
 			),
 
 			redistribution: utils.getAddress(
-				'0x90317dC80F6A9327ee728c68955a9Cef90b29f5c'
+				'0xb4E1Cd379063cb1A69C8EAaaFae3f9E3e670F798'
+			),
+		},
+	},
+	'11155111': {
+		// Sepolia Testnet
+		chain: {
+			name: 'sepolia',
+			secondsPerBlock: 12,
+		},
+		units: {
+			BZZ: 'sBZZ',
+			ETH: 'sETH',
+		},
+		game: {
+			blocksPerRound: 152,
+			commitPhaseBlocks: 152 / 4,
+			revealPhaseBlocks: 152 / 4,
+		},
+		contracts: {
+			bzzToken: utils.getAddress('0x543dDb01Ba47acB11de34891cD86B675F04840db'),
+
+			// for deployment addresses, see https://github.com/ethersphere/go-storage-incentives-abi/blob/master/abi/abi_testnet.go
+			stakeRegistry: utils.getAddress(
+				'0x41379955a216968996D10614B74b31AA48a0624A'
+			),
+			stakeDeployBlock: 4660478,
+
+			postageStamp: utils.getAddress(
+				'0x794532C50c6EfA070Cd206b82178E98433046996'
+			),
+
+			priceOracle: utils.getAddress(
+				'0x201dcde5c2D14CE03Fa74b0158488122FcA673B8'
+			),
+
+			redistribution: utils.getAddress(
+				'0xd4621827301E26645Ae3887f7172d6a372782F69'
 			),
 		},
 	},
@@ -96,13 +133,13 @@ export const chainConfig: Configs = {
 			),
 			stakeDeployBlock: 25527075,
 			postageStamp: utils.getAddress(
-				'0x30d155478eF27Ab32A1D578BE7b84BC5988aF381'
+				'0x45a1502382541Cd610CC9068e88727426b696293'
 			),
 			priceOracle: utils.getAddress(
-				'0x344A2CC7304B32A87EfDC5407cD4bEC7cf98F035'
+				'0x86DE783Bf23Bc13DaeF5A55ec531C198da8f10cF'
 			),
 			redistribution: utils.getAddress(
-				'0x1F9a1FDe5c6350E949C5E4aa163B4c97011199B4'
+				'0xD9dFE7b0ddc7CcA41304FE9507ed823faD3bdBab'
 			),
 		},
 	},
