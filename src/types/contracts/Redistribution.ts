@@ -125,7 +125,7 @@ export interface RedistributionInterface extends utils.Interface {
     "PostageContract()": FunctionFragment;
     "Stakes()": FunctionFragment;
     "claim((bytes32[],bytes32,bytes32[],bytes32,uint64,bytes32[],(bytes,bytes32,uint64,uint64),(address,bytes,bytes32,bytes32)[]),(bytes32[],bytes32,bytes32[],bytes32,uint64,bytes32[],(bytes,bytes32,uint64,uint64),(address,bytes,bytes32,bytes32)[]),(bytes32[],bytes32,bytes32[],bytes32,uint64,bytes32[],(bytes,bytes32,uint64,uint64),(address,bytes,bytes32,bytes32)[]))": FunctionFragment;
-    "commit(bytes32,bytes32,uint64)": FunctionFragment;
+    "commit(bytes32,uint64)": FunctionFragment;
     "currentClaimRound()": FunctionFragment;
     "currentCommitRound()": FunctionFragment;
     "currentCommits(uint256)": FunctionFragment;
@@ -143,13 +143,13 @@ export interface RedistributionInterface extends utils.Interface {
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
     "inProximity(bytes32,bytes32,uint8)": FunctionFragment;
-    "isParticipatingInUpcomingRound(bytes32,uint8)": FunctionFragment;
+    "isParticipatingInUpcomingRound(address,uint8)": FunctionFragment;
     "isWinner(bytes32)": FunctionFragment;
     "nextSeed()": FunctionFragment;
     "pause()": FunctionFragment;
     "paused()": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
-    "reveal(bytes32,uint8,bytes32,bytes32)": FunctionFragment;
+    "reveal(uint8,bytes32,bytes32)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
     "setFreezingParams(uint8,uint8,uint8)": FunctionFragment;
     "setSampleMaxValue(uint256)": FunctionFragment;
@@ -223,11 +223,7 @@ export interface RedistributionInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "commit",
-    values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "currentClaimRound",
@@ -303,7 +299,7 @@ export interface RedistributionInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "isParticipatingInUpcomingRound",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "isWinner",
@@ -319,7 +315,6 @@ export interface RedistributionInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "reveal",
     values: [
-      PromiseOrValue<BytesLike>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BytesLike>,
       PromiseOrValue<BytesLike>
@@ -692,7 +687,6 @@ export interface Redistribution extends BaseContract {
 
     commit(
       _obfuscatedHash: PromiseOrValue<BytesLike>,
-      _overlay: PromiseOrValue<BytesLike>,
       _roundNumber: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -776,8 +770,8 @@ export interface Redistribution extends BaseContract {
     ): Promise<[boolean]>;
 
     isParticipatingInUpcomingRound(
-      overlay: PromiseOrValue<BytesLike>,
-      depth: PromiseOrValue<BigNumberish>,
+      _owner: PromiseOrValue<string>,
+      _depth: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
@@ -801,7 +795,6 @@ export interface Redistribution extends BaseContract {
     ): Promise<ContractTransaction>;
 
     reveal(
-      _overlay: PromiseOrValue<BytesLike>,
       _depth: PromiseOrValue<BigNumberish>,
       _hash: PromiseOrValue<BytesLike>,
       _revealNonce: PromiseOrValue<BytesLike>,
@@ -874,7 +867,6 @@ export interface Redistribution extends BaseContract {
 
   commit(
     _obfuscatedHash: PromiseOrValue<BytesLike>,
-    _overlay: PromiseOrValue<BytesLike>,
     _roundNumber: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -956,8 +948,8 @@ export interface Redistribution extends BaseContract {
   ): Promise<boolean>;
 
   isParticipatingInUpcomingRound(
-    overlay: PromiseOrValue<BytesLike>,
-    depth: PromiseOrValue<BigNumberish>,
+    _owner: PromiseOrValue<string>,
+    _depth: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
@@ -981,7 +973,6 @@ export interface Redistribution extends BaseContract {
   ): Promise<ContractTransaction>;
 
   reveal(
-    _overlay: PromiseOrValue<BytesLike>,
     _depth: PromiseOrValue<BigNumberish>,
     _hash: PromiseOrValue<BytesLike>,
     _revealNonce: PromiseOrValue<BytesLike>,
@@ -1054,7 +1045,6 @@ export interface Redistribution extends BaseContract {
 
     commit(
       _obfuscatedHash: PromiseOrValue<BytesLike>,
-      _overlay: PromiseOrValue<BytesLike>,
       _roundNumber: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1136,8 +1126,8 @@ export interface Redistribution extends BaseContract {
     ): Promise<boolean>;
 
     isParticipatingInUpcomingRound(
-      overlay: PromiseOrValue<BytesLike>,
-      depth: PromiseOrValue<BigNumberish>,
+      _owner: PromiseOrValue<string>,
+      _depth: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
@@ -1159,7 +1149,6 @@ export interface Redistribution extends BaseContract {
     ): Promise<void>;
 
     reveal(
-      _overlay: PromiseOrValue<BytesLike>,
       _depth: PromiseOrValue<BigNumberish>,
       _hash: PromiseOrValue<BytesLike>,
       _revealNonce: PromiseOrValue<BytesLike>,
@@ -1331,7 +1320,6 @@ export interface Redistribution extends BaseContract {
 
     commit(
       _obfuscatedHash: PromiseOrValue<BytesLike>,
-      _overlay: PromiseOrValue<BytesLike>,
       _roundNumber: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1393,8 +1381,8 @@ export interface Redistribution extends BaseContract {
     ): Promise<BigNumber>;
 
     isParticipatingInUpcomingRound(
-      overlay: PromiseOrValue<BytesLike>,
-      depth: PromiseOrValue<BigNumberish>,
+      _owner: PromiseOrValue<string>,
+      _depth: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1418,7 +1406,6 @@ export interface Redistribution extends BaseContract {
     ): Promise<BigNumber>;
 
     reveal(
-      _overlay: PromiseOrValue<BytesLike>,
       _depth: PromiseOrValue<BigNumberish>,
       _hash: PromiseOrValue<BytesLike>,
       _revealNonce: PromiseOrValue<BytesLike>,
@@ -1483,7 +1470,6 @@ export interface Redistribution extends BaseContract {
 
     commit(
       _obfuscatedHash: PromiseOrValue<BytesLike>,
-      _overlay: PromiseOrValue<BytesLike>,
       _roundNumber: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -1559,8 +1545,8 @@ export interface Redistribution extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     isParticipatingInUpcomingRound(
-      overlay: PromiseOrValue<BytesLike>,
-      depth: PromiseOrValue<BigNumberish>,
+      _owner: PromiseOrValue<string>,
+      _depth: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1584,7 +1570,6 @@ export interface Redistribution extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     reveal(
-      _overlay: PromiseOrValue<BytesLike>,
       _depth: PromiseOrValue<BigNumberish>,
       _hash: PromiseOrValue<BytesLike>,
       _revealNonce: PromiseOrValue<BytesLike>,

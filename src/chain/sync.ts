@@ -267,7 +267,7 @@ export class ChainSync {
 
 	private setupEventListeners(showGas: boolean) {
 		// setup the event listeners
-
+		/*
 		// stake registry - only needed for new players / updated stakes
 		this.stakeRegistry.on(
 			this.stakeRegistry.filters[
@@ -286,7 +286,7 @@ export class ChainSync {
 				)
 			}
 		)
-
+*/
 		// monitor the bzz token
 		this.bzzToken.on(this.bzzToken.filters.Transfer(), (from, to, amount) => {
 			// if (this._state == State.RUNNING)
@@ -507,11 +507,15 @@ export class ChainSync {
 			// determine what function is being called
 			switch (desc.name) {
 				case 'commit': // commit
-					const [, overlayAddress] = desc.args
+					const [obfuscatedHash, roundNumber] = desc.args
+					var overlayAddress = await this.stakeRegistry.overlayOfAddress(
+						receipt.from
+					)
 					game.commit(overlayAddress, receipt.from, blockDetails)
 					break
 				case 'reveal': // reveal
-					const [overlay, depth, hash] = desc.args
+					const [depth, hash, revealNonce] = desc.args
+					var overlay = await this.stakeRegistry.overlayOfAddress(receipt.from)
 					game.reveal(overlay, receipt.from, hash, depth, blockDetails)
 					break
 				case 'claim': // claim

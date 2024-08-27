@@ -19,9 +19,63 @@ const _abi = [
         name: "_NetworkId",
         type: "uint64",
       },
+      {
+        internalType: "address",
+        name: "_oracleContract",
+        type: "address",
+      },
     ],
     stateMutability: "nonpayable",
     type: "constructor",
+  },
+  {
+    inputs: [],
+    name: "BelowMinimumStake",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "Frozen",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "OnlyPauser",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "OnlyRedistributor",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "TransferFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "Unauthorized",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "overlay",
+        type: "bytes32",
+      },
+    ],
+    name: "OverlayChanged",
+    type: "event",
   },
   {
     anonymous: false,
@@ -116,8 +170,14 @@ const _abi = [
     inputs: [
       {
         indexed: false,
+        internalType: "address",
+        name: "frozen",
+        type: "address",
+      },
+      {
+        indexed: false,
         internalType: "bytes32",
-        name: "slashed",
+        name: "overlay",
         type: "bytes32",
       },
       {
@@ -135,8 +195,14 @@ const _abi = [
     inputs: [
       {
         indexed: false,
-        internalType: "bytes32",
+        internalType: "address",
         name: "slashed",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "overlay",
         type: "bytes32",
       },
       {
@@ -154,21 +220,27 @@ const _abi = [
     inputs: [
       {
         indexed: true,
-        internalType: "bytes32",
-        name: "overlay",
-        type: "bytes32",
+        internalType: "address",
+        name: "owner",
+        type: "address",
       },
       {
         indexed: false,
         internalType: "uint256",
-        name: "stakeAmount",
+        name: "committedStake",
         type: "uint256",
       },
       {
         indexed: false,
-        internalType: "address",
-        name: "owner",
-        type: "address",
+        internalType: "uint256",
+        name: "potentialStake",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "overlay",
+        type: "bytes32",
       },
       {
         indexed: false,
@@ -178,6 +250,25 @@ const _abi = [
       },
     ],
     name: "StakeUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "node",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "StakeWithdrawn",
     type: "event",
   },
   {
@@ -208,12 +299,12 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "PAUSER_ROLE",
+    name: "OracleContract",
     outputs: [
       {
-        internalType: "bytes32",
+        internalType: "contract IPriceOracle",
         name: "",
-        type: "bytes32",
+        type: "address",
       },
     ],
     stateMutability: "view",
@@ -266,31 +357,8 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "bytes32",
-        name: "nonce",
-        type: "bytes32",
-      },
-      {
         internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "depositStake",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "overlay",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "time",
+        name: "_time",
         type: "uint256",
       },
     ],
@@ -363,12 +431,12 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "bytes32",
-        name: "overlay",
-        type: "bytes32",
+        internalType: "address",
+        name: "_owner",
+        type: "address",
       },
     ],
-    name: "lastUpdatedBlockNumberOfOverlay",
+    name: "lastUpdatedBlockNumberOfAddress",
     outputs: [
       {
         internalType: "uint256",
@@ -383,16 +451,60 @@ const _abi = [
     inputs: [
       {
         internalType: "bytes32",
-        name: "overlay",
+        name: "_setNonce",
         type: "bytes32",
       },
+      {
+        internalType: "uint256",
+        name: "_addAmount",
+        type: "uint256",
+      },
     ],
-    name: "ownerOfOverlay",
-    outputs: [
+    name: "manageStake",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "migrateStake",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
       {
         internalType: "address",
-        name: "",
+        name: "_owner",
         type: "address",
+      },
+    ],
+    name: "nodeEffectiveStake",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_owner",
+        type: "address",
+      },
+    ],
+    name: "overlayOfAddress",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
       },
     ],
     stateMutability: "view",
@@ -457,13 +569,13 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "bytes32",
-        name: "overlay",
-        type: "bytes32",
+        internalType: "address",
+        name: "_owner",
+        type: "address",
       },
       {
         internalType: "uint256",
-        name: "amount",
+        name: "_amount",
         type: "uint256",
       },
     ],
@@ -475,28 +587,9 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "bytes32",
-        name: "overlay",
-        type: "bytes32",
-      },
-    ],
-    name: "stakeOfOverlay",
-    outputs: [
-      {
-        internalType: "uint256",
+        internalType: "address",
         name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
+        type: "address",
       },
     ],
     name: "stakes",
@@ -508,23 +601,18 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "stakeAmount",
+        name: "committedStake",
         type: "uint256",
       },
       {
-        internalType: "address",
-        name: "owner",
-        type: "address",
+        internalType: "uint256",
+        name: "potentialStake",
+        type: "uint256",
       },
       {
         internalType: "uint256",
         name: "lastUpdatedBlockNumber",
         type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "isValue",
-        type: "bool",
       },
     ],
     stateMutability: "view",
@@ -557,14 +645,15 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "overlay",
-        type: "bytes32",
-      },
-    ],
-    name: "usableStakeOfOverlay",
+    inputs: [],
+    name: "withdrawFromStake",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "withdrawableStake",
     outputs: [
       {
         internalType: "uint256",
@@ -573,24 +662,6 @@ const _abi = [
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "overlay",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "withdrawFromStake",
-    outputs: [],
-    stateMutability: "nonpayable",
     type: "function",
   },
 ];

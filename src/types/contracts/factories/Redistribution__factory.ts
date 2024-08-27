@@ -38,7 +38,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "AlreadyCommited",
+    name: "AlreadyCommitted",
     type: "error",
   },
   {
@@ -55,11 +55,6 @@ const _abi = [
       },
     ],
     name: "BatchDoesNotExist",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "BelowMinimumStake",
     type: "error",
   },
   {
@@ -168,6 +163,11 @@ const _abi = [
   {
     inputs: [],
     name: "NotRevealPhase",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NotStaked",
     type: "error",
   },
   {
@@ -906,11 +906,6 @@ const _abi = [
         type: "bytes32",
       },
       {
-        internalType: "bytes32",
-        name: "_overlay",
-        type: "bytes32",
-      },
-      {
         internalType: "uint64",
         name: "_roundNumber",
         type: "uint64",
@@ -1277,13 +1272,13 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "bytes32",
-        name: "overlay",
-        type: "bytes32",
+        internalType: "address",
+        name: "_owner",
+        type: "address",
       },
       {
         internalType: "uint8",
-        name: "depth",
+        name: "_depth",
         type: "uint8",
       },
     ],
@@ -1370,11 +1365,6 @@ const _abi = [
   },
   {
     inputs: [
-      {
-        internalType: "bytes32",
-        name: "_overlay",
-        type: "bytes32",
-      },
       {
         internalType: "uint8",
         name: "_depth",

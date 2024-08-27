@@ -30,55 +30,57 @@ import type {
 export interface StakeRegistryInterface extends utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
-    "PAUSER_ROLE()": FunctionFragment;
+    "OracleContract()": FunctionFragment;
     "REDISTRIBUTOR_ROLE()": FunctionFragment;
     "bzzToken()": FunctionFragment;
     "changeNetworkId(uint64)": FunctionFragment;
-    "depositStake(address,bytes32,uint256)": FunctionFragment;
-    "freezeDeposit(bytes32,uint256)": FunctionFragment;
+    "freezeDeposit(address,uint256)": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
-    "lastUpdatedBlockNumberOfOverlay(bytes32)": FunctionFragment;
-    "ownerOfOverlay(bytes32)": FunctionFragment;
+    "lastUpdatedBlockNumberOfAddress(address)": FunctionFragment;
+    "manageStake(bytes32,uint256)": FunctionFragment;
+    "migrateStake()": FunctionFragment;
+    "nodeEffectiveStake(address)": FunctionFragment;
+    "overlayOfAddress(address)": FunctionFragment;
     "pause()": FunctionFragment;
     "paused()": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
-    "slashDeposit(bytes32,uint256)": FunctionFragment;
-    "stakeOfOverlay(bytes32)": FunctionFragment;
-    "stakes(bytes32)": FunctionFragment;
+    "slashDeposit(address,uint256)": FunctionFragment;
+    "stakes(address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "unPause()": FunctionFragment;
-    "usableStakeOfOverlay(bytes32)": FunctionFragment;
-    "withdrawFromStake(bytes32,uint256)": FunctionFragment;
+    "withdrawFromStake()": FunctionFragment;
+    "withdrawableStake()": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "DEFAULT_ADMIN_ROLE"
-      | "PAUSER_ROLE"
+      | "OracleContract"
       | "REDISTRIBUTOR_ROLE"
       | "bzzToken"
       | "changeNetworkId"
-      | "depositStake"
       | "freezeDeposit"
       | "getRoleAdmin"
       | "grantRole"
       | "hasRole"
-      | "lastUpdatedBlockNumberOfOverlay"
-      | "ownerOfOverlay"
+      | "lastUpdatedBlockNumberOfAddress"
+      | "manageStake"
+      | "migrateStake"
+      | "nodeEffectiveStake"
+      | "overlayOfAddress"
       | "pause"
       | "paused"
       | "renounceRole"
       | "revokeRole"
       | "slashDeposit"
-      | "stakeOfOverlay"
       | "stakes"
       | "supportsInterface"
       | "unPause"
-      | "usableStakeOfOverlay"
       | "withdrawFromStake"
+      | "withdrawableStake"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -86,7 +88,7 @@ export interface StakeRegistryInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "PAUSER_ROLE",
+    functionFragment: "OracleContract",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -99,16 +101,8 @@ export interface StakeRegistryInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "depositStake",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BigNumberish>
-    ]
-  ): string;
-  encodeFunctionData(
     functionFragment: "freezeDeposit",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
@@ -123,12 +117,24 @@ export interface StakeRegistryInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "lastUpdatedBlockNumberOfOverlay",
-    values: [PromiseOrValue<BytesLike>]
+    functionFragment: "lastUpdatedBlockNumberOfAddress",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "ownerOfOverlay",
-    values: [PromiseOrValue<BytesLike>]
+    functionFragment: "manageStake",
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "migrateStake",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "nodeEffectiveStake",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "overlayOfAddress",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "pause", values?: undefined): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
@@ -142,15 +148,11 @@ export interface StakeRegistryInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "slashDeposit",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "stakeOfOverlay",
-    values: [PromiseOrValue<BytesLike>]
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "stakes",
-    values: [PromiseOrValue<BytesLike>]
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
@@ -158,12 +160,12 @@ export interface StakeRegistryInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "unPause", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "usableStakeOfOverlay",
-    values: [PromiseOrValue<BytesLike>]
+    functionFragment: "withdrawFromStake",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "withdrawFromStake",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
+    functionFragment: "withdrawableStake",
+    values?: undefined
   ): string;
 
   decodeFunctionResult(
@@ -171,7 +173,7 @@ export interface StakeRegistryInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "PAUSER_ROLE",
+    functionFragment: "OracleContract",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -181,10 +183,6 @@ export interface StakeRegistryInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "bzzToken", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "changeNetworkId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "depositStake",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -198,11 +196,23 @@ export interface StakeRegistryInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "lastUpdatedBlockNumberOfOverlay",
+    functionFragment: "lastUpdatedBlockNumberOfAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "ownerOfOverlay",
+    functionFragment: "manageStake",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "migrateStake",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "nodeEffectiveStake",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "overlayOfAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "pause", data: BytesLike): Result;
@@ -216,10 +226,6 @@ export interface StakeRegistryInterface extends utils.Interface {
     functionFragment: "slashDeposit",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "stakeOfOverlay",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "stakes", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
@@ -227,25 +233,28 @@ export interface StakeRegistryInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "unPause", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "usableStakeOfOverlay",
+    functionFragment: "withdrawFromStake",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "withdrawFromStake",
+    functionFragment: "withdrawableStake",
     data: BytesLike
   ): Result;
 
   events: {
+    "OverlayChanged(address,bytes32)": EventFragment;
     "Paused(address)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
     "RoleGranted(bytes32,address,address)": EventFragment;
     "RoleRevoked(bytes32,address,address)": EventFragment;
-    "StakeFrozen(bytes32,uint256)": EventFragment;
-    "StakeSlashed(bytes32,uint256)": EventFragment;
-    "StakeUpdated(bytes32,uint256,address,uint256)": EventFragment;
+    "StakeFrozen(address,bytes32,uint256)": EventFragment;
+    "StakeSlashed(address,bytes32,uint256)": EventFragment;
+    "StakeUpdated(address,uint256,uint256,bytes32,uint256)": EventFragment;
+    "StakeWithdrawn(address,uint256)": EventFragment;
     "Unpaused(address)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "OverlayChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
@@ -253,8 +262,20 @@ export interface StakeRegistryInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "StakeFrozen"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "StakeSlashed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "StakeUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "StakeWithdrawn"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
 }
+
+export interface OverlayChangedEventObject {
+  owner: string;
+  overlay: string;
+}
+export type OverlayChangedEvent = TypedEvent<
+  [string, string],
+  OverlayChangedEventObject
+>;
+
+export type OverlayChangedEventFilter = TypedEventFilter<OverlayChangedEvent>;
 
 export interface PausedEventObject {
   account: string;
@@ -301,11 +322,12 @@ export type RoleRevokedEvent = TypedEvent<
 export type RoleRevokedEventFilter = TypedEventFilter<RoleRevokedEvent>;
 
 export interface StakeFrozenEventObject {
-  slashed: string;
+  frozen: string;
+  overlay: string;
   time: BigNumber;
 }
 export type StakeFrozenEvent = TypedEvent<
-  [string, BigNumber],
+  [string, string, BigNumber],
   StakeFrozenEventObject
 >;
 
@@ -313,27 +335,40 @@ export type StakeFrozenEventFilter = TypedEventFilter<StakeFrozenEvent>;
 
 export interface StakeSlashedEventObject {
   slashed: string;
+  overlay: string;
   amount: BigNumber;
 }
 export type StakeSlashedEvent = TypedEvent<
-  [string, BigNumber],
+  [string, string, BigNumber],
   StakeSlashedEventObject
 >;
 
 export type StakeSlashedEventFilter = TypedEventFilter<StakeSlashedEvent>;
 
 export interface StakeUpdatedEventObject {
-  overlay: string;
-  stakeAmount: BigNumber;
   owner: string;
+  committedStake: BigNumber;
+  potentialStake: BigNumber;
+  overlay: string;
   lastUpdatedBlock: BigNumber;
 }
 export type StakeUpdatedEvent = TypedEvent<
-  [string, BigNumber, string, BigNumber],
+  [string, BigNumber, BigNumber, string, BigNumber],
   StakeUpdatedEventObject
 >;
 
 export type StakeUpdatedEventFilter = TypedEventFilter<StakeUpdatedEvent>;
+
+export interface StakeWithdrawnEventObject {
+  node: string;
+  amount: BigNumber;
+}
+export type StakeWithdrawnEvent = TypedEvent<
+  [string, BigNumber],
+  StakeWithdrawnEventObject
+>;
+
+export type StakeWithdrawnEventFilter = TypedEventFilter<StakeWithdrawnEvent>;
 
 export interface UnpausedEventObject {
   account: string;
@@ -371,7 +406,7 @@ export interface StakeRegistry extends BaseContract {
   functions: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
-    PAUSER_ROLE(overrides?: CallOverrides): Promise<[string]>;
+    OracleContract(overrides?: CallOverrides): Promise<[string]>;
 
     REDISTRIBUTOR_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
@@ -382,16 +417,9 @@ export interface StakeRegistry extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    depositStake(
-      _owner: PromiseOrValue<string>,
-      nonce: PromiseOrValue<BytesLike>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     freezeDeposit(
-      overlay: PromiseOrValue<BytesLike>,
-      time: PromiseOrValue<BigNumberish>,
+      _owner: PromiseOrValue<string>,
+      _time: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -412,13 +440,28 @@ export interface StakeRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    lastUpdatedBlockNumberOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
+    lastUpdatedBlockNumberOfAddress(
+      _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    ownerOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
+    manageStake(
+      _setNonce: PromiseOrValue<BytesLike>,
+      _addAmount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    migrateStake(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    nodeEffectiveStake(
+      _owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    overlayOfAddress(
+      _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[string]>;
 
@@ -441,26 +484,20 @@ export interface StakeRegistry extends BaseContract {
     ): Promise<ContractTransaction>;
 
     slashDeposit(
-      overlay: PromiseOrValue<BytesLike>,
-      amount: PromiseOrValue<BigNumberish>,
+      _owner: PromiseOrValue<string>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    stakeOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     stakes(
-      arg0: PromiseOrValue<BytesLike>,
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber, string, BigNumber, boolean] & {
+      [string, BigNumber, BigNumber, BigNumber] & {
         overlay: string;
-        stakeAmount: BigNumber;
-        owner: string;
+        committedStake: BigNumber;
+        potentialStake: BigNumber;
         lastUpdatedBlockNumber: BigNumber;
-        isValue: boolean;
       }
     >;
 
@@ -473,21 +510,16 @@ export interface StakeRegistry extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    usableStakeOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     withdrawFromStake(
-      overlay: PromiseOrValue<BytesLike>,
-      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    withdrawableStake(overrides?: CallOverrides): Promise<[BigNumber]>;
   };
 
   DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
-  PAUSER_ROLE(overrides?: CallOverrides): Promise<string>;
+  OracleContract(overrides?: CallOverrides): Promise<string>;
 
   REDISTRIBUTOR_ROLE(overrides?: CallOverrides): Promise<string>;
 
@@ -498,16 +530,9 @@ export interface StakeRegistry extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  depositStake(
-    _owner: PromiseOrValue<string>,
-    nonce: PromiseOrValue<BytesLike>,
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   freezeDeposit(
-    overlay: PromiseOrValue<BytesLike>,
-    time: PromiseOrValue<BigNumberish>,
+    _owner: PromiseOrValue<string>,
+    _time: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -528,13 +553,28 @@ export interface StakeRegistry extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  lastUpdatedBlockNumberOfOverlay(
-    overlay: PromiseOrValue<BytesLike>,
+  lastUpdatedBlockNumberOfAddress(
+    _owner: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  ownerOfOverlay(
-    overlay: PromiseOrValue<BytesLike>,
+  manageStake(
+    _setNonce: PromiseOrValue<BytesLike>,
+    _addAmount: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  migrateStake(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  nodeEffectiveStake(
+    _owner: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  overlayOfAddress(
+    _owner: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<string>;
 
@@ -557,26 +597,20 @@ export interface StakeRegistry extends BaseContract {
   ): Promise<ContractTransaction>;
 
   slashDeposit(
-    overlay: PromiseOrValue<BytesLike>,
-    amount: PromiseOrValue<BigNumberish>,
+    _owner: PromiseOrValue<string>,
+    _amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  stakeOfOverlay(
-    overlay: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   stakes(
-    arg0: PromiseOrValue<BytesLike>,
+    arg0: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<
-    [string, BigNumber, string, BigNumber, boolean] & {
+    [string, BigNumber, BigNumber, BigNumber] & {
       overlay: string;
-      stakeAmount: BigNumber;
-      owner: string;
+      committedStake: BigNumber;
+      potentialStake: BigNumber;
       lastUpdatedBlockNumber: BigNumber;
-      isValue: boolean;
     }
   >;
 
@@ -589,21 +623,16 @@ export interface StakeRegistry extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  usableStakeOfOverlay(
-    overlay: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   withdrawFromStake(
-    overlay: PromiseOrValue<BytesLike>,
-    amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  withdrawableStake(overrides?: CallOverrides): Promise<BigNumber>;
 
   callStatic: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
-    PAUSER_ROLE(overrides?: CallOverrides): Promise<string>;
+    OracleContract(overrides?: CallOverrides): Promise<string>;
 
     REDISTRIBUTOR_ROLE(overrides?: CallOverrides): Promise<string>;
 
@@ -614,16 +643,9 @@ export interface StakeRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    depositStake(
-      _owner: PromiseOrValue<string>,
-      nonce: PromiseOrValue<BytesLike>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     freezeDeposit(
-      overlay: PromiseOrValue<BytesLike>,
-      time: PromiseOrValue<BigNumberish>,
+      _owner: PromiseOrValue<string>,
+      _time: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -644,13 +666,26 @@ export interface StakeRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    lastUpdatedBlockNumberOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
+    lastUpdatedBlockNumberOfAddress(
+      _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    ownerOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
+    manageStake(
+      _setNonce: PromiseOrValue<BytesLike>,
+      _addAmount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    migrateStake(overrides?: CallOverrides): Promise<void>;
+
+    nodeEffectiveStake(
+      _owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    overlayOfAddress(
+      _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -671,26 +706,20 @@ export interface StakeRegistry extends BaseContract {
     ): Promise<void>;
 
     slashDeposit(
-      overlay: PromiseOrValue<BytesLike>,
-      amount: PromiseOrValue<BigNumberish>,
+      _owner: PromiseOrValue<string>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    stakeOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     stakes(
-      arg0: PromiseOrValue<BytesLike>,
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber, string, BigNumber, boolean] & {
+      [string, BigNumber, BigNumber, BigNumber] & {
         overlay: string;
-        stakeAmount: BigNumber;
-        owner: string;
+        committedStake: BigNumber;
+        potentialStake: BigNumber;
         lastUpdatedBlockNumber: BigNumber;
-        isValue: boolean;
       }
     >;
 
@@ -701,19 +730,18 @@ export interface StakeRegistry extends BaseContract {
 
     unPause(overrides?: CallOverrides): Promise<void>;
 
-    usableStakeOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    withdrawFromStake(overrides?: CallOverrides): Promise<void>;
 
-    withdrawFromStake(
-      overlay: PromiseOrValue<BytesLike>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    withdrawableStake(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   filters: {
+    "OverlayChanged(address,bytes32)"(
+      owner?: null,
+      overlay?: null
+    ): OverlayChangedEventFilter;
+    OverlayChanged(owner?: null, overlay?: null): OverlayChangedEventFilter;
+
     "Paused(address)"(account?: null): PausedEventFilter;
     Paused(account?: null): PausedEventFilter;
 
@@ -750,30 +778,48 @@ export interface StakeRegistry extends BaseContract {
       sender?: PromiseOrValue<string> | null
     ): RoleRevokedEventFilter;
 
-    "StakeFrozen(bytes32,uint256)"(
-      slashed?: null,
+    "StakeFrozen(address,bytes32,uint256)"(
+      frozen?: null,
+      overlay?: null,
       time?: null
     ): StakeFrozenEventFilter;
-    StakeFrozen(slashed?: null, time?: null): StakeFrozenEventFilter;
+    StakeFrozen(
+      frozen?: null,
+      overlay?: null,
+      time?: null
+    ): StakeFrozenEventFilter;
 
-    "StakeSlashed(bytes32,uint256)"(
+    "StakeSlashed(address,bytes32,uint256)"(
       slashed?: null,
+      overlay?: null,
       amount?: null
     ): StakeSlashedEventFilter;
-    StakeSlashed(slashed?: null, amount?: null): StakeSlashedEventFilter;
+    StakeSlashed(
+      slashed?: null,
+      overlay?: null,
+      amount?: null
+    ): StakeSlashedEventFilter;
 
-    "StakeUpdated(bytes32,uint256,address,uint256)"(
-      overlay?: PromiseOrValue<BytesLike> | null,
-      stakeAmount?: null,
-      owner?: null,
+    "StakeUpdated(address,uint256,uint256,bytes32,uint256)"(
+      owner?: PromiseOrValue<string> | null,
+      committedStake?: null,
+      potentialStake?: null,
+      overlay?: null,
       lastUpdatedBlock?: null
     ): StakeUpdatedEventFilter;
     StakeUpdated(
-      overlay?: PromiseOrValue<BytesLike> | null,
-      stakeAmount?: null,
-      owner?: null,
+      owner?: PromiseOrValue<string> | null,
+      committedStake?: null,
+      potentialStake?: null,
+      overlay?: null,
       lastUpdatedBlock?: null
     ): StakeUpdatedEventFilter;
+
+    "StakeWithdrawn(address,uint256)"(
+      node?: null,
+      amount?: null
+    ): StakeWithdrawnEventFilter;
+    StakeWithdrawn(node?: null, amount?: null): StakeWithdrawnEventFilter;
 
     "Unpaused(address)"(account?: null): UnpausedEventFilter;
     Unpaused(account?: null): UnpausedEventFilter;
@@ -782,7 +828,7 @@ export interface StakeRegistry extends BaseContract {
   estimateGas: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    PAUSER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+    OracleContract(overrides?: CallOverrides): Promise<BigNumber>;
 
     REDISTRIBUTOR_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -793,16 +839,9 @@ export interface StakeRegistry extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    depositStake(
-      _owner: PromiseOrValue<string>,
-      nonce: PromiseOrValue<BytesLike>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     freezeDeposit(
-      overlay: PromiseOrValue<BytesLike>,
-      time: PromiseOrValue<BigNumberish>,
+      _owner: PromiseOrValue<string>,
+      _time: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -823,13 +862,28 @@ export interface StakeRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    lastUpdatedBlockNumberOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
+    lastUpdatedBlockNumberOfAddress(
+      _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    ownerOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
+    manageStake(
+      _setNonce: PromiseOrValue<BytesLike>,
+      _addAmount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    migrateStake(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    nodeEffectiveStake(
+      _owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    overlayOfAddress(
+      _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -852,18 +906,13 @@ export interface StakeRegistry extends BaseContract {
     ): Promise<BigNumber>;
 
     slashDeposit(
-      overlay: PromiseOrValue<BytesLike>,
-      amount: PromiseOrValue<BigNumberish>,
+      _owner: PromiseOrValue<string>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    stakeOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     stakes(
-      arg0: PromiseOrValue<BytesLike>,
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -876,16 +925,11 @@ export interface StakeRegistry extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    usableStakeOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     withdrawFromStake(
-      overlay: PromiseOrValue<BytesLike>,
-      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    withdrawableStake(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -893,7 +937,7 @@ export interface StakeRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    PAUSER_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    OracleContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     REDISTRIBUTOR_ROLE(
       overrides?: CallOverrides
@@ -906,16 +950,9 @@ export interface StakeRegistry extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    depositStake(
-      _owner: PromiseOrValue<string>,
-      nonce: PromiseOrValue<BytesLike>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     freezeDeposit(
-      overlay: PromiseOrValue<BytesLike>,
-      time: PromiseOrValue<BigNumberish>,
+      _owner: PromiseOrValue<string>,
+      _time: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -936,13 +973,28 @@ export interface StakeRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    lastUpdatedBlockNumberOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
+    lastUpdatedBlockNumberOfAddress(
+      _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    ownerOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
+    manageStake(
+      _setNonce: PromiseOrValue<BytesLike>,
+      _addAmount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    migrateStake(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    nodeEffectiveStake(
+      _owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    overlayOfAddress(
+      _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -965,18 +1017,13 @@ export interface StakeRegistry extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     slashDeposit(
-      overlay: PromiseOrValue<BytesLike>,
-      amount: PromiseOrValue<BigNumberish>,
+      _owner: PromiseOrValue<string>,
+      _amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    stakeOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     stakes(
-      arg0: PromiseOrValue<BytesLike>,
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -989,15 +1036,10 @@ export interface StakeRegistry extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    usableStakeOfOverlay(
-      overlay: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     withdrawFromStake(
-      overlay: PromiseOrValue<BytesLike>,
-      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
+
+    withdrawableStake(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }
