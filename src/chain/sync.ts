@@ -206,7 +206,21 @@ export class ChainSync {
 					'sync'
 				)
 
-			await this.blockHandler(showGas, block)
+			let roundAnchor: string | undefined
+			if (block.number % (config.game.blocksPerRound / 4) == 0) {
+				// Only at phase start
+				try {
+					roundAnchor = await this.redistribution.currentRoundAnchor({
+						blockTag: block.number,
+					})
+					//Logging.showError(`currentRoundAnchor(${block.number}): ${roundAnchor}}`)
+				} catch (e) {
+					// Logging.showError(`currentRoundAnchor(${block.number}): ${e}}`)
+					roundAnchor = undefined
+				}
+			}
+
+			await this.blockHandler(showGas, block, roundAnchor)
 
 			this.lastBlock = {
 				blockNo: block.number,

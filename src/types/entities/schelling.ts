@@ -4,7 +4,7 @@ const BTree = (BTree_ as any).default as typeof BTree_
 
 import config from '../../config.js'
 import { Logging } from '../../utils/index.js'
-import { fmtAnchor, leftId, shortId } from '../../lib/index.js'
+import { fmtAnchor, fmtColorAnchor, leftId, shortId } from '../../lib/index.js'
 import { BlockDetails } from '../../chain/index.js'
 
 import { Player } from './player.js'
@@ -39,6 +39,7 @@ export class SchellingGame {
 	private rounds: BTree_<number, Round>
 	private currentRoundNo = 0
 	private lastBlock: BlockDetails
+	private runningDepth = 0
 
 	private myOverlays: string[] = []
 	private myAccounts: string[] = []
@@ -160,10 +161,11 @@ export class SchellingGame {
 
 		let line = `${Round.roundString(block.blockNo)}`
 		if (leftInRound > 0) line += `+${leftInRound}`
-		if (round.anchor) line += ` ${fmtAnchor(round.anchor)}`
+		if (round.anchor)
+			line += ` ${fmtColorAnchor(round.anchor, this.runningDepth)}`
 		if (phase == 'claim' && roundAnchor) {
 			if (!round.anchor) line += ' next' // Fill in the gap before ->
-			line += `->${fmtAnchor(roundAnchor)}`
+			line += `->${fmtColorAnchor(roundAnchor, this.runningDepth)}`
 		}
 		line += ` ${percent}% of ${phase}`
 		if (remaining != leftInRound) line += ` +${remaining} blocks`
@@ -236,6 +238,7 @@ export class SchellingGame {
 					`${Round.roundString(block.blockNo)} new hash ${shortId(hash, 16)}`
 				)
 		}
+		this.runningDepth = depth
 
 		if (SchellingGame._showLogs)
 			Logging.showError(
@@ -380,6 +383,41 @@ export class SchellingGame {
 	 */
 	public isMyOverlay(overlay: string): boolean {
 		return this.myOverlays.includes(overlay)
+	}
+
+	/**
+	 * Determine if one of my overlays is in the specified neighborhood depth.
+	 * @param selected the selected neighborhood
+	 * @param depth the depth (left-most bits) to check
+	 * @returns true if one of my overlays is selected
+	 */
+	public isMyNeighborhood(selected: string, depth: number): boolean {
+		//process.stderr.write(`isMyNeighborhood(${selected} @ ${depth})\n`)
+		if (depth <= 0) return true
+		if (depth > 28) return false
+		const digits = Math.trunc((depth + 3) / 4)
+		if (selected.substring(0, 2) == '0x') selected = selected.substring(2)
+		const selBits = parseInt(selected.substring(0, digits), 16)
+			.toString(2)
+			.padStart(digits * 4, '0')
+			.substring(0, depth)
+		//process.stderr.write(`isMyNeighborhood(${selected} @ ${depth}) digits:${digits} selBits:${selBits}\n`)
+		for (const o of this.myOverlays) {
+			let oBits: string
+			if (o.substring(0, 2) == '0x')
+				oBits = parseInt(o.substring(2, digits + 2), 16)
+					.toString(2)
+					.padStart(digits * 4, '0')
+					.substring(0, depth)
+			else
+				oBits = parseInt(o.substring(0, digits), 16)
+					.toString(2)
+					.padStart(digits * 4, '0')
+					.substring(0, depth)
+			//process.stderr.write(`isMyNeighborhood(${selected} @ ${depth}) oBits:${oBits} selBits:${selBits}\n`)
+			if (oBits == selBits) return true
+		}
+		return false
 	}
 
 	/**

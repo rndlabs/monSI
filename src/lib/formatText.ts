@@ -45,3 +45,20 @@ export function fmtOverlay(o: string, n = 12): string {
 export function fmtAnchor(o: string, depth = 16): string {
 	return leftId(o, Math.floor((depth + 3) / 4), false) // Depth is leading bits, hex encoded is 4 bits/character
 }
+
+export function fmtColorAnchor(
+	anchor: string,
+	depth: number,
+	show = 16
+): string {
+	const id = leftId(anchor, Math.floor((show + 3) / 4), false) // Depth is leading bits, hex encoded is 4 bits/character
+	if (SchellingGame.getInstance().isMyNeighborhood(anchor, depth)) {
+		return '{yellow-fg}' + id + '{/yellow-fg}' // + `@${depth}`
+		//  This can highlight "close" selections, but a miss is as good as a mile!
+		//	} else if (depth >= 2 && SchellingGame.getInstance().isMyNeighborhood(anchor, depth-1)) {
+		//		return '{magenta-bg}' + id + '{/magenta-bg}'// + `@${depth}`
+		//	} else if (depth >= 4 && SchellingGame.getInstance().isMyNeighborhood(anchor, Math.trunc(depth/2))) {
+		//		return '{magenta-bg}' + id + '{/magenta-bg}'// + `@${depth}`
+	}
+	return id // + `@${depth}`
+}

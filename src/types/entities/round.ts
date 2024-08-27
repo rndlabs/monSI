@@ -2,7 +2,12 @@ import { BigNumber, BigNumberish } from 'ethers'
 import { Logging } from '../../utils/index.js'
 import { BlockDetails } from '../../chain/index.js'
 import config from '../../config.js'
-import { fmtAnchor, fmtOverlay, shortBZZ } from '../../lib/index.js'
+import {
+	fmtAnchor,
+	fmtColorAnchor,
+	fmtOverlay,
+	shortBZZ,
+} from '../../lib/index.js'
 import { SchellingGame } from './schelling.js'
 import { Ui, BOXES } from './ui.js'
 
@@ -70,21 +75,25 @@ export class Round {
 	 * @returns {string} The round as a string.
 	 */
 	format(): string {
-		let r = `${this.roundString()}`
-		if (this._anchor) r += ` ${fmtAnchor(this._anchor)}`
-		r += ` ${this.commits}-${this.reveals}`
-		if (this.slashes > 0) r += `={red-fg}${this.slashes}{/red-fg}`
-
 		// iterate over all hashes and if the depth is not the same in all, set sameDepth to false
 		let sameDepth = true
-		let depth = 0
+		let depth = -1
 		for (const hash in this.hashes) {
-			if (depth === 0) depth = this.hashes[hash].depth
+			if (depth === -1) depth = this.hashes[hash].depth
 			else if (depth !== this.hashes[hash].depth) {
 				sameDepth = false
-				break
+				if (depth < this.hashes[hash].depth) depth = this.hashes[hash].depth
+				//break // Need to loop all hashes to get maximum depth
 			}
 		}
+
+		let r = `${this.roundString()}`
+		if (this._anchor) {
+			if (depth === -1) r += ` ${fmtAnchor(this._anchor)}`
+			else r += ` ${fmtColorAnchor(this._anchor, depth)}`
+		}
+		r += ` ${this.commits}-${this.reveals}`
+		if (this.slashes > 0) r += `={red-fg}${this.slashes}{/red-fg}`
 
 		// enumerate and output the hashes
 		let i = 0

@@ -14,6 +14,7 @@ import {
 	fmtAccount,
 	fmtOverlay,
 	fmtAnchor,
+	fmtColorAnchor,
 } from './formatText.js'
 
 export {
@@ -34,4 +35,5 @@ export {
 	fmtAccount,
 	fmtOverlay,
 	fmtAnchor,
+	fmtColorAnchor,
 }
