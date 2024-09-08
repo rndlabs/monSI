@@ -431,7 +431,7 @@ export class ChainSync {
 
 		block.transactions.forEach(async (tx) => {
 			if (tx.to) {
-				if (tx.to === config.contracts.redistribution)
+				if (tx.to === config.contracts.redistribution) {
 					// ToDo: Update redistribution contract once ABI is available
 					await this.processRedistributionTx(
 						this.redistribution.interface,
@@ -439,6 +439,9 @@ export class ChainSync {
 						tx,
 						block.timestamp
 					)
+				}
+				//else Logging.showLog(
+				//	`Sync: block ${block.number} tx to ${tx.to} not redistribution ${config.contracts.redistribution}`)
 			}
 		})
 		// I'd like to only refresh the top line if we processed something, but forEach precludes this
