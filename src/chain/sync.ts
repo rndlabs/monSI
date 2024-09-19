@@ -28,7 +28,12 @@ import {
 	BOXES,
 } from '../types/entities/index.js'
 
-import { shortBZZ, fmtAccount, specificLocalTime } from '../lib/index.js'
+import {
+	shortBZZ,
+	fmtAccount,
+	fmtOverlay,
+	specificLocalTime,
+} from '../lib/index.js'
 import { formatBlockDeltaColor } from '../lib/formatChain.js'
 
 const game = SchellingGame.getInstance()
@@ -267,26 +272,80 @@ export class ChainSync {
 
 	private setupEventListeners(showGas: boolean) {
 		// setup the event listeners
-		/*
+
 		// stake registry - only needed for new players / updated stakes
+		/*
+export interface StakeFrozenEventObject {
+  frozen: string;
+  overlay: string;
+  time: BigNumber;
+}
+export type StakeFrozenEvent = TypedEvent<
+  [string, string, BigNumber],
+  StakeFrozenEventObject
+>;
+
+export type StakeFrozenEventFilter = TypedEventFilter<StakeFrozenEvent>;
+*/
+		/*
+export interface OverlayChangedEventObject {
+  owner: string;
+  overlay: string;
+}
+export type OverlayChangedEvent = TypedEvent<
+  [string, string],
+  OverlayChangedEventObject
+>;
+
+export type OverlayChangedEventFilter = TypedEventFilter<OverlayChangedEvent>;
+*/
+		/*
+    "StakeUpdated(address,uint256,uint256,bytes32,uint256)"(
+      owner?: PromiseOrValue<string> | null,
+      committedStake?: null,
+      potentialStake?: null,
+      overlay?: null,
+      lastUpdatedBlock?: null
+    ): StakeUpdatedEventFilter;
+export interface StakeUpdatedEventObject {
+  owner: string;
+  committedStake: BigNumber;
+  potentialStake: BigNumber;
+  overlay: string;
+  lastUpdatedBlock: BigNumber;
+}
+export type StakeUpdatedEvent = TypedEvent<
+  [string, BigNumber, BigNumber, string, BigNumber],
+  StakeUpdatedEventObject
+>;
+
+export type StakeUpdatedEventFilter = TypedEventFilter<StakeUpdatedEvent>;
+*/
 		this.stakeRegistry.on(
 			this.stakeRegistry.filters[
-				'StakeUpdated(bytes32,uint256,address,uint256)'
+				'StakeUpdated(address,uint256,uint256,bytes32,uint256)'
 			](),
-			async (overlay, stakeAmount, owner, lastBlockUpdated, event) => {
+			async (
+				owner,
+				committedStake,
+				potentialStake,
+				overlay,
+				lastUpdatedBlock,
+				event
+			) => {
 				if (this._state == State.RUNNING) {
 					const block = await this.provider.getBlock(event.blockNumber)
-					game.stakeUpdated(overlay, owner, stakeAmount, {
+					game.stakeUpdated(overlay, owner, potentialStake, {
 						blockNo: event.blockNumber,
 						blockTimestamp: block.timestamp,
 					})
 				}
-				Logging.showLogError(
-					`StakeUpdated event: ${overlay}, ${stakeAmount}, ${owner}, ${lastBlockUpdated}`
-				)
+				//Logging.showLogError(
+				//	`StakeUpdated event: ${fmtOverlay(overlay)}, ${shortBZZ(potentialStake)}(${shortBZZ(committedStake)}), ${fmtAccount(owner)}, ${lastUpdatedBlock}`
+				//)
 			}
 		)
-*/
+
 		// monitor the bzz token
 		this.bzzToken.on(this.bzzToken.filters.Transfer(), (from, to, amount) => {
 			// if (this._state == State.RUNNING)
@@ -663,13 +722,22 @@ export class ChainSync {
 					log.topics[0] ==
 					this.stakeRegistry.interface.getEventTopic('StakeUpdated')
 				) {
-					const [overlay, stakeAmount, owner] = desc.args
-					game.stakeUpdated(overlay, owner, stakeAmount, blockDetails)
+					const [
+						owner,
+						committedStake,
+						potentialStake,
+						overlay,
+						lastUpdatedBlock,
+					] = desc.args
+					game.stakeUpdated(overlay, owner, potentialStake, blockDetails)
+					//Logging.showLogError(
+					//	`StakeUpdated event: ${fmtOverlay(overlay)}, ${shortBZZ(potentialStake)}(${shortBZZ(committedStake)}), ${fmtAccount(owner)}, ${lastUpdatedBlock}`
+					//)
 				} else if (
 					log.topics[0] ==
 					this.stakeRegistry.interface.getEventTopic('StakeSlashed')
 				) {
-					const [overlay, amount] = desc.args
+					const [address, overlay, amount] = desc.args
 					game.stakeSlashed(overlay, amount, blockDetails)
 				}
 			}
