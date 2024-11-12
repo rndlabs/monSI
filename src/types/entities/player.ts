@@ -144,7 +144,7 @@ export class Player {
 						this.reveals[round].depth
 					}`
 			} else if (this.stake) t += ` ${fmtStake(this.stake, this.height)}`
-		} else if (this.stake) t += ` ${fmtStake(this.stake, this.height, true)}`
+		} else if (this.stake) t += ` ${fmtStake(this.stake, this.height)}`
 		return `${specificLocalTime(this.lastBlock!.blockTimestamp)} ${t}`
 	}
 
