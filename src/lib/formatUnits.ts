@@ -104,8 +104,9 @@ export function fmtStake(
 ) {
 	var result = shortBZZ(n, { suppressUnits: true })
 	if (height && height > 0) {
-		if (height > 1) result = `${result}/2^${height}`
-		else result = `${result}/2`
+		if (height > 1)
+			result = `${result}{yellow-fg}/2{/yellow-fg}{yellow-fg}^${height}{/yellow-fg}`
+		else result = `${result}{green-fg}/2{/green-fg}`
 	}
 	if (!suppressUnits) result = result + ' ' + config.units.BZZ
 	return result

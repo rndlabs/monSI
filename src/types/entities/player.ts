@@ -157,7 +157,7 @@ export class Player {
 		this.lastAction = 'commit'
 		this._isPlaying = true
 		this.playCount = (this.playCount || 0) + 1
-		if (height) this.height = height
+		if (height || height === 0) this.height = height
 
 		// if the player is frozen, check if they should be thawed
 		if (this.frozenThawBlock) {

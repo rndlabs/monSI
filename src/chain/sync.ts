@@ -585,7 +585,7 @@ export type StakeUpdatedEventFilter = TypedEventFilter<StakeUpdatedEvent>;
 							// below we destructure the Revealed struct
 							const [roundNumber, overlay, height] =
 								this.redistribution.interface.parseLog(log).args
-							//Logging.showError(`${roundNumber} Commit ${fmtOverlay(overlay)} ${height}`)
+							//Logging.showLogError(`${roundNumber} Commit ${fmtOverlay(overlay,64)} ${height}`)
 							newHeight = height
 						}
 					})
@@ -608,7 +608,7 @@ export type StakeUpdatedEventFilter = TypedEventFilter<StakeUpdatedEvent>;
 							// below we destructure the Revealed struct
 							const [roundNumber, overlay, stake, stakeDensity, hash, depth] =
 								this.redistribution.interface.parseLog(log).args
-							//Logging.showError(`${roundNumber} Reveal ${fmtOverlay(overlay)} ${shortBZZ(stake)} ${shortBZZ(stakeDensity)} ${depth}`)
+							//Logging.showLogError(`${roundNumber} Reveal ${fmtOverlay(overlay,64)} ${shortBZZ(stake)} ${shortBZZ(stakeDensity)} ${depth}`)
 							newStake = stake
 							newStakeDensity = stakeDensity
 						}
