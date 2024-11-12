@@ -239,6 +239,12 @@
 				"internalType": "uint256",
 				"name": "lastUpdatedBlock",
 				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint8",
+				"name": "height",
+				"type": "uint8"
 			}
 		],
 		"name": "StakeUpdated",
@@ -428,6 +434,25 @@
 				"type": "address"
 			}
 		],
+		"name": "heightOfAddress",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_owner",
+				"type": "address"
+			}
+		],
 		"name": "lastUpdatedBlockNumberOfAddress",
 		"outputs": [
 			{
@@ -450,6 +475,11 @@
 				"internalType": "uint256",
 				"name": "_addAmount",
 				"type": "uint256"
+			},
+			{
+				"internalType": "uint8",
+				"name": "_height",
+				"type": "uint8"
 			}
 		],
 		"name": "manageStake",
@@ -605,6 +635,11 @@
 				"internalType": "uint256",
 				"name": "lastUpdatedBlockNumber",
 				"type": "uint256"
+			},
+			{
+				"internalType": "uint8",
+				"name": "height",
+				"type": "uint8"
 			}
 		],
 		"stateMutability": "view",

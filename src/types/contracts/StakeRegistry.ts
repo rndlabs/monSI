@@ -38,8 +38,9 @@ export interface StakeRegistryInterface extends utils.Interface {
     "getRoleAdmin(bytes32)": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
+    "heightOfAddress(address)": FunctionFragment;
     "lastUpdatedBlockNumberOfAddress(address)": FunctionFragment;
-    "manageStake(bytes32,uint256)": FunctionFragment;
+    "manageStake(bytes32,uint256,uint8)": FunctionFragment;
     "migrateStake()": FunctionFragment;
     "nodeEffectiveStake(address)": FunctionFragment;
     "overlayOfAddress(address)": FunctionFragment;
@@ -66,6 +67,7 @@ export interface StakeRegistryInterface extends utils.Interface {
       | "getRoleAdmin"
       | "grantRole"
       | "hasRole"
+      | "heightOfAddress"
       | "lastUpdatedBlockNumberOfAddress"
       | "manageStake"
       | "migrateStake"
@@ -117,12 +119,20 @@ export interface StakeRegistryInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "heightOfAddress",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "lastUpdatedBlockNumberOfAddress",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "manageStake",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
+    values: [
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "migrateStake",
@@ -196,6 +206,10 @@ export interface StakeRegistryInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "heightOfAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "lastUpdatedBlockNumberOfAddress",
     data: BytesLike
   ): Result;
@@ -249,7 +263,7 @@ export interface StakeRegistryInterface extends utils.Interface {
     "RoleRevoked(bytes32,address,address)": EventFragment;
     "StakeFrozen(address,bytes32,uint256)": EventFragment;
     "StakeSlashed(address,bytes32,uint256)": EventFragment;
-    "StakeUpdated(address,uint256,uint256,bytes32,uint256)": EventFragment;
+    "StakeUpdated(address,uint256,uint256,bytes32,uint256,uint8)": EventFragment;
     "StakeWithdrawn(address,uint256)": EventFragment;
     "Unpaused(address)": EventFragment;
   };
@@ -351,9 +365,10 @@ export interface StakeUpdatedEventObject {
   potentialStake: BigNumber;
   overlay: string;
   lastUpdatedBlock: BigNumber;
+  height: number;
 }
 export type StakeUpdatedEvent = TypedEvent<
-  [string, BigNumber, BigNumber, string, BigNumber],
+  [string, BigNumber, BigNumber, string, BigNumber, number],
   StakeUpdatedEventObject
 >;
 
@@ -440,6 +455,11 @@ export interface StakeRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    heightOfAddress(
+      _owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[number]>;
+
     lastUpdatedBlockNumberOfAddress(
       _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -448,6 +468,7 @@ export interface StakeRegistry extends BaseContract {
     manageStake(
       _setNonce: PromiseOrValue<BytesLike>,
       _addAmount: PromiseOrValue<BigNumberish>,
+      _height: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -493,11 +514,12 @@ export interface StakeRegistry extends BaseContract {
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber, BigNumber, BigNumber] & {
+      [string, BigNumber, BigNumber, BigNumber, number] & {
         overlay: string;
         committedStake: BigNumber;
         potentialStake: BigNumber;
         lastUpdatedBlockNumber: BigNumber;
+        height: number;
       }
     >;
 
@@ -553,6 +575,11 @@ export interface StakeRegistry extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  heightOfAddress(
+    _owner: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<number>;
+
   lastUpdatedBlockNumberOfAddress(
     _owner: PromiseOrValue<string>,
     overrides?: CallOverrides
@@ -561,6 +588,7 @@ export interface StakeRegistry extends BaseContract {
   manageStake(
     _setNonce: PromiseOrValue<BytesLike>,
     _addAmount: PromiseOrValue<BigNumberish>,
+    _height: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -606,11 +634,12 @@ export interface StakeRegistry extends BaseContract {
     arg0: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<
-    [string, BigNumber, BigNumber, BigNumber] & {
+    [string, BigNumber, BigNumber, BigNumber, number] & {
       overlay: string;
       committedStake: BigNumber;
       potentialStake: BigNumber;
       lastUpdatedBlockNumber: BigNumber;
+      height: number;
     }
   >;
 
@@ -666,6 +695,11 @@ export interface StakeRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    heightOfAddress(
+      _owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<number>;
+
     lastUpdatedBlockNumberOfAddress(
       _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -674,6 +708,7 @@ export interface StakeRegistry extends BaseContract {
     manageStake(
       _setNonce: PromiseOrValue<BytesLike>,
       _addAmount: PromiseOrValue<BigNumberish>,
+      _height: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -715,11 +750,12 @@ export interface StakeRegistry extends BaseContract {
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber, BigNumber, BigNumber] & {
+      [string, BigNumber, BigNumber, BigNumber, number] & {
         overlay: string;
         committedStake: BigNumber;
         potentialStake: BigNumber;
         lastUpdatedBlockNumber: BigNumber;
+        height: number;
       }
     >;
 
@@ -800,19 +836,21 @@ export interface StakeRegistry extends BaseContract {
       amount?: null
     ): StakeSlashedEventFilter;
 
-    "StakeUpdated(address,uint256,uint256,bytes32,uint256)"(
+    "StakeUpdated(address,uint256,uint256,bytes32,uint256,uint8)"(
       owner?: PromiseOrValue<string> | null,
       committedStake?: null,
       potentialStake?: null,
       overlay?: null,
-      lastUpdatedBlock?: null
+      lastUpdatedBlock?: null,
+      height?: null
     ): StakeUpdatedEventFilter;
     StakeUpdated(
       owner?: PromiseOrValue<string> | null,
       committedStake?: null,
       potentialStake?: null,
       overlay?: null,
-      lastUpdatedBlock?: null
+      lastUpdatedBlock?: null,
+      height?: null
     ): StakeUpdatedEventFilter;
 
     "StakeWithdrawn(address,uint256)"(
@@ -862,6 +900,11 @@ export interface StakeRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    heightOfAddress(
+      _owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     lastUpdatedBlockNumberOfAddress(
       _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -870,6 +913,7 @@ export interface StakeRegistry extends BaseContract {
     manageStake(
       _setNonce: PromiseOrValue<BytesLike>,
       _addAmount: PromiseOrValue<BigNumberish>,
+      _height: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -973,6 +1017,11 @@ export interface StakeRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    heightOfAddress(
+      _owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     lastUpdatedBlockNumberOfAddress(
       _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -981,6 +1030,7 @@ export interface StakeRegistry extends BaseContract {
     manageStake(
       _setNonce: PromiseOrValue<BytesLike>,
       _addAmount: PromiseOrValue<BigNumberish>,
+      _height: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

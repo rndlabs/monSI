@@ -461,11 +461,12 @@ export interface RedistributionInterface extends utils.Interface {
 
   events: {
     "ChunkCount(uint256)": EventFragment;
-    "Committed(uint256,bytes32)": EventFragment;
+    "Committed(uint256,bytes32,uint8)": EventFragment;
     "CountCommits(uint256)": EventFragment;
     "CountReveals(uint256)": EventFragment;
     "CurrentRevealAnchor(uint256,bytes32)": EventFragment;
     "Paused(address)": EventFragment;
+    "PriceAdjustmentSkipped(uint16)": EventFragment;
     "Revealed(uint256,bytes32,uint256,uint256,bytes32,uint8)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
     "RoleGranted(bytes32,address,address)": EventFragment;
@@ -473,6 +474,7 @@ export interface RedistributionInterface extends utils.Interface {
     "TruthSelected(bytes32,uint8)": EventFragment;
     "Unpaused(address)": EventFragment;
     "WinnerSelected(tuple)": EventFragment;
+    "WithdrawFailed(address)": EventFragment;
     "transformedChunkAddressFromInclusionProof(uint256,bytes32)": EventFragment;
   };
 
@@ -482,6 +484,7 @@ export interface RedistributionInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "CountReveals"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "CurrentRevealAnchor"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PriceAdjustmentSkipped"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Revealed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
@@ -489,6 +492,7 @@ export interface RedistributionInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "TruthSelected"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WinnerSelected"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "WithdrawFailed"): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "transformedChunkAddressFromInclusionProof"
   ): EventFragment;
@@ -504,9 +508,10 @@ export type ChunkCountEventFilter = TypedEventFilter<ChunkCountEvent>;
 export interface CommittedEventObject {
   roundNumber: BigNumber;
   overlay: string;
+  height: number;
 }
 export type CommittedEvent = TypedEvent<
-  [BigNumber, string],
+  [BigNumber, string, number],
   CommittedEventObject
 >;
 
@@ -550,6 +555,17 @@ export interface PausedEventObject {
 export type PausedEvent = TypedEvent<[string], PausedEventObject>;
 
 export type PausedEventFilter = TypedEventFilter<PausedEvent>;
+
+export interface PriceAdjustmentSkippedEventObject {
+  redundancyCount: number;
+}
+export type PriceAdjustmentSkippedEvent = TypedEvent<
+  [number],
+  PriceAdjustmentSkippedEventObject
+>;
+
+export type PriceAdjustmentSkippedEventFilter =
+  TypedEventFilter<PriceAdjustmentSkippedEvent>;
 
 export interface RevealedEventObject {
   roundNumber: BigNumber;
@@ -631,6 +647,16 @@ export type WinnerSelectedEvent = TypedEvent<
 
 export type WinnerSelectedEventFilter = TypedEventFilter<WinnerSelectedEvent>;
 
+export interface WithdrawFailedEventObject {
+  owner: string;
+}
+export type WithdrawFailedEvent = TypedEvent<
+  [string],
+  WithdrawFailedEventObject
+>;
+
+export type WithdrawFailedEventFilter = TypedEventFilter<WithdrawFailedEvent>;
+
 export interface transformedChunkAddressFromInclusionProofEventObject {
   indexInRC: BigNumber;
   chunkAddress: string;
@@ -699,10 +725,11 @@ export interface Redistribution extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [string, string, boolean, BigNumber, string, BigNumber] & {
+      [string, string, boolean, number, BigNumber, string, BigNumber] & {
         overlay: string;
         owner: string;
         revealed: boolean;
+        height: number;
         stake: BigNumber;
         obfuscatedHash: string;
         revealIndex: BigNumber;
@@ -879,10 +906,11 @@ export interface Redistribution extends BaseContract {
     arg0: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<
-    [string, string, boolean, BigNumber, string, BigNumber] & {
+    [string, string, boolean, number, BigNumber, string, BigNumber] & {
       overlay: string;
       owner: string;
       revealed: boolean;
+      height: number;
       stake: BigNumber;
       obfuscatedHash: string;
       revealIndex: BigNumber;
@@ -1057,10 +1085,11 @@ export interface Redistribution extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [string, string, boolean, BigNumber, string, BigNumber] & {
+      [string, string, boolean, number, BigNumber, string, BigNumber] & {
         overlay: string;
         owner: string;
         revealed: boolean;
+        height: number;
         stake: BigNumber;
         obfuscatedHash: string;
         revealIndex: BigNumber;
@@ -1206,11 +1235,16 @@ export interface Redistribution extends BaseContract {
     "ChunkCount(uint256)"(validChunkCount?: null): ChunkCountEventFilter;
     ChunkCount(validChunkCount?: null): ChunkCountEventFilter;
 
-    "Committed(uint256,bytes32)"(
+    "Committed(uint256,bytes32,uint8)"(
       roundNumber?: null,
-      overlay?: null
+      overlay?: null,
+      height?: null
     ): CommittedEventFilter;
-    Committed(roundNumber?: null, overlay?: null): CommittedEventFilter;
+    Committed(
+      roundNumber?: null,
+      overlay?: null,
+      height?: null
+    ): CommittedEventFilter;
 
     "CountCommits(uint256)"(_count?: null): CountCommitsEventFilter;
     CountCommits(_count?: null): CountCommitsEventFilter;
@@ -1229,6 +1263,13 @@ export interface Redistribution extends BaseContract {
 
     "Paused(address)"(account?: null): PausedEventFilter;
     Paused(account?: null): PausedEventFilter;
+
+    "PriceAdjustmentSkipped(uint16)"(
+      redundancyCount?: null
+    ): PriceAdjustmentSkippedEventFilter;
+    PriceAdjustmentSkipped(
+      redundancyCount?: null
+    ): PriceAdjustmentSkippedEventFilter;
 
     "Revealed(uint256,bytes32,uint256,uint256,bytes32,uint8)"(
       roundNumber?: null,
@@ -1291,6 +1332,9 @@ export interface Redistribution extends BaseContract {
 
     "WinnerSelected(tuple)"(winner?: null): WinnerSelectedEventFilter;
     WinnerSelected(winner?: null): WinnerSelectedEventFilter;
+
+    "WithdrawFailed(address)"(owner?: null): WithdrawFailedEventFilter;
+    WithdrawFailed(owner?: null): WithdrawFailedEventFilter;
 
     "transformedChunkAddressFromInclusionProof(uint256,bytes32)"(
       indexInRC?: null,

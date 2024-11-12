@@ -248,6 +248,12 @@ const _abi = [
         name: "lastUpdatedBlock",
         type: "uint256",
       },
+      {
+        indexed: false,
+        internalType: "uint8",
+        name: "height",
+        type: "uint8",
+      },
     ],
     name: "StakeUpdated",
     type: "event",
@@ -436,6 +442,25 @@ const _abi = [
         type: "address",
       },
     ],
+    name: "heightOfAddress",
+    outputs: [
+      {
+        internalType: "uint8",
+        name: "",
+        type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_owner",
+        type: "address",
+      },
+    ],
     name: "lastUpdatedBlockNumberOfAddress",
     outputs: [
       {
@@ -458,6 +483,11 @@ const _abi = [
         internalType: "uint256",
         name: "_addAmount",
         type: "uint256",
+      },
+      {
+        internalType: "uint8",
+        name: "_height",
+        type: "uint8",
       },
     ],
     name: "manageStake",
@@ -613,6 +643,11 @@ const _abi = [
         internalType: "uint256",
         name: "lastUpdatedBlockNumber",
         type: "uint256",
+      },
+      {
+        internalType: "uint8",
+        name: "height",
+        type: "uint8",
       },
     ],
     stateMutability: "view",

@@ -289,6 +289,12 @@ const _abi = [
         name: "overlay",
         type: "bytes32",
       },
+      {
+        indexed: false,
+        internalType: "uint8",
+        name: "height",
+        type: "uint8",
+      },
     ],
     name: "Committed",
     type: "event",
@@ -349,6 +355,19 @@ const _abi = [
       },
     ],
     name: "Paused",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint16",
+        name: "redundancyCount",
+        type: "uint16",
+      },
+    ],
+    name: "PriceAdjustmentSkipped",
     type: "event",
   },
   {
@@ -544,6 +563,19 @@ const _abi = [
       },
     ],
     name: "WinnerSelected",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+    ],
+    name: "WithdrawFailed",
     type: "event",
   },
   {
@@ -966,6 +998,11 @@ const _abi = [
         internalType: "bool",
         name: "revealed",
         type: "bool",
+      },
+      {
+        internalType: "uint8",
+        name: "height",
+        type: "uint8",
       },
       {
         internalType: "uint256",

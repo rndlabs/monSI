@@ -277,6 +277,12 @@
 				"internalType": "bytes32",
 				"name": "overlay",
 				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint8",
+				"name": "height",
+				"type": "uint8"
 			}
 		],
 		"name": "Committed",
@@ -338,6 +344,19 @@
 			}
 		],
 		"name": "Paused",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint16",
+				"name": "redundancyCount",
+				"type": "uint16"
+			}
+		],
+		"name": "PriceAdjustmentSkipped",
 		"type": "event"
 	},
 	{
@@ -533,6 +552,19 @@
 			}
 		],
 		"name": "WinnerSelected",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "WithdrawFailed",
 		"type": "event"
 	},
 	{
@@ -955,6 +987,11 @@
 				"internalType": "bool",
 				"name": "revealed",
 				"type": "bool"
+			},
+			{
+				"internalType": "uint8",
+				"name": "height",
+				"type": "uint8"
 			},
 			{
 				"internalType": "uint256",
