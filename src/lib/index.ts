@@ -6,6 +6,7 @@ import {
 	formatSi,
 	shortCurrency,
 	shortETH,
+	fmtStake,
 } from './formatUnits.js'
 import { colorValue, colorSpecificDelta, colorDelta } from './formatUi.js'
 import {
@@ -24,6 +25,7 @@ export {
 	currentLocalTime,
 	wholeBZZ,
 	shortBZZ,
+	fmtStake,
 	formatSi,
 	shortCurrency,
 	shortETH,

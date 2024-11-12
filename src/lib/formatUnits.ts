@@ -96,3 +96,17 @@ export function shortBZZ(n: BigNumber, options?: FormatUnitOptions) {
 export function shortETH(n: BigNumber, options?: FormatUnitOptions) {
 	return shortCurrency(n, 18, 'ETH', options)
 }
+
+export function fmtStake(
+	n: BigNumber,
+	height: number | undefined,
+	suppressUnits: boolean = false
+) {
+	var result = shortBZZ(n, { suppressUnits: true })
+	if (height && height > 0) {
+		if (height > 1) result = `${result}/2^${height}`
+		else result = `${result}/2`
+	}
+	if (!suppressUnits) result = result + ' ' + config.units.BZZ
+	return result
+}
