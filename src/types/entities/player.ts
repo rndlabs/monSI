@@ -9,6 +9,7 @@ import {
 	colorDelta,
 	colorValue,
 	shortBZZ,
+	fmtStake,
 } from '../../lib/index.js'
 import { Round } from './round.js'
 import { Ui } from './ui.js'
@@ -17,6 +18,7 @@ export class Player {
 	private _overlay: string // overlay of the bee node
 	private _account: string | undefined // ethereum address of the bee node
 	private amount: BigNumber = BigNumber.from(0) // total amount won / lost
+	private height?: number // Total stake (if tracking)
 	private stake?: BigNumber // Total stake (if tracking)
 	private stakeSlashed?: BigNumber // Total stake slashed (if tracking)
 	private stakeChangeCount = 0
@@ -30,7 +32,9 @@ export class Player {
 	private freezeCount = 0 // initialize as 0
 	private slashCount = 0 // initialize as 0
 
-	private reveals: { [round: number]: { hash: string; depth: number } } = {}
+	private reveals: {
+		[round: number]: { hash: string; depth: number; stakeDensity?: BigNumber }
+	} = {}
 
 	public get overlay() {
 		return this._overlay
@@ -109,7 +113,7 @@ export class Player {
 			result += ` {blue-fg}${this.frozenThawBlock}{/blue-fg}`
 
 		if (this.stake) {
-			result += ` ${shortBZZ(this.stake)}`
+			result += ` ${fmtStake(this.stake, this.height)}`
 			if (this.stakeChangeCount > 1) result += `(${this.stakeChangeCount})`
 		}
 		if (this.stakeSlashed) {
@@ -132,8 +136,15 @@ export class Player {
 				this.reveals[round].hash,
 				6
 			)}`
-		}
-		if (this.stake) t += ` ${shortBZZ(this.stake)}`
+			if (this.reveals[round].stakeDensity) {
+				const options = { suppressUnits: true }
+				t += ` eff ${shortBZZ(this.reveals[round].stakeDensity!, options)}`
+				if (this.stake)
+					t += `<=${fmtStake(this.stake, this.height, true)}*2^${
+						this.reveals[round].depth
+					}`
+			} else if (this.stake) t += ` ${fmtStake(this.stake, this.height)}`
+		} else if (this.stake) t += ` ${fmtStake(this.stake, this.height, true)}`
 		return `${specificLocalTime(this.lastBlock!.blockTimestamp)} ${t}`
 	}
 
@@ -141,11 +152,12 @@ export class Player {
 	 * Bump the player's play count
 	 * @param blockTime the block time in milliseconds
 	 */
-	commit(block: BlockDetails) {
+	commit(block: BlockDetails, height?: number) {
 		this.lastBlock = block
 		this.lastAction = 'commit'
 		this._isPlaying = true
 		this.playCount = (this.playCount || 0) + 1
+		if (height) this.height = height
 
 		// if the player is frozen, check if they should be thawed
 		if (this.frozenThawBlock) {
@@ -155,11 +167,19 @@ export class Player {
 		this.render()
 	}
 
-	reveal(block: BlockDetails, round: number, hash: string, depth: number) {
+	reveal(
+		block: BlockDetails,
+		round: number,
+		hash: string,
+		depth: number,
+		stake?: BigNumber,
+		stakeDensity?: BigNumber
+	) {
 		this.lastBlock = block
 		this.lastAction = 'reveal'
 		this._isPlaying = true
-		this.reveals[round] = { hash, depth }
+		this.reveals[round] = { hash, depth, stakeDensity }
+		if (stake) this.stake = stake
 	}
 
 	/**

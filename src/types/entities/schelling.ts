@@ -175,7 +175,12 @@ export class SchellingGame {
 	}
 
 	// --- commit
-	public commit(overlay: string, owner: string, block: BlockDetails) {
+	public commit(
+		overlay: string,
+		owner: string,
+		block: BlockDetails,
+		height: number | undefined
+	) {
 		const roundNo = SchellingGame.roundFromBlockNo(block.blockNo)
 
 		const round = this.getOrCreateRound(roundNo, block)
@@ -183,7 +188,7 @@ export class SchellingGame {
 
 		// update player state
 		const player = this.getOrCreatePlayer(overlay, owner, block)!
-		player.commit(block)
+		player.commit(block, height)
 
 		// update the round state
 		round.commits++
@@ -203,7 +208,9 @@ export class SchellingGame {
 		owner: string,
 		hash: string,
 		depth: number,
-		block: BlockDetails
+		block: BlockDetails,
+		stake: BigNumber | undefined,
+		stakeDensity: BigNumber | undefined
 	) {
 		const roundNo = SchellingGame.roundFromBlockNo(block.blockNo)
 
@@ -212,7 +219,7 @@ export class SchellingGame {
 
 		// update the player
 		const player = this.getOrCreatePlayer(overlay, owner, block)!
-		player.reveal(block, roundNo, hash, depth)
+		player.reveal(block, roundNo, hash, depth, stake, stakeDensity)
 
 		// update the round state
 		round.reveals++

@@ -323,7 +323,7 @@ export type StakeUpdatedEventFilter = TypedEventFilter<StakeUpdatedEvent>;
 */
 		this.stakeRegistry.on(
 			this.stakeRegistry.filters[
-				'StakeUpdated(address,uint256,uint256,bytes32,uint256)'
+				'StakeUpdated(address,uint256,uint256,bytes32,uint256,uint8)'
 			](),
 			async (
 				owner,
@@ -331,6 +331,7 @@ export type StakeUpdatedEventFilter = TypedEventFilter<StakeUpdatedEvent>;
 				potentialStake,
 				overlay,
 				lastUpdatedBlock,
+				height,
 				event
 			) => {
 				if (this._state == State.RUNNING) {
@@ -569,16 +570,60 @@ export type StakeUpdatedEventFilter = TypedEventFilter<StakeUpdatedEvent>;
 			// determine what function is being called
 			switch (desc.name) {
 				case 'commit': // commit
+					var newHeight: number | undefined = undefined
 					const [obfuscatedHash, roundNumber] = desc.args
 					var overlayAddress = await this.stakeRegistry.overlayOfAddress(
 						receipt.from
 					)
-					game.commit(overlayAddress, receipt.from, blockDetails)
+
+					// Parse the logs for the winner / freezes / slashes
+					receipt.logs.forEach((log) => {
+						if (
+							log.topics[0] ===
+							this.redistribution.interface.getEventTopic('Committed')
+						) {
+							// below we destructure the Revealed struct
+							const [roundNumber, overlay, height] =
+								this.redistribution.interface.parseLog(log).args
+							//Logging.showError(`${roundNumber} Commit ${fmtOverlay(overlay)} ${height}`)
+							newHeight = height
+						}
+					})
+
+					game.commit(overlayAddress, receipt.from, blockDetails, newHeight)
+
 					break
 				case 'reveal': // reveal
+					var newStake: BigNumber | undefined = undefined
+					var newStakeDensity: BigNumber | undefined = undefined
 					const [depth, hash, revealNonce] = desc.args
 					var overlay = await this.stakeRegistry.overlayOfAddress(receipt.from)
-					game.reveal(overlay, receipt.from, hash, depth, blockDetails)
+
+					// Parse the logs for the winner / freezes / slashes
+					receipt.logs.forEach((log) => {
+						if (
+							log.topics[0] ===
+							this.redistribution.interface.getEventTopic('Revealed')
+						) {
+							// below we destructure the Revealed struct
+							const [roundNumber, overlay, stake, stakeDensity, hash, depth] =
+								this.redistribution.interface.parseLog(log).args
+							//Logging.showError(`${roundNumber} Reveal ${fmtOverlay(overlay)} ${shortBZZ(stake)} ${shortBZZ(stakeDensity)} ${depth}`)
+							newStake = stake
+							newStakeDensity = stakeDensity
+						}
+					})
+
+					game.reveal(
+						overlay,
+						receipt.from,
+						hash,
+						depth,
+						blockDetails,
+						newStake,
+						newStakeDensity
+					)
+
 					break
 				case 'claim': // claim
 					// check for a 'Winner' event
@@ -592,6 +637,7 @@ export type StakeUpdatedEventFilter = TypedEventFilter<StakeUpdatedEvent>;
 						if (log.topics[0] === iface.getEventTopic('WinnerSelected')) {
 							// below we destructure the Reveal struct
 							winner = iface.parseLog(log).args[0]
+							//Logging.showError(`Winner ${fmtOverlay(winner!.overlay)} ${shortBZZ(winner!.stake)} ${shortBZZ(winner!.stakeDensity)} ${winner!.depth}`)
 						} else if (
 							log.topics[0] ===
 							this.stakeRegistry.interface.getEventTopic('StakeSlashed')
