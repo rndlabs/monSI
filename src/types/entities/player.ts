@@ -140,7 +140,7 @@ export class Player {
 				const options = { suppressUnits: true }
 				t += ` eff ${shortBZZ(this.reveals[round].stakeDensity!, options)}`
 				if (this.stake)
-					t += `<=${fmtStake(this.stake, this.height, true)}*2^${
+					t += ` = ${fmtStake(this.stake, this.height, true)}*2^${
 						this.reveals[round].depth
 					}`
 			} else if (this.stake) t += ` ${fmtStake(this.stake, this.height)}`
