@@ -102,7 +102,7 @@ export class Player {
 		if (this.amount.gt(0)) {
 			result +=
 				' ' +
-				colorValue(this.amount, shortBZZ, { showPlus: false }) +
+				colorValue(this.amount, shortBZZ, { showPlus: true }) +
 				colorDelta(this._overlay + ':amount', this.amount, shortBZZ, {
 					showPlus: true,
 					suppressUnits: true,
